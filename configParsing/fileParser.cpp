@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/08 16:04:55 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/03/08 17:36:14 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,25 @@ void FileParser::start()
 		throw WrongExtentionException();
 	if (!this->checkFileExistence())
 		throw FileDoesNotExistException();
+	this->readConfigFile();
+	this->parseFile();
+}
+
+void FileParser::readConfigFile()
+{
+	std::string line;
+	while (std::getline(this->_configFile, line))
+	{
+		if (line.empty())
+			continue;
+		if (ParsingUtils::isComment(line))
+			continue;
+		line = ParsingUtils::removeWhiteSpaces(line);
+		line = ParsingUtils::cleanInLineComment(line);
+		if (line.empty())
+			continue;
+		this->_configLines.push_back(line);
+	}
 }
 
 bool FileParser::checkFileExistence()
@@ -50,7 +69,10 @@ bool FileParser::checkFileExistence()
 
 void FileParser::parseFile()
 {
-	std::cout << "Parsing file" << std::endl;
+	for (size_t i = 0; i < this->_configLines.size(); i++)
+	{
+		std::cout << this->_configLines[i] << std::endl;
+	}
 }
 
 const char *FileParser::WrongExtentionException::what() const throw()

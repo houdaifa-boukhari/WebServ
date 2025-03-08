@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:29:26 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/08 15:56:17 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/03/08 17:32:57 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,17 @@
 
 #include <iostream>
 #include <fstream>
+#include "parsingUtils.hpp"
 #define FILE_EXTENSION ".conf"
 class FileParser
 {
 private:
 	std::string _filename;
 	std::ifstream _configFile;
+	std::vector<std::string> _configLines;
 	bool checkFileExtension();
 	bool checkFileExistence();
+	void readConfigFile();
 
 public:
 	FileParser(int argc, char **argv);
