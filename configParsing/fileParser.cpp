@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/08 17:36:14 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/03/09 17:24:38 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ FileParser::FileParser(int argc, char **argv)
 	if (argc != 2)
 		throw WrongFileException();
 	_filename = argv[1];
+	_config = Config();
 }
 
 bool FileParser::checkFileExtension()
@@ -39,6 +40,8 @@ void FileParser::start()
 	if (!this->checkFileExistence())
 		throw FileDoesNotExistException();
 	this->readConfigFile();
+	if (!this->checkBrackets() || !this->checkEndOfLine())
+		throw WrongFileFormatException();
 	this->parseFile();
 }
 
@@ -73,6 +76,75 @@ void FileParser::parseFile()
 	{
 		std::cout << this->_configLines[i] << std::endl;
 	}
+}
+
+Config FileParser::getConfig()
+{
+	return this->_config;
+}
+
+bool FileParser::checkBrackets()
+{
+	int brackets = 0;
+
+	for (size_t i = 0; i < this->_configLines.size(); i++)
+	{
+		if (this->_configLines[i].find("{") != std::string::npos)
+			brackets++;
+		if (this->_configLines[i].find("}") != std::string::npos)
+			brackets--;
+	}
+	return brackets == 0;
+}
+
+bool FileParser::checkEndOfLine()
+{
+	for (size_t i = 0; i < this->_configLines.size(); i++)
+	{
+		if (this->_configLines[i].find("server") != std::string::npos)
+		{
+			if (this->_configLines[i].length() == 6)
+				continue;
+			else if ((this->_configLines[i].find("{") != std::string::npos) && (this->_configLines[i].find("{") + 1) == this->_configLines[i].length())
+				continue;
+			else
+			{
+				if (this->_configLines[i].find(";") != std::string::npos)
+					continue;
+				else
+					return (false);
+			}
+		}
+		else if (this->_configLines[i].find("location") != std::string::npos)
+		{
+			if (this->_configLines[i].length() == 8)
+				continue;
+			else if ((this->_configLines[i].find("{") != std::string::npos) && (this->_configLines[i].find("{") + 1) == this->_configLines[i].length())
+				continue;
+			else
+			{
+				if (this->_configLines[i].find(";") != std::string::npos)
+					continue;
+				else
+					return (false);
+			}
+		}
+		else if (this->_configLines[i].find("}") != std::string::npos)
+		{
+			if (this->_configLines[i].length() == 1)
+				continue;
+			else
+				return (false);
+		}
+		else
+		{
+			if (this->_configLines[i].find(";") != std::string::npos)
+				continue;
+			else
+				return (false);
+		}
+	}
+	return true;
 }
 
 const char *FileParser::WrongExtentionException::what() const throw()
