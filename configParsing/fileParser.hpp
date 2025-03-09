@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:29:26 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/08 23:36:05 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/03/09 17:33:09 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ private:
 	void readConfigFile();
 	bool checkBrackets();
 	bool checkEndOfLine();
+	int parseServerBlock(ServerConfig &server, int blockStart);
+	int parseLocationBlock(LocationConfig &location, int blockStart);
 
 public:
 	FileParser(int argc, char **argv);

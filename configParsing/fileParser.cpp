@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/09 17:24:38 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/03/09 17:47:16 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,20 @@ void FileParser::parseFile()
 	}
 }
 
+int FileParser::parseServerBlock(ServerConfig &server, int blockStart)
+{
+	(void)server;
+	(void)blockStart;
+	return 0;
+}
+
+int FileParser::parseLocationBlock(LocationConfig &location, int blockStart)
+{
+	(void)location;
+	(void)blockStart;
+	return 0;
+}
+
 Config FileParser::getConfig()
 {
 	return this->_config;
@@ -101,6 +115,7 @@ bool FileParser::checkEndOfLine()
 {
 	for (size_t i = 0; i < this->_configLines.size(); i++)
 	{
+
 		if (this->_configLines[i].find("server") != std::string::npos)
 		{
 			if (this->_configLines[i].length() == 6)
@@ -135,6 +150,18 @@ bool FileParser::checkEndOfLine()
 				continue;
 			else
 				return (false);
+		}
+		else if (this->_configLines[i].find("{") != std::string::npos)
+		{
+			if (this->_configLines[i].length() == 1)
+				continue;
+			else
+			{
+				if (this->_configLines[i].find(";") != std::string::npos)
+					continue;
+				else
+					return (false);
+			}
 		}
 		else
 		{
