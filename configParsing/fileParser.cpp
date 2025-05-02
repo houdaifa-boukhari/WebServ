@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/09 17:47:16 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/05/02 21:17:39 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ FileParser::FileParser(int argc, char **argv)
 	if (argc != 2)
 		throw WrongFileException();
 	_filename = argv[1];
-	_config = Config();
+	_serverConfiguration = ServerConfiguration();
 }
 
 bool FileParser::checkFileExtension()
@@ -72,29 +72,21 @@ bool FileParser::checkFileExistence()
 
 void FileParser::parseFile()
 {
-	for (size_t i = 0; i < this->_configLines.size(); i++)
+	size_t i = 0;
+
+	while (i < _configLines.size())
 	{
-		std::cout << this->_configLines[i] << std::endl;
+		if (_configLines[i].find("server") != std::string::npos)
+		{
+			std::cout << "Server found" << std::endl;
+		}
+		i++;
 	}
 }
 
-int FileParser::parseServerBlock(ServerConfig &server, int blockStart)
+ServerConfiguration FileParser::getServerConfiguration()
 {
-	(void)server;
-	(void)blockStart;
-	return 0;
-}
-
-int FileParser::parseLocationBlock(LocationConfig &location, int blockStart)
-{
-	(void)location;
-	(void)blockStart;
-	return 0;
-}
-
-Config FileParser::getConfig()
-{
-	return this->_config;
+	return this->_serverConfiguration;
 }
 
 bool FileParser::checkBrackets()

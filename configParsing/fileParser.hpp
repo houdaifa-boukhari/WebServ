@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:29:26 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/09 17:33:09 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/05/02 21:17:03 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include "parsingUtils.hpp"
-#include "config.hpp"
+#include "serverConfiguration.hpp"
 
 #define FILE_EXTENSION ".conf"
 class FileParser
@@ -25,20 +25,18 @@ private:
 	std::string _filename;
 	std::ifstream _configFile;
 	std::vector<std::string> _configLines;
-	Config _config;
+	ServerConfiguration _serverConfiguration;
 	bool checkFileExtension();
 	bool checkFileExistence();
 	void readConfigFile();
 	bool checkBrackets();
 	bool checkEndOfLine();
-	int parseServerBlock(ServerConfig &server, int blockStart);
-	int parseLocationBlock(LocationConfig &location, int blockStart);
 
 public:
 	FileParser(int argc, char **argv);
 	void start();
 	void parseFile();
-	Config getConfig();
+	ServerConfiguration getServerConfiguration();
 	class WrongExtentionException : public std::exception
 	{
 		virtual const char *what() const throw();
