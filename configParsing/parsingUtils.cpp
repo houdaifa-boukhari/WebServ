@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 16:47:33 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/10 21:50:48 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/05/02 22:25:44 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,4 +62,38 @@ std::string ParsingUtils::getValue(std::string const &str)
 	if (end == std::string::npos)
 		return "";
 	return str.substr(start + 1, end - start - 1);
+}
+
+double ParsingUtils::convertToNumber(std::string const &str)
+{
+	char *endptr;
+	double value = std::strtod(str.c_str(), &endptr);
+
+	if (*endptr != '\0')
+		throw FileParser::WrongFileContentException();
+
+	return value;
+}
+
+std::vector<std::string> ParsingUtils::splitString(std::string const &str, char delim)
+{
+	std::vector<std::string> tokens;
+	std::string::size_type start = 0;
+	std::string::size_type end = 0;
+
+	while ((end = str.find(delim, start)) != std::string::npos)
+	{
+		std::string token = str.substr(start, end - start);
+		token = removeWhiteSpaces(token);
+		if (!token.empty())
+			tokens.push_back(token);
+		start = end + 1;
+	}
+
+	std::string lastToken = str.substr(start);
+	lastToken = removeWhiteSpaces(lastToken);
+	if (!lastToken.empty())
+		tokens.push_back(lastToken);
+
+	return tokens;
 }

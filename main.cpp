@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:47:22 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/03/10 22:22:09 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/05/04 12:55:16 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 	{
 		FileParser fp(argc, argv);
 		fp.start();
+		fp.getServerConfiguration().printConfig();
 	}
 	catch (const std::exception &e)
 	{

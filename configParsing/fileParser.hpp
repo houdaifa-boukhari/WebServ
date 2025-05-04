@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:29:26 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/02 21:17:03 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/05/02 22:22:37 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,10 @@ private:
 	void readConfigFile();
 	bool checkBrackets();
 	bool checkEndOfLine();
+	std::vector<std::string>::iterator handleLocationBlock(std::vector<std::string>::iterator &it, ServerConfig &ServerConfig);
+	std::vector<std::string>::iterator handleServerBlock(std::vector<std::string>::iterator &it);
+	void parseServerDirective(const std::string &directive, ServerConfig &serverConfig);
+	void parseLocationDirective(const std::string &directive, LocationConfig &locationConfig);
 
 public:
 	FileParser(int argc, char **argv);
@@ -50,6 +54,10 @@ public:
 		virtual const char *what() const throw();
 	};
 	class FileDoesNotExistException : public std::exception
+	{
+		virtual const char *what() const throw();
+	};
+	class WrongFileContentException : public std::exception
 	{
 		virtual const char *what() const throw();
 	};

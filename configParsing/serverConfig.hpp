@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:40:51 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/02 20:50:39 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/05/04 12:36:17 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,14 @@
 #include <vector>
 
 #include "locationConfig.hpp"
+
+#define RESET "\033[0m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN "\033[36m"
 
 class ServerConfig
 {
