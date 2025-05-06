@@ -1,20 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   WebServer.cpp                                      :+:      :+:    :+:   */
+/*   WebServer.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/08 17:19:04 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/04/30 18:30:55 by hel-bouk         ###   ########.fr       */
+/*   Created: 2025/03/08 17:17:06 by hel-bouk          #+#    #+#             */
+/*   Updated: 2025/04/30 18:31:40 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/WebServer.hpp"
+#ifndef WEBSERVER_HPP
+#define WEBSERVER_HPP
 
-int main()
+#include <iostream>
+
+#include "logger.hpp"
+
+class WebServer
 {
-    logger::logInfo("Starting Webserv");
-    logger::logError("This is a test error");
-    logger::logDebug("Debugging test");
-}
+};
+
+#endif

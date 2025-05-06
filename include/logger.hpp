@@ -1,20 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   WebServer.cpp                                      :+:      :+:    :+:   */
+/*   logger.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/08 17:19:04 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/04/30 18:30:55 by hel-bouk         ###   ########.fr       */
+/*   Created: 2025/04/30 18:14:22 by hel-bouk          #+#    #+#             */
+/*   Updated: 2025/04/30 18:33:32 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/WebServer.hpp"
+#include <iostream>
 
-int main()
+class logger
 {
-    logger::logInfo("Starting Webserv");
-    logger::logError("This is a test error");
-    logger::logDebug("Debugging test");
-}
+	public :
+		static void logInfo(const std::string& msg);
+    	static void logError(const std::string& msg);
+    	static void logDebug(const std::string& msg);	
+};
