@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   locationConfig.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:41:47 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/02 21:01:26 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/05/06 16:29:31 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define LOCATIONCONFIG_HPP
 
 #include <iostream>
+#include <vector>
 #include <map>
 
 class LocationConfig
