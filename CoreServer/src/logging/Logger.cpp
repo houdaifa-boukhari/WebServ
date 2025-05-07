@@ -6,13 +6,13 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/30 18:19:42 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/04/30 18:33:11 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/05/07 15:52:49 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/logger.hpp"
 
-static std::string currentTime()
+std::string currentTime()
 {
     time_t now = time(0);
     char buf[80];

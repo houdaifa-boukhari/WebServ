@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:47:22 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/06 21:27:45 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/05/07 17:02:09 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 		FileParser fp(argc, argv);
 		fp.start();
 		Server sv(fp.getServerConfiguration().getServers());
+		sv.run();
 		
 	}
 	catch (const std::exception &e)
