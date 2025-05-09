@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/05/08 21:16:50 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/05/09 11:59:42 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ void Server::closeConnection(int fd)
 	}
 	std::cout << currentTime() << " [INFO] Closed connection " << fd << std::endl;
 }
+#include <iostream>     // std::cout
 
 void Server::handleNewConnection(int SvFd)
 {
@@ -44,7 +45,7 @@ void Server::handleNewConnection(int SvFd)
 	_poll_fds.push_back(pfd);
 	_client_buffers[ClientFd] = "";
 }
-
+#include <fstream>
 void Server::handleClientData(int ClientFd)
 {
 	ssize_t len = 0;
@@ -68,16 +69,25 @@ void Server::handleClientData(int ClientFd)
 	buffer[len] = '\0';
 	_client_buffers[ClientFd].append(buffer, len);
 
-	// std::cout << "\n-----------" << currentTime() << " [INFO] " << "Received data from client ------ \n\n" << _client_buffers[ClientFd] << std::endl;
-	std::cout << "\n-----------" << currentTime() << " [INFO] " << "Received data from client ------ \n\n";
+	std::cout << "\n-----------" << currentTime() << " [INFO] " << "Received data from client ------ \n\n" << _client_buffers[ClientFd] << std::endl;
+	
+	// std::cout << "\n-----------" << currentTime() << " [INFO] " << "Received data from client ------ \n\n";
 
 	if (RequestIsComplete(_client_buffers[ClientFd]))
 	{
-		std::cout << currentTime() << " [DEBUG] " << "starting to generate response" << std::endl;
+		std::string name = "request.http";
+    	std::ofstream ofs;
+		
+		ofs.open (name.c_str());
+		ofs << _client_buffers[ClientFd];
+
+		/// parse the request here
+
+		
 		generateResponse(ClientFd);
 		_client_buffers[ClientFd].clear();
 		_client_buffers[ClientFd] = "";
-		std::cout << currentTime() << " [DEBUG] " << "Response generated --- " << std::endl;
+		std::cout << currentTime() << " [INFO] " << "Request Is complete" << std::endl;
 		std::cout << currentTime() << "------------------------------------" << std::endl;
 	}
 	else
