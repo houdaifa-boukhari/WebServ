@@ -6,13 +6,14 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 16:33:22 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/05/07 22:23:42 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/05/09 16:28:13 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include <fstream>
 #include <poll.h>
 #include <vector>
 #include <fcntl.h>

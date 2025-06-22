@@ -1,0 +1,566 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.81
+# Copyright (C) 2006  Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.
+# There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# This program built for i386-apple-darwin11.3.0
+
+# Make data base, printed on Sun Jun 22 14:31:26 2025
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# makefile (from `Makefile', line 7)
+OBJ = $(SRC:.cpp=.o)
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# makefile (from `Makefile', line 4)
+SRC = $(wildcard *.cpp) $(wildcard configParsing/*.cpp) $(wildcard CoreServer/src/server/*.cpp) $(wildcard CoreServer/src/logging/*.cpp)
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# makefile (from `Makefile', line 3)
+CPPFLAGS = -Wall -Wextra -Werror -std=c++98 
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# automatic
+@F = $(notdir $@)
+# makefile
+CURDIR := /Users/hel-bouk/Desktop/all data/WebServ
+# makefile
+SHELL = /bin/sh
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-us","osLocale":"en","availableLanguages":{},"_languagePackSupport":true}
+# environment
+_ = /usr/bin/make
+# makefile (from `Makefile', line 1)
+MAKEFILE_LIST :=  Makefile
+# environment
+VSCODE_CWD = /
+# environment
+PATH = /Users/hel-bouk/.brew/bin:/Users/hel-bouk/goinfre/homebrew/bin:/Users/hel-bouk/goinfre/homebrew/bin:/Users/hel-bouk/goinfre/homebrew/bin:/Users/hel-bouk/goinfre/homebrew/bin:/Users/hel-bouk/goinfre/homebrew/bin:/Users/hel-bouk/goinfre/homebrew/bin:/Users/hel-bouk/goinfre/homebrew/bin:/Users/hel-bouk/goinfre/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/
+# environment
+LSCOLORS = Gxfxcxdxbxegedabagacad
+# environment
+LIBRARY_PATH = /Users/hel-bouk/.brew/lib:
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# default
+.FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
+# environment
+LS_COLORS = di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43
+# environment
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.syj2YpbD8n/Listeners
+# automatic
+%F = $(notdir $%)
+# environment
+PWD = /Users/hel-bouk/Desktop/all data/WebServ
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /Users/hel-bouk
+# default
+MAKEFILEPATH := /Applications/Xcode.app/Contents/Developer/Makefiles
+# environment
+VSCODE_CODE_CACHE_PATH = /Users/hel-bouk/Library/Application Support/Code/CachedData/af28b32d7e553898b2a91af498b1fb666fdebe0c
+# environment
+LOGNAME = hel-bouk
+# environment
+ZSH = /Users/hel-bouk/.oh-my-zsh
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+XPC_FLAGS = 0x0
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+SHLVL = 1
+# makefile (from `Makefile', line 2)
+CC = c++
+# default
+MAKE_VERSION := 3.81
+# environment
+USER = hel-bouk
+# makefile
+.DEFAULT_GOAL := all
+# makefile (from `Makefile', line 1)
+NAME = WebServer
+# environment
+LESS = -R
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# default
+MAKE_COMMAND := /Applications/Xcode.app/Contents/Developer/usr/bin/make
+# default
+.VARIABLES := 
+# environment
+TMPDIR = /var/folders/zz/zyxvpxvq6csfxvn_n000cc3c00330v/T/
+# automatic
+*F = $(notdir $*)
+# environment
+VSCODE_IPC_HOOK = /Users/hel-bouk/Library/Application Support/Code/1.85-main.sock
+# environment
+MallocNanoZone = 0
+# makefile
+MAKEFLAGS = Rrqp
+# environment
+MFLAGS = -Rrqp
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+XPC_SERVICE_NAME = com.microsoft.VSCode.2252
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
+# automatic
++F = $(notdir $+)
+# environment
+__CF_USER_TEXT_ENCODING = 0x18C1B:0x0:0x0
+# default
+MAKEFILES := 
+# automatic
+<F = $(notdir $<)
+# environment
+PAGER = less
+# environment
+LC_ALL = C
+# makefile (from `Makefile', line 6)
+HEADER = $(wildcard *.hpp) $(wildcard configParsing/*.hpp)
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+C_INCLUDE_PATH = /Users/hel-bouk/.brew/include:
+# default
+.INCLUDE_DIRS = /usr/local/include
+# environment
+MAKELEVEL := 0
+# environment
+LANG = C
+# environment
+VSCODE_PID = 3485
+# variable set hash-table stats:
+# Load=70/1024=7%, Rehash=0, Collisions=4/99=4%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# CoreServer/src/logging (device 16777225, inode 12791292): 4 files, no impossibilities.
+# . (device 16777225, inode 11739492): 17 files, no impossibilities.
+# CoreServer/src/server (device 16777225, inode 12791294): 12 files, no impossibilities.
+# configParsing (device 16777225, inode 12791321): 17 files, no impossibilities.
+
+# 50 files, no impossibilities in 4 directories.
+
+# Implicit Rules
+
+%.o: %.cpp  configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# 1 implicit rules, 0 (0.0%) terminal.
+
+# Files
+
+# Not a target:
+configParsing/locationConfig.hpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:29:31
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+configParsing/serverConfig.hpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:13:02
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+ 
+configParsing/parsingUtils.o: configParsing/parsingUtils.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `configParsing/parsingUtils'
+#  Last modified 2025-06-22 10:56:13
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# Not a target:
+CoreServer/src/server/Connection.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-09 16:22:58
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+CoreServer/src/server/utilise.o: CoreServer/src/server/utilise.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `CoreServer/src/server/utilise'
+#  Last modified 2025-06-22 10:56:15
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# Not a target:
+CoreServer/src/server/PollManager.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:12:36
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+all: WebServer
+#  Phony target (prerequisite of .PHONY).
+#  Command-line target.
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+.PHONY: all clean fclean re
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+CoreServer/src/logging/Logger.o: CoreServer/src/logging/Logger.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `CoreServer/src/logging/Logger'
+#  Last modified 2025-06-22 10:56:15
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+WebServer: main.o configParsing/fileParser.o configParsing/locationConfig.o configParsing/parsingUtils.o configParsing/serverConfig.o configParsing/serverConfiguration.o CoreServer/src/server/Connection.o CoreServer/src/server/PollManager.o CoreServer/src/server/Server.o CoreServer/src/server/WebServer.o CoreServer/src/server/utilise.o CoreServer/src/logging/Logger.o
+#  Implicit rule search has not been done.
+#  Last modified 2025-06-22 10:56:15
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 11):
+	$(CC) $(CPPFLAGS) $(OBJ) -o $(NAME)
+	
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+configParsing/fileParser.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:13:02
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2025-06-22 10:56:08
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+CoreServer/src/server/WebServer.o: CoreServer/src/server/WebServer.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `CoreServer/src/server/WebServer'
+#  Last modified 2025-06-22 10:56:14
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# Not a target:
+configParsing/serverConfiguration.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:13:02
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+configParsing/locationConfig.o: configParsing/locationConfig.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `configParsing/locationConfig'
+#  Last modified 2025-06-22 10:56:12
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+configParsing/serverConfig.o: configParsing/serverConfig.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `configParsing/serverConfig'
+#  Last modified 2025-06-22 10:56:13
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# Not a target:
+main.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-08 20:55:32
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+configParsing/fileParser.hpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:13:02
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+configParsing/serverConfiguration.hpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 18:23:11
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+fclean: clean
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile', line 20):
+	rm -f $(NAME)
+	
+
+# Not a target:
+CoreServer/src/server/Server.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-08 20:35:11
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+CoreServer/src/server/Connection.o: CoreServer/src/server/Connection.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `CoreServer/src/server/Connection'
+#  Last modified 2025-06-22 10:56:14
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+CoreServer/src/server/PollManager.o: CoreServer/src/server/PollManager.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `CoreServer/src/server/PollManager'
+#  Last modified 2025-06-22 10:56:14
+#  File has been updated.
+ 
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+configParsing/parsingUtils.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:13:02
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+CoreServer/src/server/utilise.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-09 16:42:38
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+re: fclean all
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile', line 17):
+	rm -f $(OBJ)
+	
+
+configParsing/fileParser.o: configParsing/fileParser.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `configParsing/fileParser'
+#  Last modified 2025-06-22 10:56:12
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# Not a target:
+CoreServer/src/logging/Logger.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-07 15:52:49
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+configParsing/serverConfiguration.o: configParsing/serverConfiguration.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `configParsing/serverConfiguration'
+#  Last modified 2025-06-22 10:56:13
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# Not a target:
+configParsing/parsingUtils.hpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:13:02
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+main.o: main.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `main'
+#  Last modified 2025-06-22 10:56:11
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# Not a target:
+CoreServer/src/server/WebServer.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 19:02:26
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+configParsing/locationConfig.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:13:02
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+configParsing/serverConfig.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2025-05-06 16:13:02
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+CoreServer/src/server/Server.o: CoreServer/src/server/Server.cpp configParsing/fileParser.hpp configParsing/locationConfig.hpp configParsing/parsingUtils.hpp configParsing/serverConfig.hpp configParsing/serverConfiguration.hpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `CoreServer/src/server/Server'
+#  Last modified 2025-06-22 10:56:14
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 14):
+	$(CC) $(CPPFLAGS) -c $< -o $@
+	
+
+# files hash-table stats:
+# Load=38/1024=4%, Rehash=0, Collisions=0/227=0%
+# VPATH Search Paths
+
+# No `vpath' search paths.
+
+# No general (`VPATH' variable) search path.
+
+# # of strings in strcache: 1
+# # of strcache buffers: 1
+# strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
+# strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
+
+# Finished Make data base on Sun Jun 22 14:31:26 2025
+
+ 

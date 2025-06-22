@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:19:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/05/08 21:18:33 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/05/09 16:42:38 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,15 @@ bool Server::RequestIsComplete(const std::string& request)
 		// Body starts right after \r\n\r\n
 		body_start = request.find("\r\n\r\n") + 4;
 		body_size = request.size() - body_start;
+		std::string name = "numbers.txt";
+    	std::ofstream ofs;
+		
+		ofs.open (name.c_str());
+		ofs << "Content lenght : " << len << ", " << "request_size : " << request.size() 
+			<< ", body start : "<< body_start << std::endl;
+
+
+		
 		if (body_size < len)
 			return (false);
 		return (true);
