@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:47:22 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/08 20:55:32 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:03:18 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,12 @@ int main(int argc, char *argv[])
 {
 	try
 	{
-		FileParser fp(argc, argv);
-		fp.start();
-		Server sv(fp.getServerConfiguration().getServers());
-		sv.run();		
+		FileParser *fp = new FileParser(argc, argv);
+		fp->start();
+		fp->getServerConfiguration().printConfig();
+		Server sv(fp->getServerConfiguration().getServers());
+		sv.run();
+		delete fp;
 	}
 	catch (const std::exception &e)
 	{

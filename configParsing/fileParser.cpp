@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/04 12:52:21 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:12:47 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,9 +261,9 @@ void FileParser::parseLocationDirective(const std::string &directive, LocationCo
 		for (size_t i = 0; i < methods.size(); i++)
 			locationConfig.addAllowedMethod(methods[i]);
 	}
-	else if (directive.find("redirection") != std::string::npos)
+	else if (directive.find("return") != std::string::npos)
 	{
-		std::string redirection = directive.substr(directive.find("redirection") + 12, directive.find(";", directive.find("redirection") + 12) - (directive.find("redirection") + 12));
+		std::string redirection = directive.substr(directive.find("return") + 6, directive.find(";", directive.find("return") + 6) - (directive.find("return") + 6));
 		redirection = ParsingUtils::removeWhiteSpaces(redirection);
 		std::vector<std::string> redirectionParts = ParsingUtils::splitString(redirection, ' ');
 		if (redirectionParts.size() != 2)
@@ -286,28 +286,28 @@ void FileParser::parseLocationDirective(const std::string &directive, LocationCo
 		upload = ParsingUtils::removeWhiteSpaces(upload);
 		locationConfig.setUpload(true, upload);
 	}
-	
 }
 
 std::vector<std::string>::iterator FileParser::handleLocationBlock(std::vector<std::string>::iterator &it, ServerConfig &serverConfig)
 {
 	LocationConfig locationConfig;
+	std::string locationName;
+
+	// Extract location name from the current line
+	if (it->find("location") != std::string::npos)
+	{
+		locationName = it->substr(it->find("location") + 9, it->find("{") - (it->find("location") + 9));
+		locationName = ParsingUtils::removeWhiteSpaces(locationName);
+		locationConfig.setName(locationName);
+		std::cout << "Location name: " << locationName << std::endl;
+	}
 	it++;
 	while (it != _configLines.end())
 	{
 		if (it->find("}") != std::string::npos)
 		{
-			*it ++;
-			break;
-		}
-		if (it->find("location") != std::string::npos)
-		{
-			std::string locationName = it->substr(it->find("location") + 9, it->find("{") - (it->find("location") + 9));
-			std::cout << "Location name: " << locationName << std::endl;
-			locationName = ParsingUtils::removeWhiteSpaces(locationName);
-			locationConfig.setName(locationName);
 			it++;
-			continue;
+			break;
 		}
 		parseLocationDirective(*it, locationConfig);
 		it++;
