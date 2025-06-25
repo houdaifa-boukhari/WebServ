@@ -6,11 +6,11 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:19:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/25 13:05:16 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/25 13:34:42 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/Server.hpp"
+#include "../include/Server.hpp"
 
 bool Server::RequestIsComplete(const std::string& request)
 {

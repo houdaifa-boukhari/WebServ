@@ -6,11 +6,11 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/25 13:18:25 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/25 13:34:39 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../include/Server.hpp"
+#include "../include/Server.hpp"
 
 Server::Server(const std::vector<ServerConfig>& configs) : _config(configs) , _timeoutSec(30)
 {
