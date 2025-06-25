@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:19:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/05/08 21:18:33 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/25 13:05:16 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ bool Server::RequestIsComplete(const std::string& request)
 	pos = request.find("\r\n\r\n");
 	if (pos == std::string::npos)
 	{
-		std::cerr << currentTime() << " [ERROR] " << "Headers not complete yet" << std::endl;
+		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Headers not complete yet" << WHIET << std::endl;
 		return (false);
 	}
 	// Get first line (request line)
@@ -50,14 +50,22 @@ bool Server::RequestIsComplete(const std::string& request)
 		body_size = request.size() - body_start;
 		if (body_size < len)
 			return (false);
+		else if (body_size > len)
+		{
+			// Errror: Body size is larger than Content-Length (youssef)
+			std::cerr << YELLOW << currentTime() << RED << " [ERROR] " << "Body size is larger than Content-Length From Client" << WHIET << std::endl;
+			return (false);
+		}
 		return (true);
 	}
+	// Error Unknown method
+	std::cerr << YELLOW << currentTime() << RED << " [ERROR] " << "Unknown method From Client" << WHIET << std::endl;
 	return (false);
 }
 
 void Server::generateResponse(int ClientFd)
 {
-	std::cout << currentTime() << " [INFO] " << "Generating response for client " << ClientFd << std::endl;
+	std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Generating Response For Client " << ClientFd << WHIET << std::endl;
 	std::string    exampleHtml = "<html><body><h1> <center> Welcome to 1337 | testing Webserv </center></h1></body></html>";
     std::string response = "HTTP/1.1 200 OK\r\n"
                            "Content-Type: text/html\r\n"
@@ -68,11 +76,11 @@ void Server::generateResponse(int ClientFd)
                            "\r\n" + exampleHtml;
 	if (send(ClientFd, response.c_str(), response.size(), 0) < 0)
 	{
-		std::cerr << currentTime() << " [ERROR] " << "Failed to send response to client " << ClientFd << std::endl;
+		std::cerr << YELLOW << currentTime() << RED << " [ERROR] " << "Failed to send response to client " << ClientFd << WHIET << std::endl;
 		closeConnection(ClientFd);
 		return ;
 	}
-	std::cout << currentTime() << " [DEBUG] " << "Response sent to client " << ClientFd << std::endl;
+	std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Response sent to client " << ClientFd << WHIET << std::endl;
 }
 
 void Server::checkTimeouts()
@@ -84,8 +92,8 @@ void Server::checkTimeouts()
 	{
         if (now - it->second > _timeoutSec)
 		{
-            std::cout << currentTime() << " [TIMEOUT] Closing " << it->first
-                      << " after " << _timeoutSec << "s inactivity\n";
+            std::cout << YELLOW << currentTime() << MAGENTA << " [TIMEOUT] Closing " << it->first
+                      << " after " << _timeoutSec << "s inactivity" << WHIET << std::endl;
             closeConnection((it++)->first);
         }
 		else

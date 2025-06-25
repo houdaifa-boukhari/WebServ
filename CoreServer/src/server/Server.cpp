@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/05/08 20:35:11 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/25 13:18:25 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,8 @@ void Server::initializeSockets()
 			ports = _config[i].getPorts();
 			if (ports[j] < 1024) // all port younger than 1024 need high privilege
 			{
-				std::cerr << "[WARNING] Port " << ports[j] << " is privileged. Skipping.\n";
+				std::cerr << YELLOW << currentTime() << " [WARNING] " 
+          << "Port " << ports[j] << " is privileged. Skipping." <<  WHIET << std::endl;
 				continue;
 			}
 			tmp_fd = socket(AF_INET, SOCK_STREAM, 0); // AF_INET  IPv4 address family., SOCK_STREAM = TCP protocol (reliable, connection-oriented), 0 = default protocole
@@ -65,7 +66,7 @@ void Server::initializeSockets()
 			listen(tmp_fd, SOMAXCONN);
 			struct pollfd pfd = {tmp_fd, POLLIN, 0};
 			_poll_fds.push_back(pfd);
-			std::cout << "[INFO] Listening on " << host << ":" << ports[j] << std::endl;
+			std::cout << YELLOW << currentTime() << GREEN << " [INFO] Listening on " << host << ":" << ports[j] << WHIET<< std::endl;
 		}
 	}
 }
@@ -79,17 +80,23 @@ void Server::run()
 		checkTimeouts();
 		pollCount = poll(_poll_fds.data(), _poll_fds.size(), -1); // first element, size, blockin until event
 		if (pollCount < 0)
-			throw ("Poll error");
+		{
+			std::cout << YELLOW << currentTime() << RED << " [ERROR] " << 
+                      "Poll error occurred." << WHIET << std::endl;
+            throw ("Poll error");
+		}
 		size_t i = 0;
 		while (i < _poll_fds.size())
 		{
 			//  Error handling
 			if (_poll_fds[i].revents & POLLERR)
 			{
-        		std::cout << "Closing bad fd=" << _poll_fds[i].fd << std::endl;
+        		std::cout << YELLOW << currentTime() << RED << " [ERROR] "
+                          << "Closing bad fd=" << _poll_fds[i].fd << WHIET << std::endl;
         		close(_poll_fds[i].fd);
         		_poll_fds.erase(_poll_fds.begin() + i);
-        		std::cout << "Erased - new size=" << _poll_fds.size() << std::endl;
+        		std::cout << YELLOW << currentTime() << BLUE << " [DEBUG] "
+                          << "Erased bad fd. New size=" << _poll_fds.size()  << WHIET << std::endl;
         		continue;
     		}
 			// manage connection
@@ -97,12 +104,14 @@ void Server::run()
 			{
 				if (isServerSocket(_poll_fds[i].fd))
 				{
-					std::cout << "Accepting on server fd=" << _poll_fds[i].fd << std::endl;
+					 std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+                              << "Accepting connection on server fd=" << _poll_fds[i].fd << WHIET << std::endl;
     				handleNewConnection(_poll_fds[i].fd);
 				}
 				else
 				{
-					std::cout << "Reading from client fd=" << _poll_fds[i].fd << std::endl;
+					std::cout << YELLOW << currentTime() << GREEN << " [INFO] " 
+                              << "Reading data from client fd=" << _poll_fds[i].fd << WHIET << std::endl;
     				handleClientData(_poll_fds[i].fd);
 				}
 			}

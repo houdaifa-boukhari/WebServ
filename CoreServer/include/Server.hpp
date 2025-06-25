@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 16:33:22 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/05/07 22:23:42 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/25 12:44:22 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,15 @@
 #include <sys/socket.h>
 #include "logger.hpp"
 #include "../../configParsing/serverConfig.hpp"
+
+
+#define WHIET "\033[0m"
+#define GREEN "\033[32m"   
+#define BLUE "\033[34m"  
+#define RED "\033[31m"  
+#define YELLOW "\033[33m"
+#define CYAN "\033[36m"
+#define MAGENTA "\033[35m"
 
 class Server
 {
