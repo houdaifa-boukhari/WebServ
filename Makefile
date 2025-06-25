@@ -2,8 +2,8 @@ NAME = WebServer
 CC = c++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
 SRC = $(wildcard *.cpp) $(wildcard configParsing/*.cpp) $(wildcard CoreServer/src/*.cpp) \
-		$(wildcard CoreServer/src/logging/*.cpp)
-HEADER = $(wildcard *.hpp) $(wildcard configParsing/*.hpp)
+		$(wildcard ./ParseRequest/*.cpp)
+HEADER = $(wildcard *.hpp) $(wildcard configParsing/*.hpp) $(wildcard ./ParseRequest/*.hpp)
 OBJ = $(SRC:.cpp=.o)
 all: $(NAME)
 

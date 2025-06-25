@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 16:33:22 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/25 12:44:22 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/25 15:21:55 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <sys/socket.h>
 #include "logger.hpp"
 #include "../../configParsing/serverConfig.hpp"
+#include "../../ParseRequest/Request.hpp"
 
 
 #define WHIET "\033[0m"
@@ -36,6 +37,7 @@
 class Server
 {
 	private :
+		ParssedRequest _request; // Parsed request
 		std::vector<int> _serverFds; // fds for every socket conections
 		std::vector<ServerConfig> _config; // Parsed server Configuration
 		std::vector<struct pollfd>   _poll_fds;  // Polling structure for I/O monitoring
