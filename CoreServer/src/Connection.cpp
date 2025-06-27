@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/25 15:40:03 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/26 12:14:08 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,20 @@
 void Server::closeConnection(int fd)
 {
 	if (fd < 0)
-		return ;
+		return;
 	close(fd);
-	 _client_buffers.erase(fd);
-	 _lastActivity.erase(fd);
- 	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-    {
-        if (it->fd == fd)
-        {
-            _poll_fds.erase(it);
-            break;
-    	}
+	_client_buffers.erase(fd);
+	_lastActivity.erase(fd);
+	for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+	{
+		if (it->fd == fd)
+		{
+			_poll_fds.erase(it);
+			break;
+		}
 	}
-	std::cout << YELLOW << currentTime() << GREEN << " [INFO] " << "Closed connection " << fd << WHIET << std::endl;
+	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+			  << "Closed connection " << fd << WHIET << std::endl;
 }
 
 void Server::handleNewConnection(int SvFd)
@@ -37,7 +38,7 @@ void Server::handleNewConnection(int SvFd)
 
 	ClientFd = accept(SvFd, NULL, NULL);
 	if (fcntl(SvFd, F_SETFL, O_NONBLOCK) < 0)
-		throw ("fcntl Error");
+		throw("fcntl Error");
 	pfd.fd = ClientFd;
 	pfd.events = POLLIN | POLLOUT;
 	pfd.revents = 0;
@@ -51,25 +52,30 @@ void Server::handleClientData(int ClientFd)
 	char buffer[4096];
 
 	if (ClientFd < 0)
-		return ;
+		return;
 	_lastActivity[ClientFd] = time(NULL);
-	std::cout << YELLOW << currentTime() << GREEN << " [INFO] " << "Reading from client " << ClientFd << WHIET << std::endl;
+	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+			  << "Reading from client " << ClientFd << WHIET << std::endl;
 	len = recv(ClientFd, buffer, 4095, 0); // 0 for non bloking socket
 	if (len <= 0)
 	{
 		if (len == 0)
-			std::cout << YELLOW << currentTime() << GREEN << " [INFO] " << "Client " << ClientFd << " disconnected gracefully" << WHIET << std::endl;
+			std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+					  << "Client " << ClientFd << " disconnected gracefully" << WHIET << std::endl;
 		else
-			std::cout << YELLOW << currentTime() << RED << " [ERROR] " << "Client " << ClientFd << " has an Error" <<  WHIET << std::endl;
+			std::cout << YELLOW << currentTime() << RED << " [ERROR] "
+					  << "Client " << ClientFd << " has an Error" << WHIET << std::endl;
 		closeConnection(ClientFd);
-		return ;
+		return;
 	}
-	
+
 	buffer[len] = '\0';
 	_client_buffers[ClientFd].append(buffer, len);
 
-	std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] " << "Received data from client ------ \n\n" << _client_buffers[ClientFd] << WHIET<< std::endl;
-	
+	std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
+			  << "Received data from client ------ \n\n"
+			  << _client_buffers[ClientFd] << WHIET << std::endl;
+
 	if (RequestIsComplete(_client_buffers[ClientFd]))
 	{
 
@@ -89,21 +95,35 @@ void Server::handleClientData(int ClientFd)
 		// std::cout << "Output: " << output << std::endl;
 		// free_envp(env);
 
-		/////////////////////////////		
+		/////////////////////////////
 
 		///// youssef Part /////
 
+		ServerConfig _config = this->_config[0];
+		Response _response = Response();
+		std::string httpResponse = _response.generateResponse(ClientFd, _request, _config);
+		if (send(ClientFd, httpResponse.c_str(), httpResponse.size(), 0) < 0)
+		{
+			std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
+					  << "Failed to send response to client " << ClientFd << WHIET << std::endl;
+			closeConnection(ClientFd);
+			return;
+		}
+		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
+				  << "Response sent to client " << ClientFd << WHIET << std::endl;
 
 		// generatResponse(serverConfig, _request, ClientFd);
 
 		//////////////////
-		generateResponse(ClientFd);
+		// generateResponse(ClientFd);
 		_client_buffers[ClientFd].clear();
 		_client_buffers[ClientFd] = "";
 		// _config.;
-		std::cout << YELLOW << currentTime() << GREEN << " [INFO] " << "Request Is complete" << WHIET << std::endl;
+		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+				  << "Request Is complete" << WHIET << std::endl;
 		std::cout << RED << "			------------------------------------			" << std::endl;
 	}
 	else
-		std::cout << YELLOW << currentTime() << GREEN << " [INFO] " << "Request not complete yet" << WHIET << std::endl;
+		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+				  << "Request not complete yet" << WHIET << std::endl;
 }

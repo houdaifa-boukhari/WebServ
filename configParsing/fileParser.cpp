@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/25 16:12:47 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/26 13:51:44 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,6 @@ void FileParser::parseFile()
 }
 void FileParser::parseServerDirective(const std::string &directive, ServerConfig &serverConfig)
 {
-	(void)serverConfig;
 	if (directive.find("listen") != std::string::npos)
 	{
 		std::string portsString = directive.substr(directive.find("listen") + 6, directive.find(";", directive.find("listen") + 6) - (directive.find("listen") + 6));
@@ -236,12 +235,6 @@ void FileParser::parseLocationDirective(const std::string &directive, LocationCo
 		root = ParsingUtils::removeWhiteSpaces(root);
 		locationConfig.setRoot(root);
 	}
-	else if (directive.find("index") != std::string::npos)
-	{
-		std::string index = directive.substr(directive.find("index") + 6, directive.find(";", directive.find("index") + 6) - (directive.find("index") + 6));
-		index = ParsingUtils::removeWhiteSpaces(index);
-		locationConfig.setIndex(index);
-	}
 	else if (directive.find("autoindex") != std::string::npos)
 	{
 		std::string autoIndex = directive.substr(directive.find("autoindex") + 10, directive.find(";", directive.find("autoindex") + 10) - (directive.find("autoindex") + 10));
@@ -252,6 +245,17 @@ void FileParser::parseLocationDirective(const std::string &directive, LocationCo
 			locationConfig.setAutoIndex(false);
 		else
 			throw WrongFileContentException();
+	}
+	else if (directive.find("index") != std::string::npos)
+	{
+		std::string indexString = directive.substr(directive.find("index") + 6, directive.find(";", directive.find("index") + 6) - (directive.find("index") + 6));
+		indexString = ParsingUtils::removeWhiteSpaces(indexString);
+		std::vector<std::string> indexFiles = ParsingUtils::splitString(indexString, ' ');
+		for (size_t i = 0; i < indexFiles.size(); i++)
+		{
+			std::string indexFile = ParsingUtils::removeWhiteSpaces(indexFiles[i]);
+			locationConfig.addIndex(indexFile);
+		}
 	}
 	else if (directive.find("allowed_methods") != std::string::npos)
 	{
@@ -299,7 +303,6 @@ std::vector<std::string>::iterator FileParser::handleLocationBlock(std::vector<s
 		locationName = it->substr(it->find("location") + 9, it->find("{") - (it->find("location") + 9));
 		locationName = ParsingUtils::removeWhiteSpaces(locationName);
 		locationConfig.setName(locationName);
-		std::cout << "Location name: " << locationName << std::endl;
 	}
 	it++;
 	while (it != _configLines.end())
@@ -311,6 +314,12 @@ std::vector<std::string>::iterator FileParser::handleLocationBlock(std::vector<s
 		}
 		parseLocationDirective(*it, locationConfig);
 		it++;
+	}
+	if (locationConfig.getAllowedMethods().empty())
+	{
+		locationConfig.addAllowedMethod("GET");
+		locationConfig.addAllowedMethod("POST");
+		locationConfig.addAllowedMethod("DELETE");
 	}
 	serverConfig.addLocation(locationConfig);
 	return it;

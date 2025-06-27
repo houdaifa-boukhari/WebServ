@@ -6,11 +6,18 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 14:10:16 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/25 13:46:15 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/27 17:15:21 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "response.hpp"
+#include <sys/stat.h>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <cctype>
+#include <dirent.h>
+#include <ctime>
 
 Response::Response()
 {
@@ -20,6 +27,7 @@ Response::Response()
 	this->_response = "";
 	this->_httpVersion = "HTTP/1.1";
 	this->_headers["Content-Type"] = "text/html";
+	this->_headers["Server"] = "WebServ/1.0";
 }
 
 Response::~Response()
@@ -56,6 +64,27 @@ void Response::setBody(const std::string &body)
 void Response::setHeader(const std::string &key, const std::string &value)
 {
 	this->_headers[key] = value;
+}
+
+// Getter methods
+std::string Response::getResponse() const
+{
+	return this->_response;
+}
+
+int Response::getStatusCode() const
+{
+	return this->_statusCode;
+}
+
+std::string Response::getBody() const
+{
+	return this->_body;
+}
+
+std::map<std::string, std::string> Response::getHeaders() const
+{
+	return this->_headers;
 }
 
 std::string Response::getMimeType(const std::string &filePath)
@@ -281,4 +310,458 @@ std::string Response::joinPath(const std::string &root, const std::string &path)
 		cleanPath = "/" + cleanPath;
 
 	return result + cleanPath;
+}
+
+std::string Response::generateResponse(size_t clientFd, ParssedRequest &request, ServerConfig &serverConfig)
+{
+	try
+	{
+		this->_requestHeaders = request.getHeaders();
+		std::string method = request.getMethod();
+		std::string path = request.getPath();
+		std::string requestedResource = normalizePath(path);
+
+		std::cout << "method : " << method << std::endl;
+		std::cout << "requestedResource : " << requestedResource << std::endl;
+		std::cout << "path : " << path << std::endl;
+
+		// Handle different HTTP methods
+		if (method == "GET")
+		{
+			return handleGetRequest(requestedResource, serverConfig);
+		}
+		else if (method == "POST")
+		{
+			return handlePostRequest(requestedResource, request, serverConfig);
+		}
+		else if (method == "DELETE")
+		{
+			return handleDeleteRequest(requestedResource, serverConfig);
+		}
+		else
+		{
+			// Method not allowed
+			generateDefaultErrorPage(405);
+			return buildHttpResponse();
+		}
+	}
+	catch (const std::exception &e)
+	{
+		// Internal server error
+		generateDefaultErrorPage(500);
+		return buildHttpResponse();
+	}
+}
+
+std::string Response::handleGetRequest(const std::string &path, ServerConfig &serverConfig)
+{
+	// Find matching location
+	LocationConfig matchedLocation;
+	bool locationFound = findMatchingLocation(path, serverConfig, matchedLocation);
+
+	if (!locationFound)
+	{
+		generateDefaultErrorPage(404);
+		return buildHttpResponse();
+	}
+
+	if (matchedLocation.isRedirection())
+	{
+		setStatusCode(matchedLocation.getRedirectionCode());
+		setHeader("Location", matchedLocation.getRedirectionTo());
+		setHeader("Content-Length", "0");
+		setBody("");
+		return buildHttpResponse();
+	}
+
+	// Check if method is allowed
+	if (!isMethodAllowed("GET", matchedLocation))
+	{
+		generateDefaultErrorPage(405);
+		return buildHttpResponse();
+	}
+
+	// Build full file path
+	std::string fullPath = joinPath(matchedLocation.getRoot(), path);
+	std::cout << "full Path : " << fullPath << std::endl;
+
+	if (isDirectory(fullPath))
+	{
+
+		return handleDirectoryRequest(fullPath, matchedLocation);
+	}
+	else if (fileExists(fullPath))
+	{
+
+		return handleFileRequest(fullPath);
+	}
+	else
+	{
+
+		// Check if there's a custom error page for 404
+		std::string errorPagePath = serverConfig.getErrorPage("404");
+		if (!errorPagePath.empty())
+		{
+			generateCustomErrorPage(404, errorPagePath);
+		}
+		else
+		{
+			generateDefaultErrorPage(404);
+		}
+		return buildHttpResponse();
+	}
+}
+
+std::string Response::handlePostRequest(const std::string &path, ParssedRequest &request, ServerConfig &serverConfig)
+{
+	// Find matching location
+	LocationConfig matchedLocation;
+	bool locationFound = findMatchingLocation(path, serverConfig, matchedLocation);
+
+	if (!locationFound)
+	{
+		generateDefaultErrorPage(404);
+		return buildHttpResponse();
+	}
+
+	// Check if method is allowed
+	if (!isMethodAllowed("POST", matchedLocation))
+	{
+		generateDefaultErrorPage(405);
+		return buildHttpResponse();
+	}
+
+	// Check content length against max body size
+	std::map<std::string, std::string> headers = request.getHeaders();
+	if (headers.find("Content-Length") != headers.end())
+	{
+		size_t contentLength = std::stoul(headers["Content-Length"]);
+		if (contentLength > serverConfig.getMaxBodySizeBytes())
+		{
+			generateDefaultErrorPage(413); // Payload Too Large
+			return buildHttpResponse();
+		}
+	}
+
+	// // Handle CGI if configured
+	// std::string cgiPath = matchedLocation.getCgi();
+	// if (!cgiPath.empty())
+	// {
+	// 	return handleCgiRequest(path, request, matchedLocation);
+	// }
+
+	// // Handle file upload if it's an upload location
+	// if (matchedLocation.getUploadEnable())
+	// {
+	// 	return handleFileUpload(request, matchedLocation);
+	// }
+
+	// Default POST handling
+	setStatusCode(201);
+	setHeader("Content-Type", "text/html");
+	std::string responseBody = "<html><body><h1>201 Created</h1><p>Resource created successfully.</p></body></html>";
+	setHeader("Content-Length", std::to_string(responseBody.size()));
+	setBody(responseBody);
+	return buildHttpResponse();
+}
+
+std::string Response::handleDeleteRequest(const std::string &path, ServerConfig &serverConfig)
+{
+	// Find matching location
+	LocationConfig matchedLocation;
+	bool locationFound = findMatchingLocation(path, serverConfig, matchedLocation);
+
+	if (!locationFound)
+	{
+		generateDefaultErrorPage(404);
+		return buildHttpResponse();
+	}
+
+	// Check if method is allowed
+	if (!isMethodAllowed("DELETE", matchedLocation))
+	{
+		generateDefaultErrorPage(405);
+		return buildHttpResponse();
+	}
+
+	std::string fullPath = joinPath(matchedLocation.getRoot(), path);
+
+	if (fileExists(fullPath))
+	{
+		if (remove(fullPath.c_str()) == 0)
+		{
+			setStatusCode(204); // No Content
+			setHeader("Content-Length", "0");
+			setBody("");
+			return buildHttpResponse();
+		}
+		else
+		{
+			generateDefaultErrorPage(500);
+			return buildHttpResponse();
+		}
+	}
+	else
+	{
+		generateDefaultErrorPage(404);
+		return buildHttpResponse();
+	}
+}
+
+std::string Response::handleDirectoryRequest(const std::string &dirPath, LocationConfig &location)
+{
+	// Check for index files
+	std::vector<std::string> indexFiles = location.getIndex();
+	for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); ++it)
+	{
+		std::string indexPath = joinPath(dirPath, *it);
+		if (fileExists(indexPath))
+		{
+			return handleFileRequest(indexPath);
+		}
+	}
+
+	// Check if autoindex is enabled
+	if (location.getAutoIndex())
+	{
+		return generateDirectoryListing(dirPath);
+	}
+	else
+	{
+		generateDefaultErrorPage(403); // Forbidden
+		return buildHttpResponse();
+	}
+}
+
+std::string Response::handleFileRequest(const std::string &filePath)
+{
+	// Get file size first
+	struct stat fileStat;
+	if (stat(filePath.c_str(), &fileStat) != 0)
+	{
+		generateDefaultErrorPage(404);
+		return buildHttpResponse();
+	}
+
+	size_t fileSize = fileStat.st_size;
+	std::string mimeType = getMimeType(filePath);
+
+	std::cout << "File size: " << fileSize << " bytes" << std::endl;
+
+	// Check if this is a range request
+	std::map<std::string, std::string>::iterator rangeIt = _requestHeaders.find("Range");
+	if (rangeIt != _requestHeaders.end())
+	{
+		std::cout << "Range request detected: " << rangeIt->second << std::endl;
+		return handleRangeRequest(filePath, rangeIt->second, fileSize, mimeType);
+	}
+
+	// For large files without range request, still read entire file (but add range support)
+	std::string content = readFile(filePath);
+	if (content.empty())
+	{
+		generateDefaultErrorPage(500);
+		return buildHttpResponse();
+	}
+
+	setStatusCode(200);
+	setHeader("Content-Type", mimeType);
+	setHeader("Content-Length", std::to_string(content.size()));
+	setHeader("Accept-Ranges", "bytes"); // Tell browser we support ranges
+	setBody(content);
+	return buildHttpResponse();
+}
+
+std::string Response::handleFileUpload(ParssedRequest &request, LocationConfig &location)
+{
+	std::string uploadPath = location.getUploadPath();
+	std::string body = request.getBody();
+
+	// Generate unique filename (simplified)
+	std::time_t now = std::time(0);
+	std::string filename = "upload_" + std::to_string(now) + ".txt";
+	std::string fullPath = joinPath(uploadPath, filename);
+
+	std::ofstream file(fullPath.c_str());
+	if (file.is_open())
+	{
+		file << body;
+		file.close();
+
+		setStatusCode(201);
+		setHeader("Content-Type", "text/html");
+		std::string responseBody = "<html><body><h1>File Uploaded</h1><p>File uploaded successfully as " + filename + "</p></body></html>";
+		setHeader("Content-Length", std::to_string(responseBody.size()));
+		setBody(responseBody);
+		return buildHttpResponse();
+	}
+	else
+	{
+		generateDefaultErrorPage(500);
+		return buildHttpResponse();
+	}
+}
+
+std::string Response::handleCgiRequest(const std::string &path, ParssedRequest &request, LocationConfig &location)
+{
+	// This is a simplified CGI implementation
+	// In a real implementation, you would execute the CGI script and capture its output
+
+	setStatusCode(200);
+	setHeader("Content-Type", "text/html");
+	std::string responseBody = "<html><body><h1>CGI Response</h1><p>CGI script executed for: " + path + "</p></body></html>";
+	setHeader("Content-Length", std::to_string(responseBody.size()));
+	setBody(responseBody);
+	return buildHttpResponse();
+}
+
+std::string Response::generateDirectoryListing(const std::string &dirPath)
+{
+	std::string html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Directory Listing</title>\n";
+	html += "<style>body{font-family:Arial,sans-serif;margin:40px;}a{text-decoration:none;color:#0066cc;}a:hover{text-decoration:underline;}</style>\n";
+	html += "</head>\n<body>\n<h1>Directory Listing for " + dirPath + "</h1>\n<hr>\n<ul>\n";
+
+	DIR *dir = opendir(dirPath.c_str());
+	if (dir != NULL)
+	{
+		struct dirent *entry;
+		while ((entry = readdir(dir)) != NULL)
+		{
+			std::string name = entry->d_name;
+			if (name != ".")
+			{
+				html += "<li><a href=\"" + name;
+				if (entry->d_type == DT_DIR)
+					html += "/";
+				html += "\">" + name;
+				if (entry->d_type == DT_DIR)
+					html += "/";
+				html += "</a></li>\n";
+			}
+		}
+		closedir(dir);
+	}
+
+	html += "</ul>\n<hr>\n<p><em>WebServ/1.0</em></p>\n</body>\n</html>";
+
+	setStatusCode(200);
+	setHeader("Content-Type", "text/html");
+	setHeader("Content-Length", std::to_string(html.size()));
+	setBody(html);
+	return buildHttpResponse();
+}
+
+bool Response::findMatchingLocation(const std::string &path, ServerConfig &serverConfig, LocationConfig &matchedLocation)
+{
+	std::vector<LocationConfig> locations = serverConfig.getLocations();
+	std::string bestMatch = "";
+	bool found = false;
+
+	for (std::vector<LocationConfig>::iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		std::string locationPath = it->getName();
+		if (path.find(locationPath) == 0)
+		{
+			if (locationPath.length() > bestMatch.length())
+			{
+				bestMatch = locationPath;
+				matchedLocation = *it;
+				found = true;
+			}
+		}
+	}
+
+	return found;
+}
+
+bool Response::isMethodAllowed(const std::string &method, LocationConfig &location)
+{
+	std::vector<std::string> allowedMethods = location.getAllowedMethods();
+	// if (allowedMethods.empty() && (method == "GET" || method == "POST" || method == "DELETE"))
+	// 	return true;
+
+	for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
+	{
+		if (*it == method)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+std::string Response::handleRangeRequest(const std::string &filePath, const std::string &rangeHeader, size_t fileSize, const std::string &mimeType)
+{
+	// Parse range header: "bytes=269776-" or "bytes=0-1023" or "bytes=100-200"
+	size_t start = 0, end = fileSize - 1;
+
+	std::cout << "Parsing range header: " << rangeHeader << std::endl;
+
+	if (rangeHeader.find("bytes=") == 0)
+	{
+		std::string range = rangeHeader.substr(6); // Remove "bytes="
+		size_t dashPos = range.find('-');
+
+		if (dashPos != std::string::npos)
+		{
+			std::string startStr = range.substr(0, dashPos);
+			std::string endStr = range.substr(dashPos + 1);
+
+			if (!startStr.empty())
+			{
+				start = std::stoul(startStr);
+			}
+			if (!endStr.empty())
+			{
+				end = std::stoul(endStr);
+			}
+		}
+	}
+
+	// Validate range
+	if (start >= fileSize || end >= fileSize || start > end)
+	{
+		std::cout << "Invalid range: start=" << start << ", end=" << end << ", fileSize=" << fileSize << std::endl;
+		setStatusCode(416); // Range Not Satisfiable
+		setHeader("Content-Range", "bytes */" + std::to_string(fileSize));
+		setHeader("Content-Length", "0");
+		setBody("");
+		return buildHttpResponse();
+	}
+
+	std::cout << "Valid range: " << start << "-" << end << " (size: " << (end - start + 1) << ")" << std::endl;
+
+	// Read the requested range
+	std::ifstream file(filePath.c_str(), std::ios::binary);
+	if (!file.is_open())
+	{
+		generateDefaultErrorPage(500);
+		return buildHttpResponse();
+	}
+
+	file.seekg(start);
+	size_t rangeSize = end - start + 1;
+	std::vector<char> buffer(rangeSize);
+	file.read(&buffer[0], rangeSize);
+
+	if (file.gcount() != static_cast<std::streamsize>(rangeSize))
+	{
+		std::cout << "Warning: Read " << file.gcount() << " bytes instead of " << rangeSize << std::endl;
+		rangeSize = file.gcount();
+	}
+
+	file.close();
+
+	std::string content(buffer.begin(), buffer.begin() + rangeSize);
+
+	// Build partial content response
+	setStatusCode(206); // Partial Content
+	setHeader("Content-Type", mimeType);
+	setHeader("Content-Length", std::to_string(rangeSize));
+	setHeader("Accept-Ranges", "bytes");
+	setHeader("Content-Range", "bytes " + std::to_string(start) + "-" + std::to_string(end) + "/" + std::to_string(fileSize));
+	setBody(content);
+
+	std::cout << "Sending partial content: " << rangeSize << " bytes" << std::endl;
+	return buildHttpResponse();
 }

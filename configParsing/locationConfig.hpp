@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   locationConfig.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:41:47 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/06 16:29:31 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/26 12:03:26 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ class LocationConfig
 private:
 	std::string _name;
 	std::string _root;
-	std::string _index;
+	std::vector<std::string> _index;
 	std::vector<std::string> _allowedMethods;
 	bool _autoIndex;
 	// redirection variables
@@ -44,7 +44,7 @@ public:
 	~LocationConfig();
 	void setName(std::string name);
 	void setRoot(std::string root);
-	void setIndex(std::string index);
+	void addIndex(std::string index);
 	void addAllowedMethod(std::string allowedMethod);
 	void setAutoIndex(bool autoIndex);
 	void setRedirection(bool has_redirection, int redirection_code, std::string redirection_to);
@@ -52,7 +52,9 @@ public:
 	void setUpload(bool has_upload, std::string upload_path);
 	std::string getName();
 	std::string getRoot();
-	std::string getIndex();
+	std::vector<std::string> getIndex();
+	std::string getIndexPath();
+	bool getAutoIndex();
 	std::vector<std::string> getAllowedMethods();
 	bool isAutoIndex();
 	bool isRedirection();

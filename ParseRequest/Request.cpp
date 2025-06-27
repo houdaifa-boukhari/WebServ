@@ -1,13 +1,16 @@
 #include "Request.hpp"
 
-std::string trim(const std::string& str) {
+std::string trim(const std::string &str)
+{
     std::string::const_iterator start = str.begin();
-    while (start != str.end() && std::isspace(*start)) {
+    while (start != str.end() && std::isspace(*start))
+    {
         ++start;
     }
 
     std::string::const_reverse_iterator r_end = str.rbegin();
-    while (r_end != str.rend() && std::isspace(*r_end)) {
+    while (r_end != str.rend() && std::isspace(*r_end))
+    {
         ++r_end;
     }
 
@@ -30,7 +33,8 @@ ParssedRequest::~ParssedRequest()
 void ParssedRequest::printParams()
 {
     std::map<std::string, std::string>::iterator it;
-    for (it = _params.begin(); it != _params.end(); ++it) {
+    for (it = _params.begin(); it != _params.end(); ++it)
+    {
         std::cout << it->first << ": " << it->second << std::endl;
     }
 }
@@ -38,12 +42,14 @@ void ParssedRequest::printParams()
 void ParssedRequest::assign_params(std::string path)
 {
     std::string::size_type pos = path.find('?');
-    if (pos != std::string::npos) {
+    if (pos != std::string::npos)
+    {
         std::string query_string = path.substr(pos + 1);
         path = path.substr(0, pos);
         std::istringstream iss(query_string);
         std::string param;
-        while (std::getline(iss, param, '&')) {
+        while (std::getline(iss, param, '&'))
+        {
             std::string key = param.substr(0, param.find('='));
             std::string value = param.substr(param.find('=') + 1);
             _params[trim(key)] = trim(value);
@@ -61,7 +67,8 @@ void ParssedRequest::AssignRequestLine(std::string request)
     std::istringstream iss(request);
     std::string method, path, version;
 
-    if (!(iss >> method >> path >> version)) {
+    if (!(iss >> method >> path >> version))
+    {
         std::cerr << "Invalid request line format.\n";
         return;
     }
@@ -70,7 +77,8 @@ void ParssedRequest::AssignRequestLine(std::string request)
     _path = path;
     _version = version;
     std::string extra;
-    if (iss >> extra) {
+    if (iss >> extra)
+    {
         std::cerr << "Too many parts in request line.\n";
         return;
     }
@@ -86,7 +94,8 @@ void ParssedRequest::AssignHeadersLine(std::string request)
     std::string line;
 
     // // Read the request line
-    if (!std::getline(stream, line) || line.empty()) {
+    if (!std::getline(stream, line) || line.empty())
+    {
         std::cerr << "Empty or invalid request line.\n";
         return;
     }
@@ -94,17 +103,18 @@ void ParssedRequest::AssignHeadersLine(std::string request)
     if (!line.empty() && line.back() == '\r')
         line.pop_back();
 
-
     std::istringstream iss(line);
     std::string method, path, version;
-    if (!(iss >> _method >> _path >> _version)) {
+    if (!(iss >> _method >> _path >> _version))
+    {
         std::cerr << "Invalid request line format.\n";
-        return ;
+        return;
     }
     std::string extra;
-    if (iss >> extra) {
+    if (iss >> extra)
+    {
         std::cerr << "Too many parts in request line.\n";
-        return ;
+        return;
     }
     // std::cout << "request line: " << line << std::endl;
     // std::cout << "HEADERS" << std::endl;
@@ -114,24 +124,28 @@ void ParssedRequest::AssignHeadersLine(std::string request)
     {
         iss.clear();
         iss.str(line);
-        if (std::getline(iss, key, ':') && std::getline(iss, value)) {
+        if (std::getline(iss, key, ':') && std::getline(iss, value))
+        {
             // maybe check is key has two words
             _headers[trim(key)] = trim(value);
         }
-        else {
+        else
+        {
             std::cerr << "Invalid header format: " << line << std::endl;
-            return ;
+            return;
         }
     }
     assign_params(_path);
     std::ostringstream body_stream;
-    body_stream << stream.rdbuf();  // Reads the rest of the stream
+    body_stream << stream.rdbuf(); // Reads the rest of the stream
     _body = body_stream.str();
 }
 
-void printMap(std::map<std::string, std::string> myMap) {
+void printMap(std::map<std::string, std::string> myMap)
+{
     std::map<std::string, std::string>::iterator it;
-    for (it = myMap.begin(); it != myMap.end(); ++it) {
+    for (it = myMap.begin(); it != myMap.end(); ++it)
+    {
         std::cout << it->first << ": " << it->second << std::endl;
     }
 }
@@ -173,6 +187,21 @@ std::map<std::string, std::string> ParssedRequest::getHeaders()
 std::string ParssedRequest::getBody()
 {
     return (_body);
+}
+
+std::string ParssedRequest::getMethod() const
+{
+    return _method;
+}
+
+std::string ParssedRequest::getPath() const
+{
+    return _path;
+}
+
+std::string ParssedRequest::getVersion() const
+{
+    return _version;
 }
 
 void ParssedRequest::AssignBody(std::string request)
