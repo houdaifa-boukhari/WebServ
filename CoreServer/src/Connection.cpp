@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/26 12:14:08 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/28 16:02:38 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,45 +83,26 @@ void Server::handleClientData(int ClientFd)
 
 		std::cout << "\033[1;31m********\033[0m" << std::endl;
 		_request.AssignHeadersLine(_client_buffers[ClientFd]);
-		std::cout << _request.GetReqeustLIne() << std::endl;
-		printMap(_request.getHeaders());
-		std::cout << "Body: " << _request.getBody() << std::endl;
+		// std::cout << _request.GetReqeustLIne() << std::endl;
+		// printMap(_request.getHeaders());
+		// std::cout << "Body: " << _request.getBody() << std::endl;
 		_request.assign_params(_request.getBody());
-		std::cout << "Params: " << std::endl;
-		_request.printParams();
+		// std::cout << "Params: " << std::endl;
+		// _request.printParams();
 		std::cout << "\033[1;31m********\033[0m" << std::endl;
 		// char **env = _request.get_env();
 		// std::string output = execute_cgi("/Users/aet-tale/Desktop/webserv/cgi-cookies.py", env);
 		// std::cout << "Output: " << output << std::endl;
 		// free_envp(env);
 
-		/////////////////////////////
+		NewResponse response(ClientFd, _config[0], _request);
+		response.generateResponse();
 
-		///// youssef Part /////
-
-		ServerConfig _config = this->_config[0];
-		Response _response = Response();
-		std::string httpResponse = _response.generateResponse(ClientFd, _request, _config);
-		if (send(ClientFd, httpResponse.c_str(), httpResponse.size(), 0) < 0)
-		{
-			std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
-					  << "Failed to send response to client " << ClientFd << WHIET << std::endl;
-			closeConnection(ClientFd);
-			return;
-		}
-		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
-				  << "Response sent to client " << ClientFd << WHIET << std::endl;
-
-		// generatResponse(serverConfig, _request, ClientFd);
-
-		//////////////////
-		// generateResponse(ClientFd);
-		_client_buffers[ClientFd].clear();
-		_client_buffers[ClientFd] = "";
-		// _config.;
-		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-				  << "Request Is complete" << WHIET << std::endl;
-		std::cout << RED << "			------------------------------------			" << std::endl;
+		// _client_buffers[ClientFd].clear();
+		// _client_buffers[ClientFd] = "";
+		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+		// 		  << "Request Is complete" << WHIET << std::endl;
+		// std::cout << RED << "			------------------------------------			" << std::endl;
 	}
 	else
 		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "

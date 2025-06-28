@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 14:10:16 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/27 17:15:21 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/28 16:01:38 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,8 @@ std::string Response::getMimeType(const std::string &filePath)
 		return "video/mp4";
 	if (extension == ".mp3")
 		return "audio/mpeg";
+	if (extension == ".webm")
+		return "video/webm";
 	if (extension == ".wav")
 		return "audio/wav";
 
@@ -167,6 +169,8 @@ std::string Response::getStatusMessage(int code)
 		return "Forbidden";
 	case 404:
 		return "Not Found";
+	case 206:
+		return "Partial Content";
 	case 405:
 		return "Method Not Allowed";
 	case 413:
@@ -179,6 +183,8 @@ std::string Response::getStatusMessage(int code)
 		return "Bad Gateway";
 	case 503:
 		return "Service Unavailable";
+	case 416:
+		return "Range Not Satisfiable";
 	default:
 		return "Unknown";
 	}
@@ -226,6 +232,7 @@ std::string Response::buildHttpResponse()
 	}
 	_response += "\r\n";
 	_response += _body;
+
 	return _response;
 }
 
@@ -321,33 +328,23 @@ std::string Response::generateResponse(size_t clientFd, ParssedRequest &request,
 		std::string path = request.getPath();
 		std::string requestedResource = normalizePath(path);
 
-		std::cout << "method : " << method << std::endl;
-		std::cout << "requestedResource : " << requestedResource << std::endl;
-		std::cout << "path : " << path << std::endl;
-
-		// Handle different HTTP methods
 		if (method == "GET")
-		{
 			return handleGetRequest(requestedResource, serverConfig);
-		}
+
 		else if (method == "POST")
-		{
 			return handlePostRequest(requestedResource, request, serverConfig);
-		}
+
 		else if (method == "DELETE")
-		{
 			return handleDeleteRequest(requestedResource, serverConfig);
-		}
 		else
 		{
-			// Method not allowed
 			generateDefaultErrorPage(405);
 			return buildHttpResponse();
 		}
 	}
 	catch (const std::exception &e)
 	{
-		// Internal server error
+		// todo : get the correct Error page not just the default one
 		generateDefaultErrorPage(500);
 		return buildHttpResponse();
 	}
@@ -355,16 +352,20 @@ std::string Response::generateResponse(size_t clientFd, ParssedRequest &request,
 
 std::string Response::handleGetRequest(const std::string &path, ServerConfig &serverConfig)
 {
-	// Find matching location
 	LocationConfig matchedLocation;
 	bool locationFound = findMatchingLocation(path, serverConfig, matchedLocation);
-
+	std::cout << "Searching for location for GET request: " << path << std::endl;
 	if (!locationFound)
 	{
+		std::cout << "Location not found for GET request: " << path << std::endl;
+
 		generateDefaultErrorPage(404);
 		return buildHttpResponse();
 	}
-
+	else
+	{
+		std::cout << "Matched location for GET request: " << matchedLocation.getName() << std::endl;
+	}
 	if (matchedLocation.isRedirection())
 	{
 		setStatusCode(matchedLocation.getRedirectionCode());
@@ -374,25 +375,19 @@ std::string Response::handleGetRequest(const std::string &path, ServerConfig &se
 		return buildHttpResponse();
 	}
 
-	// Check if method is allowed
 	if (!isMethodAllowed("GET", matchedLocation))
 	{
 		generateDefaultErrorPage(405);
 		return buildHttpResponse();
 	}
 
-	// Build full file path
 	std::string fullPath = joinPath(matchedLocation.getRoot(), path);
-	std::cout << "full Path : " << fullPath << std::endl;
-
 	if (isDirectory(fullPath))
 	{
-
 		return handleDirectoryRequest(fullPath, matchedLocation);
 	}
 	else if (fileExists(fullPath))
 	{
-
 		return handleFileRequest(fullPath);
 	}
 	else
@@ -546,14 +541,21 @@ std::string Response::handleFileRequest(const std::string &filePath)
 	size_t fileSize = fileStat.st_size;
 	std::string mimeType = getMimeType(filePath);
 
+	std::cout << "-----------------------------------------------------------------" << std::endl;
 	std::cout << "File size: " << fileSize << " bytes" << std::endl;
+	std::cout << "MIME type: " << mimeType << std::endl;
+	std::cout << "-----------------------------------------------------------------" << std::endl;
 
-	// Check if this is a range request
+	const size_t MIN_RANGE_FILE_SIZE = 1024 * 1024;
+	bool rangeSupport = false;
 	std::map<std::string, std::string>::iterator rangeIt = _requestHeaders.find("Range");
 	if (rangeIt != _requestHeaders.end())
-	{
-		std::cout << "Range request detected: " << rangeIt->second << std::endl;
+		rangeSupport = true;
+	if (rangeSupport)
 		return handleRangeRequest(filePath, rangeIt->second, fileSize, mimeType);
+	if (fileSize >= MIN_RANGE_FILE_SIZE)
+	{
+		return handleRangeRequest(filePath, "", fileSize, mimeType);
 	}
 
 	// For large files without range request, still read entire file (but add range support)
@@ -600,19 +602,6 @@ std::string Response::handleFileUpload(ParssedRequest &request, LocationConfig &
 		generateDefaultErrorPage(500);
 		return buildHttpResponse();
 	}
-}
-
-std::string Response::handleCgiRequest(const std::string &path, ParssedRequest &request, LocationConfig &location)
-{
-	// This is a simplified CGI implementation
-	// In a real implementation, you would execute the CGI script and capture its output
-
-	setStatusCode(200);
-	setHeader("Content-Type", "text/html");
-	std::string responseBody = "<html><body><h1>CGI Response</h1><p>CGI script executed for: " + path + "</p></body></html>";
-	setHeader("Content-Length", std::to_string(responseBody.size()));
-	setBody(responseBody);
-	return buildHttpResponse();
 }
 
 std::string Response::generateDirectoryListing(const std::string &dirPath)
@@ -677,9 +666,6 @@ bool Response::findMatchingLocation(const std::string &path, ServerConfig &serve
 bool Response::isMethodAllowed(const std::string &method, LocationConfig &location)
 {
 	std::vector<std::string> allowedMethods = location.getAllowedMethods();
-	// if (allowedMethods.empty() && (method == "GET" || method == "POST" || method == "DELETE"))
-	// 	return true;
-
 	for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
 	{
 		if (*it == method)
@@ -690,78 +676,99 @@ bool Response::isMethodAllowed(const std::string &method, LocationConfig &locati
 	return false;
 }
 
-std::string Response::handleRangeRequest(const std::string &filePath, const std::string &rangeHeader, size_t fileSize, const std::string &mimeType)
+std::string Response::handleRangeRequest(const std::string &filePath,
+										 const std::string &rangeHeader,
+										 size_t fileSize,
+										 const std::string &mimeType)
 {
-	// Parse range header: "bytes=269776-" or "bytes=0-1023" or "bytes=100-200"
-	size_t start = 0, end = fileSize - 1;
+	std::cout << "Handling range request for file: " << filePath << std::endl;
+	std::map<std::string, size_t> rangeHeaders = responseUtils::extractRangeHeaders(rangeHeader);
+	size_t start = rangeHeaders["start"];
+	size_t end = rangeHeaders["end"];
+	std::cout << "Range header: " << rangeHeader << std::endl;
 
-	std::cout << "Parsing range header: " << rangeHeader << std::endl;
-
-	if (rangeHeader.find("bytes=") == 0)
+	// Validate and clamp range
+	if (start > end || start >= fileSize)
 	{
-		std::string range = rangeHeader.substr(6); // Remove "bytes="
-		size_t dashPos = range.find('-');
-
-		if (dashPos != std::string::npos)
-		{
-			std::string startStr = range.substr(0, dashPos);
-			std::string endStr = range.substr(dashPos + 1);
-
-			if (!startStr.empty())
-			{
-				start = std::stoul(startStr);
-			}
-			if (!endStr.empty())
-			{
-				end = std::stoul(endStr);
-			}
-		}
-	}
-
-	// Validate range
-	if (start >= fileSize || end >= fileSize || start > end)
-	{
-		std::cout << "Invalid range: start=" << start << ", end=" << end << ", fileSize=" << fileSize << std::endl;
-		setStatusCode(416); // Range Not Satisfiable
+		// Invalid range, respond with 416
+		setStatusCode(416);
 		setHeader("Content-Range", "bytes */" + std::to_string(fileSize));
 		setHeader("Content-Length", "0");
 		setBody("");
 		return buildHttpResponse();
 	}
+	if (end >= fileSize)
+	{
+		end = fileSize - 1;
+	}
+	size_t requestedSize = end - start + 1;
 
-	std::cout << "Valid range: " << start << "-" << end << " (size: " << (end - start + 1) << ")" << std::endl;
+	// Handle empty file early
+	if (fileSize == 0)
+	{
+		setStatusCode(200);
+		setHeader("Content-Length", "0");
+		setBody("");
+		return buildHttpResponse();
+	}
 
-	// Read the requested range
-	std::ifstream file(filePath.c_str(), std::ios::binary);
+	std::cout << "Range request: start=" << start << ", end=" << end << std::endl;
+	std::cout << "Requested size: " << requestedSize << " bytes" << std::endl;
+
+	// Open file
+	std::ifstream file(filePath, std::ios::binary);
 	if (!file.is_open())
 	{
+		std::cerr << "File open failed: " << filePath << std::endl;
+		generateDefaultErrorPage(404);
+		return buildHttpResponse();
+	}
+
+	// Seek to start position
+	file.seekg(static_cast<std::streamoff>(start));
+	if (!file)
+	{
+		std::cerr << "File seek failed: " << start << std::endl;
 		generateDefaultErrorPage(500);
 		return buildHttpResponse();
 	}
 
-	file.seekg(start);
-	size_t rangeSize = end - start + 1;
-	std::vector<char> buffer(rangeSize);
-	file.read(&buffer[0], rangeSize);
-
-	if (file.gcount() != static_cast<std::streamsize>(rangeSize))
-	{
-		std::cout << "Warning: Read " << file.gcount() << " bytes instead of " << rangeSize << std::endl;
-		rangeSize = file.gcount();
-	}
-
+	// Read file chunk
+	std::vector<char> buffer(requestedSize);
+	file.read(buffer.data(), static_cast<std::streamsize>(requestedSize));
+	size_t bytesRead = static_cast<size_t>(file.gcount());
 	file.close();
 
-	std::string content(buffer.begin(), buffer.begin() + rangeSize);
+	if (bytesRead == 0)
+	{
+		std::cerr << "File read failed: 0 bytes read" << std::endl;
+		generateDefaultErrorPage(500);
+		return buildHttpResponse();
+	}
 
-	// Build partial content response
-	setStatusCode(206); // Partial Content
+	size_t actualEnd = start + bytesRead - 1;
+
+	// Set response headers
+	if (start > 0 || actualEnd < fileSize - 1)
+	{
+		setStatusCode(206); // Partial Content
+		setHeader("Content-Range", "bytes " +
+									   std::to_string(start) + "-" +
+									   std::to_string(actualEnd) + "/" +
+									   std::to_string(fileSize));
+	}
+	else
+	{
+		setStatusCode(200); // Full content
+	}
+
 	setHeader("Content-Type", mimeType);
-	setHeader("Content-Length", std::to_string(rangeSize));
+	setHeader("Content-Length", std::to_string(bytesRead));
 	setHeader("Accept-Ranges", "bytes");
-	setHeader("Content-Range", "bytes " + std::to_string(start) + "-" + std::to_string(end) + "/" + std::to_string(fileSize));
-	setBody(content);
+	setBody(std::string(buffer.data(), bytesRead));
 
-	std::cout << "Sending partial content: " << rangeSize << " bytes" << std::endl;
+	std::cout << "Served: " << start << "-" << actualEnd
+			  << " (" << bytesRead << " bytes)" << std::endl;
+
 	return buildHttpResponse();
 }

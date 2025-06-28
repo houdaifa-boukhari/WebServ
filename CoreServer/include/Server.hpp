@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 16:33:22 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/26 12:16:33 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/28 16:02:21 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include "../../configParsing/serverConfig.hpp"
 #include "../../ParseRequest/Request.hpp"
 #include "/Users/elmountahi/1337/13Projects/WebServ/response/response.hpp"
+#include "/Users/elmountahi/1337/13Projects/WebServ/response/NewResponse.hpp"
 
 #define WHIET "\033[0m"
 #define GREEN "\033[32m"

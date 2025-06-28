@@ -6,14 +6,13 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/26 12:11:37 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/28 16:28:39 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
 
-
-Server::Server(const std::vector<ServerConfig> &configs) : _config(configs), _timeoutSec(30)
+Server::Server(const std::vector<ServerConfig> &configs) : _config(configs), _timeoutSec(500)
 {
 	this->initializeSockets();
 }

@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/23 13:58:01 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/26 16:51:57 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/28 16:15:46 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include "../ParseRequest/Request.hpp"
 #include "../configParsing/serverConfig.hpp"
 #include "../configParsing/locationConfig.hpp"
+#include <sys/socket.h>
 
 class Response
 {
@@ -43,7 +44,6 @@ private:
 	void generateCustomErrorPage(int statusCode, const std::string &errorPagePath);
 	std::string normalizePath(const std::string &path);
 	std::string joinPath(const std::string &root, const std::string &path);
-
 	// HTTP request handlers
 	std::string handleGetRequest(const std::string &path, ServerConfig &serverConfig);
 	std::string handlePostRequest(const std::string &path, ParssedRequest &request, ServerConfig &serverConfig);
@@ -51,7 +51,6 @@ private:
 	std::string handleDirectoryRequest(const std::string &dirPath, LocationConfig &location);
 	std::string handleFileRequest(const std::string &filePath);
 	std::string handleFileUpload(ParssedRequest &request, LocationConfig &location);
-	std::string handleCgiRequest(const std::string &path, ParssedRequest &request, LocationConfig &location);
 	std::string generateDirectoryListing(const std::string &dirPath);
 	bool findMatchingLocation(const std::string &path, ServerConfig &serverConfig, LocationConfig &matchedLocation);
 	bool isMethodAllowed(const std::string &method, LocationConfig &location);
