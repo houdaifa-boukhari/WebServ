@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/28 16:28:39 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/28 22:52:13 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,10 @@ void Server::initializeSockets()
 
 	for (size_t i = 0; i < _config.size(); i++)
 	{
+		host = _config[i].getHost();
+		ports = _config[i].getPorts();
 		for (size_t j = 0; j < _config[i].getPorts().size(); j++)
 		{
-			host = _config[i].getHost();
-			ports = _config[i].getPorts();
 			if (ports[j] < 1024) // all port younger than 1024 need high privilege
 			{
 				std::cerr << YELLOW << currentTime() << " [WARNING] "
@@ -88,7 +88,6 @@ void Server::run()
 		size_t i = 0;
 		while (i < _poll_fds.size())
 		{
-			//  Error handling
 			if (_poll_fds[i].revents & POLLERR)
 			{
 				std::cout << YELLOW << currentTime() << RED << " [ERROR] "
@@ -99,7 +98,6 @@ void Server::run()
 						  << "Erased bad fd. New size=" << _poll_fds.size() << WHIET << std::endl;
 				continue;
 			}
-			// manage connection
 			if (_poll_fds[i].revents & POLLIN)
 			{
 				if (isServerSocket(_poll_fds[i].fd))
@@ -114,6 +112,16 @@ void Server::run()
 							  << "Reading data from client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 					handleClientData(_poll_fds[i].fd);
 				}
+			}
+			if (_poll_fds[i].revents & POLLOUT)
+			{
+			    if (!isServerSocket(_poll_fds[i].fd))
+			    {
+			        std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+			                  << "Sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
+					generateResponse(_poll_fds[i].fd);
+			        // handleClientSend(_poll_fds[i].fd);
+			    }
 			}
 			i++;
 		}

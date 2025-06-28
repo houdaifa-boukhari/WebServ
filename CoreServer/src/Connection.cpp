@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/28 16:02:38 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/28 22:50:53 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,10 @@ void Server::handleNewConnection(int SvFd)
 
 	ClientFd = accept(SvFd, NULL, NULL);
 	if (fcntl(SvFd, F_SETFL, O_NONBLOCK) < 0)
+	{
+		close(ClientFd);
 		throw("fcntl Error");
+	}
 	pfd.fd = ClientFd;
 	pfd.events = POLLIN | POLLOUT;
 	pfd.revents = 0;
@@ -95,8 +98,8 @@ void Server::handleClientData(int ClientFd)
 		// std::cout << "Output: " << output << std::endl;
 		// free_envp(env);
 
-		NewResponse response(ClientFd, _config[0], _request);
-		response.generateResponse();
+		// NewResponse response(ClientFd, _config[0], _request);
+		// response.generateResponse();
 
 		// _client_buffers[ClientFd].clear();
 		// _client_buffers[ClientFd] = "";
