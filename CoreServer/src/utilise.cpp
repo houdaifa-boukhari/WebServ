@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 12:03:44 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/29 16:09:43 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,25 +109,3 @@ void Server::checkTimeouts()
         	++it;
     }
 }
-
-
-// ServerConfig Server::getServerConfig()
-// {
-// 	std::string Host = this->_request.getHeaders()["Host: "];
-// 	std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Getting server config for Host: " << Host << WHIET << std::endl;
-// 	std::vector<ServerConfig>::iterator it = _config.begin();
-// 	for (; it != _config.end(); ++it)
-// 	{
-// 		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Checking server config for request" << WHIET << std::endl;
-// 		std::cout << RED << "			------------------------------------			" << WHIET << std::endl;
-// 		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Host: " << it->getHost() << WHIET << std::endl;
-// 		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Request Host: " << this->_request.getHeaders().begin()->second << WHIET << std::endl;
-// 		std::cout << RED << "			------------------------------------			" << WHIET << std::endl;
-// 		if (it->getHost() == this->_request.getHeaders().begin()->first)
-// 		{
-// 			std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Matched server config for request" << WHIET << std::endl;
-// 			return *it;
-// 		}
-// 	}
-// 	return *(--it);
-// }

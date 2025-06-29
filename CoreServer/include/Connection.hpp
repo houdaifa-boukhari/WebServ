@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 21:19:37 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 13:06:55 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/29 16:06:37 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ class Connection
 		std::string ClientRequest;
 		std::string ClientResponse;
 		ssize_t bytesSent;
+		size_t totalFileSize;
 		ServerConfig config;
 		ParssedRequest ParseRequest;
 		time_t lastActivity;

@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 13:13:40 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/29 16:03:27 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,9 +120,12 @@ void Server::run()
 			        std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 			                  << "Sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 
+					///// youssef
+					
 					generateResponse(_poll_fds[i].fd);
 
-
+					////
+					
 					if (_connections[_poll_fds[i].fd].getClientRequest().find("Connection: keep-alive") != std::string::npos)
 					{
 						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
