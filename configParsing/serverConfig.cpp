@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 23:29:35 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/04 12:40:27 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:23:41 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ ServerConfig::ServerConfig()
 	_host = "";
 	_serverName = "";
 	_max_Body_Size = "";
+	_max_Body_Size_Bytes = 1024 * 1024;
 	_errorPages = std::map<std::string, std::string>();
 	_locations = std::vector<LocationConfig>();
 }
@@ -39,9 +40,60 @@ void ServerConfig::setServerName(std::string serverName)
 {
 	_serverName = serverName;
 }
+
+size_t ServerConfig::parseBodySizeToBytes(const std::string &sizeStr)
+{
+	if (sizeStr.empty())
+		return 1024 * 1024;
+
+	std::string cleanStr = sizeStr;
+	cleanStr.erase(std::remove_if(cleanStr.begin(), cleanStr.end(), ::isspace), cleanStr.end());
+
+	if (cleanStr.empty())
+		return 1024 * 1024;
+
+	size_t i = 0;
+	while (i < cleanStr.length() && std::isdigit(cleanStr[i]))
+		i++;
+
+	if (i == 0)
+		throw std::invalid_argument("Invalid body size format");
+
+	long long number = std::atoll(cleanStr.substr(0, i).c_str());
+	if (number < 0)
+		throw std::invalid_argument("Body size cannot be negative");
+
+	// Get the suffix (if any)
+	std::string suffix = cleanStr.substr(i);
+	std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
+
+	size_t multiplier = 1;
+	if (suffix.empty() || suffix == "b")
+		multiplier = 1;
+	else if (suffix == "k" || suffix == "kb")
+		multiplier = 1024;
+	else if (suffix == "m" || suffix == "mb")
+		multiplier = 1024 * 1024;
+	else if (suffix == "g" || suffix == "gb")
+		multiplier = 1024 * 1024 * 1024;
+	else
+		throw std::invalid_argument("Invalid body size suffix: " + suffix);
+
+	// if (number > (LLONG_MAX / multiplier))
+	// 	throw std::overflow_error("Body size too large");
+
+	return static_cast<size_t>(number * multiplier);
+}
+
 void ServerConfig::setMaxBodySize(std::string maxBodySize)
 {
 	_max_Body_Size = maxBodySize;
+	_max_Body_Size_Bytes = parseBodySizeToBytes(maxBodySize);
+}
+
+size_t ServerConfig::getMaxBodySizeBytes()
+{
+	return _max_Body_Size_Bytes;
 }
 void ServerConfig::addErrorPage(std::string key, std::string value)
 {
@@ -104,12 +156,13 @@ void ServerConfig::printServer()
 	}
 	std::cout << std::endl;
 	std::cout << "Max Body Size: " << _max_Body_Size << std::endl;
+	std::cout << "Max Body Size in Bytes: " << _max_Body_Size_Bytes << std::endl;
 	std::cout << "Error Pages: " << std::endl;
 	for (std::map<std::string, std::string>::iterator it = _errorPages.begin(); it != _errorPages.end(); it++)
 	{
 		std::cout << "\t" << it->first << ": " << it->second << std::endl;
 	}
-	std::cout << "Number of Locations: " << RED << _locations.size() << RESET<< std::endl;
+	std::cout << "Number of Locations: " << RED << _locations.size() << RESET << std::endl;
 	std::cout << "Locations: " << std::endl;
 	for (size_t i = 0; i < _locations.size(); i++)
 	{

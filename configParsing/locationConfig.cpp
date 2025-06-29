@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:42:15 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/02 21:02:05 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/26 12:35:42 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ LocationConfig::LocationConfig()
 	_allowedMethods = std::vector<std::string>();
 	_name = "";
 	_root = "";
-	_index = "";
+	_index = std::vector<std::string>();
 	_autoIndex = false;
 	_has_redirection = false;
 	_redirection_code = 0;
@@ -42,9 +42,9 @@ void LocationConfig::setRoot(std::string root)
 	_root = root;
 }
 
-void LocationConfig::setIndex(std::string index)
+void LocationConfig::addIndex(std::string index)
 {
-	_index = index;
+	_index.push_back(index);
 }
 
 void LocationConfig::addAllowedMethod(std::string allowedMethod)
@@ -87,9 +87,14 @@ std::string LocationConfig::getRoot()
 	return _root;
 }
 
-std::string LocationConfig::getIndex()
+std::vector<std::string> LocationConfig::getIndex()
 {
 	return _index;
+}
+
+bool LocationConfig::getAutoIndex()
+{
+	return _autoIndex;
 }
 
 std::vector<std::string> LocationConfig::getAllowedMethods()
@@ -142,11 +147,22 @@ std::string LocationConfig::getUploadPath()
 	return _upload_path;
 }
 
+std::string LocationConfig::getIndexPath()
+{
+	if (_index.empty())
+		return "";
+	return "/" + _index[0];
+}
+
 void LocationConfig::printLocation()
 {
 	std::cout << "Location Name: " << _name << std::endl;
 	std::cout << "Root: " << _root << std::endl;
-	std::cout << "Index: " << _index << std::endl;
+	std::cout << "Index : " << std::endl;
+	for (size_t i = 0; i < _index.size(); i++)
+	{
+		std::cout << "  " << _index[i] << std::endl;
+	}
 	std::cout << "Allowed Methods: ";
 	for (size_t i = 0; i < _allowedMethods.size(); i++)
 	{

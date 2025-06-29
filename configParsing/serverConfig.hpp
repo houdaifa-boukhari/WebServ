@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:40:51 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/04 12:36:17 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:19:38 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,14 @@ private:
 
 	// limits
 	std::string _max_Body_Size;
+	size_t _max_Body_Size_Bytes;
 
 	// error pages
 	std::map<std::string, std::string> _errorPages;
 
 	// locations
 	std::vector<LocationConfig> _locations;
+	size_t parseBodySizeToBytes(const std::string &sizeStr);
 
 public:
 	ServerConfig();
@@ -56,6 +58,7 @@ public:
 	std::string getHost();
 	std::string getServerName();
 	std::string getMaxBodySize();
+	size_t getMaxBodySizeBytes();
 	std::string getErrorPage(std::string key);
 	std::map<std::string, std::string> getErrorPages();
 	std::vector<LocationConfig> getLocations();
