@@ -5,12 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/08 20:19:09 by hel-bouk          #+#    #+#             */
-<<<<<<< HEAD:CoreServer/src/server/utilise.cpp
-/*   Updated: 2025/05/09 16:42:38 by hel-bouk         ###   ########.fr       */
-=======
-/*   Updated: 2025/06/28 18:12:34 by hel-bouk         ###   ########.fr       */
->>>>>>> 7a95435823a8143339d8c12718799f4ad8aa7c87:CoreServer/src/utilise.cpp
+/*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
+/*   Updated: 2025/06/29 12:03:44 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,10 +96,10 @@ void Server::checkTimeouts()
 {
     time_t now = time(NULL);
 
-    std::map<int, time_t>::iterator it = _lastActivity.begin();
-    while (it != _lastActivity.end())
+    std::map<int, Connection>::iterator it = _connections.begin();
+    while (it != _connections.end())
 	{
-        if (now - it->second > _timeoutSec)
+        if (now - it->second.getLastActivity() > _timeoutSec)
 		{
             std::cout << YELLOW << currentTime() << MAGENTA << " [TIMEOUT] Closing " << it->first
                       << " after " << _timeoutSec << "s inactivity" << WHIET << std::endl;

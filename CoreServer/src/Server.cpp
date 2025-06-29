@@ -6,29 +6,29 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/28 22:52:13 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/06/29 13:13:40 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
 
-Server::Server(const std::vector<ServerConfig> &configs) : _config(configs), _timeoutSec(500)
+Server::Server(const std::vector<ServerConfig> &configs) : _config(configs), _timeoutSec(30)
 {
 	this->initializeSockets();
 }
 
 Server::~Server()
 {
-	for (size_t i = 0; i < _serverFds.size(); i++)
-		close(_serverFds[i]);
+	std::map<int, ServerConfig>::iterator it;
+
+	for (it = _server.begin(); it != _server.end(); ++it)
+		close(it->first);
 	for (size_t i = 0; i < _poll_fds.size(); i++)
 		close(_poll_fds[i].fd);
 	_poll_fds.clear();
-	_serverFds.clear();
+	_server.clear();
 	logger::logInfo("Server shutdown, all connections closed.");
 }
-
-// check Non-bloking mode
 
 void Server::initializeSockets()
 {
@@ -52,7 +52,7 @@ void Server::initializeSockets()
 			tmp_fd = socket(AF_INET, SOCK_STREAM, 0); // AF_INET  IPv4 address family., SOCK_STREAM = TCP protocol (reliable, connection-oriented), 0 = default protocole
 			if (tmp_fd == -1)
 				throw("Error creating socket");
-			_serverFds.push_back(tmp_fd);
+			_server[tmp_fd] = _config[i];
 			if (fcntl(tmp_fd, F_SETFL, O_NONBLOCK) == -1)
 				throw("fcntl(F_SETFL) failed");
 			if (setsockopt(tmp_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) // need to deep understand
@@ -113,14 +113,29 @@ void Server::run()
 					handleClientData(_poll_fds[i].fd);
 				}
 			}
-			if (_poll_fds[i].revents & POLLOUT)
+			else if (_poll_fds[i].revents & POLLOUT && _connections[_poll_fds[i].fd].getIsComplete()) // remove else (check if close connection)
 			{
 			    if (!isServerSocket(_poll_fds[i].fd))
 			    {
 			        std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 			                  << "Sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
+
 					generateResponse(_poll_fds[i].fd);
-			        // handleClientSend(_poll_fds[i].fd);
+
+
+					if (_connections[_poll_fds[i].fd].getClientRequest().find("Connection: keep-alive") != std::string::npos)
+					{
+						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+								  << "Keeping connection alive for client fd=" << _poll_fds[i].fd  << " , Untile Timeout"<< WHIET << std::endl;
+						_connections[_poll_fds[i].fd].reset();
+					}
+					else
+					{
+						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+								  << "Closing connection for client fd=" << _poll_fds[i].fd << WHIET << std::endl;
+						closeConnection(_poll_fds[i].fd);
+					}
+					std::cout << RED << "			------------------------------			" << WHIET << std::endl;
 			    }
 			}
 			i++;
@@ -130,10 +145,7 @@ void Server::run()
 
 bool Server::isServerSocket(int fd)
 {
-	for (size_t i = 0; i < _serverFds.size(); i++)
-	{
-		if (_serverFds[i] == fd)
-			return (true);
-	}
+	if (_server.find(fd) != _server.end())
+		return (true);
 	return (false);
 }
