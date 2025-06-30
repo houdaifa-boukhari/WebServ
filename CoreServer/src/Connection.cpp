@@ -101,30 +101,31 @@ void Server::handleClientData(int ClientFd)
 		/////// anour Part ///////
 
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		_request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
+		_connections[ClientFd].getParceRequest().AssignHeadersLine(_connections[ClientFd].getClientRequest());
 		
-		std::cout << _request.GetReqeustLIne() << std::endl;
-		printMap(_request.getHeaders());
-		std::cout << "Body: " << _request.getBody() << std::endl;
+		std::cout << _connections[ClientFd].getParceRequest().GetReqeustLIne() << std::endl;
+		printMap(_connections[ClientFd].getParceRequest().getHeaders());
+		std::cout << "Body: " << _connections[ClientFd].getParceRequest().getBody() << std::endl;
 		
-		_request.assign_params(_request.getBody());
+		_connections[ClientFd].getParceRequest().assign_params(_connections[ClientFd].getParceRequest().getBody());
 
 		std::cout << "Params: " << std::endl;
-		_request.printParams();
+		_connections[ClientFd].getParceRequest().printParams();
 		
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
 		
-		// char **env = _request.get_env();
-		// std::string output = execute_cgi("/Users/aet-tale/Desktop/webserv/cgi-cookies.py", env);
-		// std::cout << "Output: " << output << std::endl;
-		// free_envp(env);
+		char **env = _connections[ClientFd].getParceRequest().get_env();
+		// set_moreenv(env);
+		std::string output = execute_cgi("/Users/aet-tale/Desktop/websrv_lst/test.py", env);
+		std::cout << "Output: " << output << std::endl;
+		free_envp(env);
 
 		// NewResponse response(ClientFd, _config[0], _request);
 		// response.generateResponse();
 
 		
 		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-		// 		  << "Request Is complete" << WHIET << std::endl;
+		//		<< "Request Is complete" << WHIET << std::endl;
 		// std::cout << RED << "			------------------------------------			" << std::endl;
 	}
 	else

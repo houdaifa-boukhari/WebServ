@@ -41,7 +41,7 @@ class Server
 {
 	private:
 		std::map<int, Connection> _connections; // Map to manage client connections
-		ParssedRequest _request;					// Parsed request
+		// ParssedRequest _request;					// Parsed request
 		std::map<int, ServerConfig> _server;				// fds for every socket conections
 		std::vector<ServerConfig> _config;			// Parsed server Configuration
 		std::vector<struct pollfd> _poll_fds;		// Polling structure for I/O monitoring

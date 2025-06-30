@@ -27,7 +27,7 @@ class Connection
 		ssize_t bytesSent;
 		size_t totalFileSize;
 		ServerConfig config;
-		ParssedRequest ParseRequest;
+		ParssedRequest _request;
 		time_t lastActivity;
 		bool isComplete;
 	public:
@@ -40,6 +40,7 @@ class Connection
 		ssize_t getBytesSent() const { return bytesSent; }
 		time_t getLastActivity() const { return lastActivity; }
 		bool getIsComplete() const { return isComplete; }
+		ParssedRequest getParceRequest() {return _request;}
 		
 		void reset();
 		void setIsComplete(bool complete) { isComplete = complete; }
@@ -51,7 +52,7 @@ class Connection
 		void setClientRequest(const std::string &request) { ClientRequest = request; }
 		void setClientResponse(const std::string &response) { ClientResponse = response; }
 		void setBytesSent(ssize_t bytes) { bytesSent = bytes; }
-		void setParsedRequest(const ParssedRequest &parsed) { ParseRequest = parsed; }
+		void setParsedRequest(const ParssedRequest &parsed) { _request = parsed; }
 		void updateLastActivity() { lastActivity = time(NULL); }
 		
 };

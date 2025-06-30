@@ -124,6 +124,8 @@ void Server::run()
 					
 					generateResponse(_poll_fds[i].fd);
 
+					// NewResponse (_connections[_poll_fds[i].fd])
+
 					////
 					
 					if (_connections[_poll_fds[i].fd].getClientRequest().find("Connection: keep-alive") != std::string::npos)
