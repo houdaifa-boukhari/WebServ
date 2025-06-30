@@ -115,9 +115,10 @@ void Server::handleClientData(int ClientFd)
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
 		
 		char **env = _connections[ClientFd].getParceRequest().get_env();
-		// set_moreenv(env);
-		std::string output = execute_cgi("/Users/aet-tale/Desktop/websrv_lst/test.py", env);
-		std::cout << "Output: " << output << std::endl;
+		std::string output_cgi = execute_cgi("/Users/aet-tale/Desktop/websrv_lst/cgi_file.py", env);
+		std::cout << "output_cgi : " << output_cgi << std::endl;
+		std::string cookie_set = execute_cgi("/Users/aet-tale/Desktop/websrv_lst/cookie_set.py", env);
+		std::cout << "cgi_set_cookie : " << cookie_set << std::endl;
 		free_envp(env);
 
 		// NewResponse response(ClientFd, _config[0], _request);

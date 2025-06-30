@@ -165,7 +165,7 @@ char **ParssedRequest::get_env()
     std::map<std::string, std::string>::iterator begin = _params.begin();
     std::map<std::string, std::string>::iterator end = _params.end();
     std::string key_val;
-    char **envp = new char *[_params.size() + 1];
+    char **envp = new char *[_params.size() + 1]; // add new cookies
     envp[_params.size()] = NULL;
     int i = 0;
     while (begin != end)

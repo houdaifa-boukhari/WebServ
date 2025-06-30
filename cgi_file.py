@@ -1,0 +1,1 @@
+print("<html><body><pre>Hello from CGI</pre></body></html>")
