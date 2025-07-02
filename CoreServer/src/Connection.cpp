@@ -3,14 +3,40 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 13:12:50 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 13:53:54 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
+
+Connection::Connection()
+{
+	this->Client_fd = -1;
+	this->bytesSent = 0;
+	this->lastActivity = time(NULL);
+	this->ClientRequest = "";
+	this->ClientResponse = "";
+	this->isComplete = false;
+	this->config = ServerConfig();
+	this->_request = ParssedRequest();
+	this->_response = NewResponse();
+}
+
+Connection::Connection(int fd, ServerConfig &cfg)
+{
+	this->Client_fd = fd;
+	this->bytesSent = 0;
+	this->lastActivity = time(NULL);
+	this->ClientRequest = "";
+	this->ClientResponse = "";
+	this->isComplete = false;
+	this->config = cfg;
+	this->_request = ParssedRequest();
+	this->_response = NewResponse(fd, cfg, _request);
+}
 
 void Connection::reset()
 {
@@ -58,7 +84,6 @@ void Server::handleNewConnection(int SvFd)
 	_poll_fds.push_back(pfd);
 
 	_connections[ClientFd] = newConnecion;
-	
 }
 
 void Server::handleClientData(int ClientFd)
@@ -95,36 +120,31 @@ void Server::handleClientData(int ClientFd)
 
 	if (RequestIsComplete(_connections[ClientFd].getClientRequest()))
 	{
-		
+
 		_connections[ClientFd].setIsComplete(true);
 
 		/////// anour Part ///////
 
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
 		_connections[ClientFd].getParceRequest().AssignHeadersLine(_connections[ClientFd].getClientRequest());
-		
+
 		std::cout << _connections[ClientFd].getParceRequest().GetReqeustLIne() << std::endl;
 		printMap(_connections[ClientFd].getParceRequest().getHeaders());
 		std::cout << "Body: " << _connections[ClientFd].getParceRequest().getBody() << std::endl;
-		
+
 		_connections[ClientFd].getParceRequest().assign_params(_connections[ClientFd].getParceRequest().getBody());
 
 		std::cout << "Params: " << std::endl;
 		_connections[ClientFd].getParceRequest().printParams();
-		
+
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		
-		char **env = _connections[ClientFd].getParceRequest().get_env();
-		std::string output_cgi = execute_cgi("/Users/aet-tale/Desktop/websrv_lst/cgi_file.py", env);
-		std::cout << "output_cgi : " << output_cgi << std::endl;
-		std::string cookie_set = execute_cgi("/Users/aet-tale/Desktop/websrv_lst/cookie_set.py", env);
-		std::cout << "cgi_set_cookie : " << cookie_set << std::endl;
-		free_envp(env);
 
-		// NewResponse response(ClientFd, _config[0], _request);
-		// response.generateResponse();
-
-		
+		// char **env = _connections[ClientFd].getParceRequest().get_env();
+		// std::string output_cgi = execute_cgi("/Users/aet-tale/Desktop/websrv_lst/cgi_file.py", env);
+		// std::cout << "output_cgi : " << output_cgi << std::endl;
+		// std::string cookie_set = execute_cgi("/Users/aet-tale/Desktop/websrv_lst/cookie_set.py", env);
+		// std::cout << "cgi_set_cookie : " << cookie_set << std::endl;
+		// free_envp(env);
 		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 		//		<< "Request Is complete" << WHIET << std::endl;
 		// std::cout << RED << "			------------------------------------			" << std::endl;
@@ -132,4 +152,21 @@ void Server::handleClientData(int ClientFd)
 	else
 		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 				  << "Request not complete yet" << WHIET << std::endl;
+}
+
+// Response related methods
+SendStatus Connection::getSendStatus() const
+{
+	return _response.getSendStatus();
+}
+
+void Connection::generateResponse()
+{
+	std::cout << "starting  generateResponse" << std::endl;
+	this->_response.generateResponse();
+}
+
+void Connection::generateChunkedResponse()
+{
+	this->_response.sendNextChunk();
 }

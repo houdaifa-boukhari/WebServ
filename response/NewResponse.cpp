@@ -3,17 +3,38 @@
 /*                                                        :::      ::::::::   */
 /*   NewResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/28 22:43:57 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 14:03:30 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "NewResponse.hpp"
 
-NewResponse::NewResponse(size_t clientFd, ServerConfig &_config, ParssedRequest &request)
+NewResponse::NewResponse()
 {
+	this->_sendStatus = SEND_NOT_STARTED;
+	this->_clientFd = -1;
+	this->_file_fd = -1;
+	this->_config = ServerConfig();
+	this->_request = ParssedRequest();
+	this->_statusCode = 200;
+	this->_byteSent = 0;
+	this->_totalFileSize = 0;
+	this->_httpVersion = "HTTP/1.1";
+	this->_response = "";
+	this->_body = "";
+	this->_response_headers = std::map<std::string, std::string>();
+	this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+	this->_response_headers["Connection"] = "close";
+	this->_response_headers["Server"] = "WebServ/1.0";
+}
+
+NewResponse::NewResponse(int clientFd, ServerConfig &_config, ParssedRequest &request)
+{
+	this->_sendStatus = SEND_NOT_STARTED;
+	this->_file_fd = -1;
 	this->_config = _config;
 	this->_request = request;
 	this->_clientFd = clientFd;
@@ -29,9 +50,18 @@ NewResponse::NewResponse(size_t clientFd, ServerConfig &_config, ParssedRequest 
 
 NewResponse::~NewResponse()
 {
+	if (this->_file_fd != -1)
+	{
+		close(this->_file_fd);
+	}
 }
 
-size_t NewResponse::getClientFd() const
+SendStatus NewResponse::getSendStatus() const
+{
+	return this->_sendStatus;
+}
+
+int NewResponse::getClientFd() const
 {
 	return this->_clientFd;
 }
@@ -301,14 +331,17 @@ void NewResponse::sendResponseToClient()
 	if (send(this->_clientFd, _response.c_str(), _response.size(), 0) < 0)
 	{
 		perror("send");
-		close(this->_clientFd);
+		this->_sendStatus = SEND_ERROR;
 		return;
+	}
+	else
+	{
+		this->_sendStatus = SEND_COMPLETED;
 	}
 }
 
-void NewResponse::sendResponseLargeFile()
+void NewResponse::sendOnlyHeaders()
 {
-	this->_response_headers["Content-Length"] = std::to_string(this->_response.size());
 	_response = _httpVersion + " " + std::to_string(_statusCode) + " " + this->getStatusMessage(_statusCode) + "\r\n";
 	_response += "Date: " + responseUtils::getCurrentDate() + "\r\n";
 	for (std::map<std::string, std::string>::iterator it = _response_headers.begin(); it != _response_headers.end(); ++it)
@@ -318,8 +351,8 @@ void NewResponse::sendResponseLargeFile()
 	_response += "\r\n";
 	if (send(this->_clientFd, _response.c_str(), _response.size(), 0) < 0)
 	{
-		perror("send");
-		close(this->_clientFd);
+		perror("sendOnlyHeaders failed");
+		this->_sendStatus = SEND_ERROR;
 		return;
 	}
 }
@@ -385,11 +418,11 @@ void NewResponse::handleGetRequest()
 		return;
 	}
 	std::string path = normalizePath(_request.getPath());
-	std::string fullPath = joinPath(_matchedLocation.getRoot(),"");
+	std::string fullPath = joinPath(_matchedLocation.getRoot(), "");
 	if (isDirectory(fullPath))
 		return handleDirectoryRequest(fullPath);
 	else if (fileExists(fullPath))
-		return handleFileRequest(fullPath);
+		return prepareFileResponse(fullPath);
 	else
 	{
 		std::cout << "File not found for path: " << fullPath << std::endl;
@@ -418,7 +451,7 @@ void NewResponse::handleDirectoryRequest(std::string &dirPath)
 	{
 		std::string indexPath = joinPath(dirPath, *it);
 		if (fileExists(indexPath))
-			return handleFileRequest(indexPath);
+			return prepareFileResponse(indexPath);
 	}
 	if (_matchedLocation.isAutoIndex())
 	{
@@ -471,32 +504,10 @@ void NewResponse::generateDirectoryListing(std::string &filePath)
 	return;
 }
 
-void NewResponse::handleFileRequest(std::string &filePath)
+void NewResponse::prepareFileResponse(const std::string &filePath)
 {
-	const size_t LARGE_FILE_THRESHOLD = 1024 * 1024; // 1MB
-	int fd = open(filePath.c_str(), O_RDONLY);
-	if (fd < 0)
-	{
-		this->_statusCode = 404;
-		this->_body = getErrorPage(this->_statusCode);
-		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-		sendResponseToClient();
-		return;
-	}
-	size_t fileSize = getFileSize(filePath);
-	close(fd);
-	if (fileSize > LARGE_FILE_THRESHOLD)
-		return handleLargeFileRequest(filePath);
-	else
-		return handleSmallFileRequest(filePath);
-}
-
-void NewResponse::handleSmallFileRequest(std::string &filePath)
-{
-	std::cout << "Handling small file request for: " << filePath << std::endl;
-
-	std::ifstream file(filePath.c_str(), std::ios::binary);
-	if (!file.is_open())
+	this->_file_fd = open(filePath.c_str(), O_RDONLY);
+	if (this->_file_fd < 0)
 	{
 		this->_statusCode = 403;
 		this->_body = getErrorPage(this->_statusCode);
@@ -504,121 +515,74 @@ void NewResponse::handleSmallFileRequest(std::string &filePath)
 		sendResponseToClient();
 		return;
 	}
-	std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-	file.close();
-
+	this->_totalFileSize = getFileSize(filePath);
 	this->_statusCode = 200;
-	this->_body = content;
 	this->_response_headers["Content-Type"] = getMimeType(filePath);
-	sendResponseToClient();
+	this->_response_headers["Content-Length"] = std::to_string(this->_totalFileSize);
+	sendOnlyHeaders();
+
+	if (this->_totalFileSize == 0)
+	{
+		this->_sendStatus = SEND_COMPLETED;
+		close(this->_file_fd);
+		this->_file_fd = -1;
+		return;
+	}
+	else
+	{
+		this->_sendStatus = SEND_IN_PROGRESS;
+		this->_byteSent = 0;
+	}
 }
 
-void NewResponse::handleLargeFileRequest(std::string &filePath)
+void NewResponse::sendNextChunk()
 {
-// 	this->_statusCode = 200;
-// 	this->_body = "chi haja";
-// 	sendResponseToClient();
-// 	std::cout << "Handling large file request for: " << filePath << std::endl;
+	if (this->_sendStatus == SEND_COMPLETED || this->_sendStatus == SEND_ERROR)
+		return;
 
-// 	std::ifstream file(filePath.c_str(), std::ios::binary);
-// 	if (!file.is_open())
-// 	{
-// 		this->_statusCode = 403;
-// 		this->_body = getErrorPage(this->_statusCode);
-// 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-// 		sendResponseToClient();
-// 		return;
-// 	}
+	if (this->_file_fd < 0)
+	{
+		this->_sendStatus = SEND_ERROR;
+		return;
+	}
 
-// 	this->_statusCode = 200;
-// 	this->_response_headers["Content-Type"] = getMimeType(filePath);
-// 	this->_response_headers["Content-Length"] = std::to_string(getFileSize(filePath));
-// 	this->_response_headers["Connection"] = "close";
+	static char buffer[CHUNK_SIZE];
 
-// 	// Send headers first
-// 	std::string headers = _httpVersion + " " + std::to_string(_statusCode) + " " + getStatusMessage(_statusCode) + "\r\n";
-// 	headers += "Date: " + responseUtils::getCurrentDate() + "\r\n";
-// 	for (std::map<std::string, std::string>::iterator it = _response_headers.begin(); it != _response_headers.end(); ++it)
-// 	{
-// 		headers += it->first + ": " + it->second + "\r\n";
-// 	}
-// 	headers += "\r\n";
+	ssize_t bytes_read = read(this->_file_fd, buffer, CHUNK_SIZE);
 
-// 	if (send(this->_clientFd, headers.c_str(), headers.length(), MSG_NOSIGNAL) < 0)
-// 	{
-// 		perror("send headers");
-// 		file.close();
-// 		return;
-// 	}
+	if (bytes_read < 0)
+	{
+		perror("read failed");
+		close(this->_file_fd);
+		this->_file_fd = -1;
+		this->_sendStatus = SEND_ERROR;
+		return;
+	}
+	if (bytes_read == 0)
+	{
+		close(this->_file_fd);
+		this->_file_fd = -1;
+		this->_sendStatus = SEND_COMPLETED;
+		return;
+	}
+	ssize_t bytes_sent_now = send(this->_clientFd, buffer, bytes_read, MSG_NOSIGNAL);
+	if (bytes_sent_now < 0)
+	{
+		perror("send chunk failed");
+		close(this->_file_fd);
+		this->_file_fd = -1;
+		this->_sendStatus = SEND_ERROR;
+		return;
+	}
+	this->_byteSent += bytes_sent_now;
 
-// 	// Send file content in chunks with simplified error handling
-// 	const size_t bufferSize = 64;
-// 	char buffer[bufferSize];
-// 	size_t totalBytesSent = 0;
-// 	size_t fileSize = getFileSize(filePath);
-
-// 	while (file.read(buffer, bufferSize) || file.gcount() > 0)
-// 	{
-// 		size_t bytesToSend = file.gcount();
-// 		size_t totalSent = 0;
-
-// 		while (totalSent < bytesToSend)
-// 		{
-// 			ssize_t sent = send(this->_clientFd, buffer + totalSent, bytesToSend - totalSent, MSG_NOSIGNAL);
-// 			if (sent < 0)
-// 			{
-// 				if (sent < 0)
-//         		{
-//         		    if (errno == EAGAIN || errno == EWOULDBLOCK)
-//         		    {
-//         		        // Use poll() to wait for the socket to become writable
-//         		        struct pollfd pfd;
-//         		        pfd.fd = this->_clientFd;
-//         		        pfd.events = POLLOUT;
-		
-//         		        int pollResult = poll(&pfd, 1, 10000); // 10-second timeout
-//         		        if (pollResult <= 0)
-//         		        {
-//         		            std::cout << "Client disconnected or timeout during large file transfer" << std::endl;
-//         		            file.close();
-//         		            return;
-//         		        }
-//         		        // Retry sending
-//         		        continue;
-//         		    }
-//         		    else if (errno == EPIPE || errno == ECONNRESET)
-//         		    {
-//         		        std::cout << "Client disconnected during file transfer" << std::endl;
-//         		        file.close();
-//         		        return;
-//         		    }
-//         		    else
-//         		    {
-//         		        perror("send body");
-//         		        file.close();
-//         		        return;
-//         		    }
-//         		}
-				
-// 			else if (sent == 0)
-// 			{
-// 				std::cout << "Connection closed by client" << std::endl;
-// 				file.close();
-// 				return;
-// 			}
-
-// 			totalSent += sent;
-// 			totalBytesSent += sent;
-// 		}
-
-// 		// Optional: Progress indicator for very large files
-// 		if (fileSize > 0 && totalBytesSent % (1024 * 1024) == 0) // Every MB
-// 		{
-// 			std::cout << "Sent " << totalBytesSent << "/" << fileSize << " bytes" << std::endl;
-// 		}
-// 	}
-
-// 	file.close();
-// 	std::cout << "Large file sent successfully (" << totalBytesSent << " bytes)" << std::endl;
-// }
+	if (this->_byteSent >= this->_totalFileSize)
+	{
+		this->_sendStatus = SEND_COMPLETED;
+		close(this->_file_fd);
+		this->_file_fd = -1;
+		this->_sendStatus = SEND_COMPLETED;
+		return;
+	}
+	this->_sendStatus = SEND_IN_PROGRESS;
 }

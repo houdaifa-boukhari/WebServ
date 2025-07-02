@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 16:03:27 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 13:33:44 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,23 +115,33 @@ void Server::run()
 			}
 			else if (_poll_fds[i].revents & POLLOUT && _connections[_poll_fds[i].fd].getIsComplete()) // remove else (check if close connection)
 			{
-			    if (!isServerSocket(_poll_fds[i].fd))
-			    {
-			        std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-			                  << "Sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
+				std::cout << "HERE :" << std::endl;
+				if (!isServerSocket(_poll_fds[i].fd))
+				{
 
-					///// youssef
-					
-					generateResponse(_poll_fds[i].fd);
+					std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+							  << "Sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 
-					// NewResponse (_connections[_poll_fds[i].fd])
+					if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_NOT_STARTED)
+					{
+						_connections[_poll_fds[i].fd].generateResponse();
+					}
+					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_IN_PROGRESS)
+					{
+						_connections[_poll_fds[i].fd].generateChunkedResponse();
+					}
+					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_COMPLETED)
+					{
+						// to do later
+					}
+					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_ERROR)
+					{
+					}
 
-					////
-					
 					if (_connections[_poll_fds[i].fd].getClientRequest().find("Connection: keep-alive") != std::string::npos)
 					{
 						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-								  << "Keeping connection alive for client fd=" << _poll_fds[i].fd  << " , Untile Timeout"<< WHIET << std::endl;
+								  << "Keeping connection alive for client fd=" << _poll_fds[i].fd << " , Untile Timeout" << WHIET << std::endl;
 						_connections[_poll_fds[i].fd].reset();
 					}
 					else
@@ -141,7 +151,7 @@ void Server::run()
 						closeConnection(_poll_fds[i].fd);
 					}
 					std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-			    }
+				}
 			}
 			i++;
 		}

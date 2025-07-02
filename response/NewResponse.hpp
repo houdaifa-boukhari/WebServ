@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 12:59:27 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/28 16:20:08 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/02 14:02:38 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,23 @@
 #include <sys/socket.h>
 #include <dirent.h>
 
+#define CHUNK_SIZE 32768
+
+enum SendStatus
+{
+	SEND_NOT_STARTED,
+	SEND_COMPLETED,
+	SEND_IN_PROGRESS,
+	SEND_ERROR
+};
+
 class NewResponse
 {
 private:
-	size_t _clientFd;
+	int _clientFd;
+	int _file_fd;
 	std::string _response;
+	SendStatus _sendStatus;
 	int _statusCode;
 	std::string _body;
 	std::string _httpVersion;
@@ -36,16 +48,10 @@ private:
 	ServerConfig _config;
 	ParssedRequest _request;
 	LocationConfig _matchedLocation;
-	// Private Function declarations
+	size_t _byteSent;
+	size_t _totalFileSize;
 
-	// Getters
-	size_t
-	getClientFd() const;
-	std::string getResponse() const;
-	int getStatusCode() const;
-	std::map<std::string, std::string> getResponseHeaders() const;
-	std::string getBody() const;
-	std::string getHttpVersion() const;
+	// Private Function declarations
 
 	// Utility functions
 	bool fileExists(const std::string &filePath);
@@ -60,23 +66,33 @@ private:
 	std::string getErrorPage(int statusCode);
 	std::string normalizePath(const std::string &path);
 	std::string joinPath(const std::string &root, const std::string &path);
+	void prepareFileResponse(const std::string &filePath);
 
 	// HTTP request handlers
 	void sendResponseToClient();
-	void sendResponseLargeFile();
+	void sendOnlyHeaders();
 	void handleGetRequest();
 	void handlePostRequest();
 	void handleDeleteRequest();
 	void handleDirectoryRequest(std::string &dirPath);
 	void generateDirectoryListing(std::string &filePath);
-	void handleFileRequest(std::string &filePath);
-	void handleSmallFileRequest(std::string &filePath);
-	void handleLargeFileRequest(std::string &filePath);
 
 public:
-	NewResponse(size_t clientFd, ServerConfig &_config, ParssedRequest &request);
+	NewResponse();
+	NewResponse(int clientFd, ServerConfig &_config, ParssedRequest &request);
 	void generateResponse();
+	void sendNextChunk();
 	~NewResponse();
+
+	// Getters
+	int
+	getClientFd() const;
+	std::string getResponse() const;
+	int getStatusCode() const;
+	std::map<std::string, std::string> getResponseHeaders() const;
+	std::string getBody() const;
+	std::string getHttpVersion() const;
+	SendStatus getSendStatus() const;
 };
 
 #endif
