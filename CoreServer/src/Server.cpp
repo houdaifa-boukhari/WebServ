@@ -6,13 +6,13 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 16:03:27 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 15:22:50 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
 
-Server::Server(const std::vector<ServerConfig> &configs) : _config(configs), _timeoutSec(30)
+Server::Server(const std::vector<ServerConfig> &configs) : _config(configs), _timeoutSec(120)
 {
 	this->initializeSockets();
 }
@@ -120,11 +120,21 @@ void Server::run()
 			        std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 			                  << "Sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 
-					///// youssef
-					
-					generateResponse(_poll_fds[i].fd);
-
-					////
+					if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_NOT_STARTED)
+					{
+						_connections[_poll_fds[i].fd].generateResponse();
+					}
+					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_IN_PROGRESS)
+					{
+						_connections[_poll_fds[i].fd].generateChunkedResponse();
+					}
+					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_COMPLETED)
+					{
+						// to do later
+					}
+					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_ERROR)
+					{
+					}
 					
 					if (_connections[_poll_fds[i].fd].getClientRequest().find("Connection: keep-alive") != std::string::npos)
 					{

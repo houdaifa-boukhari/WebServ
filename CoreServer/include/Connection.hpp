@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 21:19:37 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 16:06:37 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 15:28:59 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <iostream>
 #include "../../ParseRequest/Request.hpp"
 #include "../../configParsing/serverConfig.hpp"
+#include "../../response/NewResponse.hpp"
 
 class Connection
 {
@@ -28,6 +29,7 @@ class Connection
 		size_t totalFileSize;
 		ServerConfig config;
 		ParssedRequest ParseRequest;
+		NewResponse _response;
 		time_t lastActivity;
 		bool isComplete;
 	public:
@@ -42,6 +44,8 @@ class Connection
 		bool getIsComplete() const { return isComplete; }
 		
 		void reset();
+		NewResponse &getResponse() { return _response; }
+		ParssedRequest &getParsedRequest() { return ParseRequest; }
 		void setIsComplete(bool complete) { isComplete = complete; }
 		void setClientFd(int fd) { Client_fd = fd; }
 		void clearClientRequest() { ClientRequest.clear(); }
@@ -53,11 +57,13 @@ class Connection
 		void setBytesSent(ssize_t bytes) { bytesSent = bytes; }
 		void setParsedRequest(const ParssedRequest &parsed) { ParseRequest = parsed; }
 		void updateLastActivity() { lastActivity = time(NULL); }
+
+
+		// Response related methods
+	SendStatus getSendStatus() const;
+	void generateResponse(); //Add commentMore actions
+	void generateChunkedResponse();
 		
 };
-
-
-
-
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 13:12:50 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 15:30:29 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,18 +101,19 @@ void Server::handleClientData(int ClientFd)
 		/////// anour Part ///////
 
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		_request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
+		_connections[ClientFd].getParsedRequest().AssignHeadersLine(_connections[ClientFd].getClientRequest());
 		
-		std::cout << _request.GetReqeustLIne() << std::endl;
-		printMap(_request.getHeaders());
-		std::cout << "Body: " << _request.getBody() << std::endl;
+		std::cout << _connections[ClientFd].getParsedRequest().GetReqeustLIne() << std::endl;
+		printMap(_connections[ClientFd].getParsedRequest().getHeaders());
+		std::cout << "Body: " << _connections[ClientFd].getParsedRequest().getBody() << std::endl;
 		
-		_request.assign_params(_request.getBody());
+		_connections[ClientFd].getParsedRequest().assign_params(_connections[ClientFd].getParsedRequest().getBody());
 
 		std::cout << "Params: " << std::endl;
-		_request.printParams();
+		_connections[ClientFd].getParsedRequest().printParams();
 		
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
+		_connections[ClientFd].getResponse().setParssedRequest(_connections[ClientFd].getParsedRequest());
 		
 		// char **env = _request.get_env();
 		// std::string output = execute_cgi("/Users/aet-tale/Desktop/webserv/cgi-cookies.py", env);
@@ -130,4 +131,22 @@ void Server::handleClientData(int ClientFd)
 	else
 		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 				  << "Request not complete yet" << WHIET << std::endl;
+}
+
+
+
+SendStatus Connection::getSendStatus() const
+{
+	return _response.getSendStatus();
+}
+
+void Connection::generateResponse()
+{
+	std::cout << "starting  generateResponse" << std::endl;
+	this->_response.generateResponse();
+}
+
+void Connection::generateChunkedResponse()
+{
+	this->_response.sendNextChunk();
 }

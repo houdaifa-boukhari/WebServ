@@ -6,11 +6,36 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 16:09:43 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 10:37:37 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
+
+bool	chunkedRequest(const std::string& request)
+{
+    size_t pos, body_start, body_end;
+
+    pos = request.find("Transfer-Encoding: chunked");
+    if (pos != std::string::npos)
+    {
+        std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Chunked request detected" << WHIET << std::endl;
+        // Find the start of the body
+        body_start = request.find("\r\n\r\n");
+        if (body_start == std::string::npos)
+        {
+            std::cerr << YELLOW << currentTime() << RED << " [ERROR] " << "Invalid chunked request format" << WHIET << std::endl;
+            return false;
+        }
+        body_start += 4; // Skip past the \r\n\r\n
+        body_end = request.find("\r\n0\r\n\r\n", body_start);
+        if (body_end == std::string::npos)
+            return (false);
+        std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] " << "Chunked request processing complete" << WHIET << std::endl;
+        return (true);
+    }
+    return (false);
+}
 
 bool Server::RequestIsComplete(const std::string& request)
 {
@@ -34,6 +59,8 @@ bool Server::RequestIsComplete(const std::string& request)
 		return (true);
 	if (header.find("POST") == 0)
 	{
+		if (request.find("Transfer-Encoding: chunked") != std::string::npos)
+            return (chunkedRequest(request));
 		pos = request.find("Content-Length:");
 		if (pos == std::string::npos)
 			return (false);
@@ -48,15 +75,6 @@ bool Server::RequestIsComplete(const std::string& request)
 		// Body starts right after \r\n\r\n
 		body_start = request.find("\r\n\r\n") + 4;
 		body_size = request.size() - body_start;
-		std::string name = "numbers.txt";
-    	std::ofstream ofs;
-		
-		ofs.open (name.c_str());
-		ofs << "Content lenght : " << len << ", " << "request_size : " << request.size() 
-			<< ", body start : "<< body_start << std::endl;
-
-
-		
 		if (body_size < len)
 			return (false);
 		else if (body_size > len)

@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 10:11:38 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/06/29 15:59:46 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 14:38:16 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class Server
 {
 	private:
 		std::map<int, Connection> _connections; // Map to manage client connections
-		ParssedRequest _request;					// Parsed request
+		// ParssedRequest _request;					// Parsed request
 		std::map<int, ServerConfig> _server;				// fds for every socket conections
 		std::vector<ServerConfig> _config;			// Parsed server Configuration
 		std::vector<struct pollfd> _poll_fds;		// Polling structure for I/O monitoring
