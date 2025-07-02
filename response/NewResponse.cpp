@@ -6,11 +6,26 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 15:32:47 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 20:51:55 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "NewResponse.hpp"
+
+void NewResponse::setClientFd(int clientFd)
+{
+	this->_clientFd = clientFd;
+}
+
+void NewResponse::setRequest(ParssedRequest &request)
+{
+	this->_request = request;
+}
+
+void NewResponse::setServerConfig(ServerConfig &config)
+{
+	this->_config = config;
+}
 
 NewResponse::NewResponse()
 {
@@ -359,7 +374,7 @@ void NewResponse::sendOnlyHeaders()
 
 void NewResponse::generateResponse()
 {
-	std::cout << "Generating response for client fd: " << this->_clientFd <<  " Method : " << _request.getMethod()  <<std::endl;
+	std::cout << "Generating response for client fd: " << this->_clientFd << " Method : " << _request.getMethod() << std::endl;
 	if (_request.getMethod() == "GET")
 		return handleGetRequest();
 	else if (_request.getMethod() == "POST")
@@ -521,7 +536,7 @@ void NewResponse::prepareFileResponse(const std::string &filePath)
 	this->_response_headers["Content-Type"] = getMimeType(filePath);
 	this->_response_headers["Content-Length"] = std::to_string(this->_totalFileSize);
 	sendOnlyHeaders();
-
+	std::cout << "File size: " << this->_totalFileSize << " bytes" << std::endl;
 	if (this->_totalFileSize == 0)
 	{
 		this->_sendStatus = SEND_COMPLETED;
@@ -534,10 +549,12 @@ void NewResponse::prepareFileResponse(const std::string &filePath)
 		this->_sendStatus = SEND_IN_PROGRESS;
 		this->_byteSent = 0;
 	}
+	std::cout << "Done Sending headers" << std::endl;
 }
 
 void NewResponse::sendNextChunk()
 {
+	std::cout << "Sending file in chunks..." << std::endl;
 	if (this->_sendStatus == SEND_COMPLETED || this->_sendStatus == SEND_ERROR)
 		return;
 
@@ -579,10 +596,10 @@ void NewResponse::sendNextChunk()
 
 	if (this->_byteSent >= this->_totalFileSize)
 	{
+		std::cout << "All bytes sent: " << this->_byteSent << " bytes" << std::endl;
 		this->_sendStatus = SEND_COMPLETED;
 		close(this->_file_fd);
 		this->_file_fd = -1;
-		this->_sendStatus = SEND_COMPLETED;
 		return;
 	}
 	this->_sendStatus = SEND_IN_PROGRESS;

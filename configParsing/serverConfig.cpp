@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 23:29:35 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/25 16:23:41 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/02 20:57:28 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,26 @@ ServerConfig::ServerConfig()
 	_max_Body_Size_Bytes = 1024 * 1024;
 	_errorPages = std::map<std::string, std::string>();
 	_locations = std::vector<LocationConfig>();
+}
+
+ServerConfig::ServerConfig(const ServerConfig &other)
+{
+	*this = other;
+}
+
+ServerConfig &ServerConfig::operator=(const ServerConfig &other)
+{
+	if (this != &other)
+	{
+		_ports = other._ports;
+		_host = other._host;
+		_serverName = other._serverName;
+		_max_Body_Size = other._max_Body_Size;
+		_max_Body_Size_Bytes = other._max_Body_Size_Bytes;
+		_errorPages = other._errorPages;
+		_locations = other._locations;
+	}
+	return *this;
 }
 
 ServerConfig::~ServerConfig()

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverConfiguration.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:42:53 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/02 21:15:50 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/02 20:57:10 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,22 @@ ServerConfiguration::ServerConfiguration()
 
 ServerConfiguration::~ServerConfiguration()
 {
+}
+
+
+ServerConfiguration::ServerConfiguration(const ServerConfiguration &other)
+{
+	_servers = other._servers;
+}
+
+
+ServerConfiguration &ServerConfiguration::operator=(const ServerConfiguration &other)
+{
+	if (this != &other)
+	{
+		_servers = other._servers;
+	}
+	return *this;
 }
 
 void ServerConfiguration::addServer(ServerConfig server)

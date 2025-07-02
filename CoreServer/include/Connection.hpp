@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 21:19:37 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/02 15:28:59 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 21:12:11 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,25 +25,23 @@ class Connection
 		int Client_fd;
 		std::string ClientRequest;
 		std::string ClientResponse;
-		ssize_t bytesSent;
-		size_t totalFileSize;
 		ServerConfig config;
 		ParssedRequest ParseRequest;
 		NewResponse _response;
 		time_t lastActivity;
 		bool isComplete;
 	public:
-		Connection() : Client_fd(-1), bytesSent(0), lastActivity(time(NULL)), ClientRequest(""), ClientResponse(""), isComplete(false) {}
-		Connection(int fd, const ServerConfig &cfg) : Client_fd(fd), config(cfg), bytesSent(0), lastActivity(time(NULL)), ClientRequest(""), ClientResponse(""), isComplete(false) {}
+		Connection() : Client_fd(-1), lastActivity(time(NULL)), ClientRequest(""), ClientResponse(""), isComplete(false) {}
+		Connection(int fd, const ServerConfig &cfg) : Client_fd(fd), config(cfg), lastActivity(time(NULL)), ClientRequest(""), ClientResponse(""), isComplete(false) {}
 
 		int getClientFd() const { return Client_fd; }
 		const std::string &getClientRequest() const { return ClientRequest; }
 		const std::string &getClientResponse() const { return ClientResponse; }
-		ssize_t getBytesSent() const { return bytesSent; }
 		time_t getLastActivity() const { return lastActivity; }
 		bool getIsComplete() const { return isComplete; }
 		
 		void reset();
+		ServerConfig &getServerConfig() { return config; }
 		NewResponse &getResponse() { return _response; }
 		ParssedRequest &getParsedRequest() { return ParseRequest; }
 		void setIsComplete(bool complete) { isComplete = complete; }
@@ -54,12 +52,12 @@ class Connection
 		void appendClientResponse(const std::string &response) { ClientResponse.append(response); }
 		void setClientRequest(const std::string &request) { ClientRequest = request; }
 		void setClientResponse(const std::string &response) { ClientResponse = response; }
-		void setBytesSent(ssize_t bytes) { bytesSent = bytes; }
 		void setParsedRequest(const ParssedRequest &parsed) { ParseRequest = parsed; }
 		void updateLastActivity() { lastActivity = time(NULL); }
 
 
 		// Response related methods
+	void buildResponse(int clientFd, ParssedRequest &request, ServerConfig &config);
 	SendStatus getSendStatus() const;
 	void generateResponse(); //Add commentMore actions
 	void generateChunkedResponse();

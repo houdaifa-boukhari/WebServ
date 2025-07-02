@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:42:31 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/06 18:23:11 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 20:49:09 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ private:
 	std::vector<ServerConfig> _servers;
 
 public:
+	ServerConfiguration(const ServerConfiguration &other);
+	ServerConfiguration &operator=(const ServerConfiguration &other);
 	ServerConfiguration();
 	~ServerConfiguration();
 	void addServer(ServerConfig server);

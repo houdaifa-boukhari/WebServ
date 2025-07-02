@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 12:59:27 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 15:29:57 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 20:52:38 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,10 @@ public:
 	std::string getBody() const;
 	std::string getHttpVersion() const;
 	SendStatus getSendStatus() const;
+
+	void setClientFd(int clientFd);
+	void setRequest(ParssedRequest &request);
+	void setServerConfig(ServerConfig &config);
 };
 
 #endif

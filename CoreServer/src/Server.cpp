@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/02 15:22:50 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 21:16:13 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,8 @@ void Server::run()
 					handleClientData(_poll_fds[i].fd);
 				}
 			}
-			else if (_poll_fds[i].revents & POLLOUT && _connections[_poll_fds[i].fd].getIsComplete()) // remove else (check if close connection)
+			else if (_poll_fds[i].revents & POLLOUT
+				&& (_connections[_poll_fds[i].fd].getIsComplete() || _connections[_poll_fds[i].fd].getSendStatus() == SEND_IN_PROGRESS)) // remove else (check if close connection)
 			{
 			    if (!isServerSocket(_poll_fds[i].fd))
 			    {
@@ -128,12 +129,10 @@ void Server::run()
 					{
 						_connections[_poll_fds[i].fd].generateChunkedResponse();
 					}
-					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_COMPLETED)
-					{
-						// to do later
-					}
 					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_ERROR)
 					{
+						std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
+								  << "Error sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 					}
 					
 					if (_connections[_poll_fds[i].fd].getClientRequest().find("Connection: keep-alive") != std::string::npos)
@@ -142,8 +141,10 @@ void Server::run()
 								  << "Keeping connection alive for client fd=" << _poll_fds[i].fd  << " , Untile Timeout"<< WHIET << std::endl;
 						_connections[_poll_fds[i].fd].reset();
 					}
-					else
+					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_COMPLETED)
 					{
+						std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
+								  << "All Response send it to " << _poll_fds[i].fd << WHIET << std::endl;
 						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 								  << "Closing connection for client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 						closeConnection(_poll_fds[i].fd);

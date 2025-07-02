@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:40:51 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/25 16:19:38 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/02 20:58:05 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ private:
 
 public:
 	ServerConfig();
+	ServerConfig(const ServerConfig &other);
+	ServerConfig &operator=(const ServerConfig &other);
 	~ServerConfig();
 	void addPort(int port);
 	void setHost(std::string host);

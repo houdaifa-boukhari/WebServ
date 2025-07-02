@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/02 15:30:29 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/02 21:11:32 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,14 +75,16 @@ void Server::handleClientData(int ClientFd)
 	if (len <= 0)
 	{
 		if (len == 0)
+		{
 			std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 					  << "Client " << ClientFd << " disconnected gracefully" << WHIET << std::endl;
+		}			
 		else
 		{
 			std::cout << YELLOW << currentTime() << RED << " [ERROR] "
 					  << "Client " << ClientFd << " has an Error" << WHIET << std::endl;
-			closeConnection(ClientFd);
 		}
+		closeConnection(ClientFd);
 		return;
 	}
 
@@ -113,20 +115,12 @@ void Server::handleClientData(int ClientFd)
 		_connections[ClientFd].getParsedRequest().printParams();
 		
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		_connections[ClientFd].getResponse().setParssedRequest(_connections[ClientFd].getParsedRequest());
+		ParssedRequest request = _connections[ClientFd].getParsedRequest();
+		ServerConfig confg = _connections[ClientFd].getServerConfig();
+		std::cout << confg.getHost() << ":" << std::endl;
+		_connections[ClientFd].buildResponse(ClientFd, request, confg);
 		
-		// char **env = _request.get_env();
-		// std::string output = execute_cgi("/Users/aet-tale/Desktop/webserv/cgi-cookies.py", env);
-		// std::cout << "Output: " << output << std::endl;
-		// free_envp(env);
-
-		// NewResponse response(ClientFd, _config[0], _request);
-		// response.generateResponse();
-
-		
-		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-		// 		  << "Request Is complete" << WHIET << std::endl;
-		// std::cout << RED << "			------------------------------------			" << std::endl;
+	
 	}
 	else
 		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
@@ -149,4 +143,9 @@ void Connection::generateResponse()
 void Connection::generateChunkedResponse()
 {
 	this->_response.sendNextChunk();
+}
+
+void Connection::buildResponse(int clientFd, ParssedRequest &request, ServerConfig &config)
+{
+	_response = NewResponse(clientFd, config, request);
 }
