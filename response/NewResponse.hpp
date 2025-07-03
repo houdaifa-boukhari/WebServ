@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   NewResponse.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 12:59:27 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 20:52:38 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/03 13:52:35 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,7 @@
 #include <sys/socket.h>
 #include <dirent.h>
 
-
-#ifndef MSG_NOSIGNAL
-#define MSG_NOSIGNAL 0
-#endif
-
-#define CHUNK_SIZE 32768
+#define CHUNK_SIZE 1096
 
 enum SendStatus
 {
@@ -82,6 +77,7 @@ private:
 	void handleDeleteRequest();
 	void handleDirectoryRequest(std::string &dirPath);
 	void generateDirectoryListing(std::string &filePath);
+	size_t sendAll(int sockfd, const void *buf, size_t len );
 
 public:
 	NewResponse();

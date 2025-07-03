@@ -8,7 +8,7 @@ request_lines = [
     "Content-Type: text/plain\r\n",
     "\r\n",
     "5\r\n",
-    "Hello6\r\n",   # Intentional error: declared 5, sending 6 bytes
+    "Hello\r\n",   # Intentional error: declared 5, sending 6 bytes
     "4\r\n",
     "Test\r\n",
     "0\r\n",

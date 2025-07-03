@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/02 21:16:13 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/03 14:00:36 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,9 @@ void Server::initializeSockets()
 			_server[tmp_fd] = _config[i];
 			if (fcntl(tmp_fd, F_SETFL, O_NONBLOCK) == -1)
 				throw("fcntl(F_SETFL) failed");
-			if (setsockopt(tmp_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) // need to deep understand
+			if (setsockopt(tmp_fd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0) // need to deep understand
 				throw("setsockopt(SO_REUSEADDR) failed");
+			setsockopt(tmp_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 			sockaddr_in address;
 			address.sin_family = AF_INET;										// Address family: IPv4
 			address.sin_addr.s_addr = inet_addr(host.c_str());					// assign host ; why is forebedin
@@ -147,7 +148,7 @@ void Server::run()
 								  << "All Response send it to " << _poll_fds[i].fd << WHIET << std::endl;
 						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 								  << "Closing connection for client fd=" << _poll_fds[i].fd << WHIET << std::endl;
-						closeConnection(_poll_fds[i].fd);
+						// closeConnection(_poll_fds[i].fd);
 					}
 					std::cout << RED << "			------------------------------			" << WHIET << std::endl;
 			    }

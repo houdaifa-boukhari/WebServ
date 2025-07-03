@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   NewResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 20:51:55 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/03 13:51:31 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -370,6 +370,9 @@ void NewResponse::sendOnlyHeaders()
 		this->_sendStatus = SEND_ERROR;
 		return;
 	}
+	std::cout << "----------------- Response headers ------------------" << std::endl;
+	std::cout << _response << std::endl;
+	std::cout << "----------------- Response headers ------------------" << std::endl;
 }
 
 void NewResponse::generateResponse()
@@ -534,7 +537,7 @@ void NewResponse::prepareFileResponse(const std::string &filePath)
 	this->_totalFileSize = getFileSize(filePath);
 	this->_statusCode = 200;
 	this->_response_headers["Content-Type"] = getMimeType(filePath);
-	this->_response_headers["Content-Length"] = std::to_string(this->_totalFileSize);
+	this->_response_headers["Transfer-Encoding"] = "chunked";
 	sendOnlyHeaders();
 	std::cout << "File size: " << this->_totalFileSize << " bytes" << std::endl;
 	if (this->_totalFileSize == 0)
@@ -552,6 +555,22 @@ void NewResponse::prepareFileResponse(const std::string &filePath)
 	std::cout << "Done Sending headers" << std::endl;
 }
 
+size_t NewResponse::sendAll(int sockfd, const void *buf, size_t len)
+{
+	size_t total_sent = 0;
+	while (total_sent < len)
+	{
+		size_t n = send(sockfd, (const char *)buf + total_sent, len - total_sent, 0);
+		if (n == -1)
+		{
+			// A real error occurred, report it
+			return -1;
+		}
+		total_sent += n;
+	}
+	return total_sent;
+}
+
 void NewResponse::sendNextChunk()
 {
 	std::cout << "Sending file in chunks..." << std::endl;
@@ -564,12 +583,13 @@ void NewResponse::sendNextChunk()
 		return;
 	}
 
-	static char buffer[CHUNK_SIZE];
+	 char buffer[CHUNK_SIZE];
 
 	ssize_t bytes_read = read(this->_file_fd, buffer, CHUNK_SIZE);
 
 	if (bytes_read < 0)
 	{
+		std::cout << "error in read " << std::endl;
 		perror("read failed");
 		close(this->_file_fd);
 		this->_file_fd = -1;
@@ -578,12 +598,29 @@ void NewResponse::sendNextChunk()
 	}
 	if (bytes_read == 0)
 	{
+		// Send last chunk to mark the end of the stream
+		const char *last_chunk = "0\r\n\r\n";
+		ssize_t sent = send(this->_clientFd, last_chunk, strlen(last_chunk),0);
+		if (sent < 0)
+		{
+			perror("send last chunk failed");
+			this->_sendStatus = SEND_ERROR;
+		}
+		else
+		{
+			this->_sendStatus = SEND_COMPLETED;
+		}
 		close(this->_file_fd);
 		this->_file_fd = -1;
-		this->_sendStatus = SEND_COMPLETED;
 		return;
 	}
-	ssize_t bytes_sent_now = send(this->_clientFd, buffer, bytes_read, MSG_NOSIGNAL);
+
+	std::ostringstream chunk_stream;
+	chunk_stream << std::hex << bytes_read << "\r\n";
+	std::string chunk_header = chunk_stream.str();
+	std::string chunk = chunk_header + std::string(buffer, bytes_read) + "\r\n";
+
+	ssize_t bytes_sent_now = send(this->_clientFd, chunk.c_str(), chunk.size(), 0);
 	if (bytes_sent_now < 0)
 	{
 		perror("send chunk failed");
@@ -592,15 +629,89 @@ void NewResponse::sendNextChunk()
 		this->_sendStatus = SEND_ERROR;
 		return;
 	}
-	this->_byteSent += bytes_sent_now;
+	std::cout << "move to next chunk " << std::endl;
 
-	if (this->_byteSent >= this->_totalFileSize)
-	{
-		std::cout << "All bytes sent: " << this->_byteSent << " bytes" << std::endl;
-		this->_sendStatus = SEND_COMPLETED;
-		close(this->_file_fd);
-		this->_file_fd = -1;
-		return;
-	}
+	this->_byteSent += bytes_read; // Only count payload, not chunk headers
+
 	this->_sendStatus = SEND_IN_PROGRESS;
 }
+
+// void NewResponse::sendNextChunk()
+// {
+// 	std::cout << "Sending file in chunks..." << std::endl;
+// 	if (this->_sendStatus == SEND_COMPLETED || this->_sendStatus == SEND_ERROR)
+// 		return;
+
+// 	if (this->_file_fd < 0)
+// 	{
+// 		this->_sendStatus = SEND_ERROR;
+// 		return;
+// 	}
+
+// 	static char buffer[CHUNK_SIZE];
+// 	ssize_t bytes_read = read(this->_file_fd, buffer, CHUNK_SIZE);
+
+// 	if (bytes_read < 0)
+// 	{
+// 		perror("read failed");
+// 		close(this->_file_fd);
+// 		this->_file_fd = -1;
+// 		this->_sendStatus = SEND_ERROR;
+// 		return;
+// 	}
+
+// 	if (bytes_read == 0)
+// 	{
+// 		// End of file, send the last chunk
+// 		const char *last_chunk = "0\r\n\r\n";
+// 		if (sendAll(this->_clientFd, last_chunk, strlen(last_chunk)) < 0)
+// 		{
+// 			perror("send last chunk failed");
+// 			this->_sendStatus = SEND_ERROR;
+// 		}
+// 		else
+// 		{
+// 			this->_sendStatus = SEND_COMPLETED;
+// 		}
+// 		close(this->_file_fd);
+// 		this->_file_fd = -1;
+// 		return;
+// 	}
+
+// 	// Create and send the chunk header (e.g., "400\r\n")
+// 	std::ostringstream chunk_header_stream;
+// 	chunk_header_stream << std::hex << bytes_read << "\r\n";
+// 	std::string chunk_header = chunk_header_stream.str();
+
+// 	if (sendAll(this->_clientFd, chunk_header.c_str(), chunk_header.size()) < 0)
+// 	{
+// 		perror("send chunk header failed");
+// 		this->_sendStatus = SEND_ERROR;
+// 		close(this->_file_fd);
+// 		this->_file_fd = -1;
+// 		return;
+// 	}
+
+// 	// Send the actual file data
+// 	if (sendAll(this->_clientFd, buffer, bytes_read) < 0)
+// 	{
+// 		perror("send chunk data failed");
+// 		this->_sendStatus = SEND_ERROR;
+// 		close(this->_file_fd);
+// 		this->_file_fd = -1;
+// 		return;
+// 	}
+
+// 	// Send the chunk terminator
+// 	if (sendAll(this->_clientFd, "\r\n", 2) < 0)
+// 	{
+// 		perror("send chunk trailer failed");
+// 		this->_sendStatus = SEND_ERROR;
+// 		close(this->_file_fd);
+// 		this->_file_fd = -1;
+// 		return;
+// 	}
+
+// 	this->_byteSent += bytes_read;
+// 	this->_sendStatus = SEND_IN_PROGRESS;
+// }
