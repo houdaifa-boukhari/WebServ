@@ -1,5 +1,0 @@
-make --dry-run --keep-going --print-directory
-make: Entering directory `/Users/hel-bouk/Desktop/all data/WebServ'
-make: Nothing to be done for `all'.
-make: Leaving directory `/Users/hel-bouk/Desktop/all data/WebServ'
- 

@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/06/26 13:51:44 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/05 16:41:58 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,10 +260,16 @@ void FileParser::parseLocationDirective(const std::string &directive, LocationCo
 	else if (directive.find("allowed_methods") != std::string::npos)
 	{
 		std::string allowedMethods = directive.substr(directive.find("allowed_methods") + 15, directive.find(";", directive.find("allow_methods") + 14) - (directive.find("allow_methods") + 14));
+		if (!allowedMethods.empty() && allowedMethods[allowedMethods.size() - 1] == ';')
+			allowedMethods.erase(allowedMethods.size() - 1);
 		allowedMethods = ParsingUtils::removeWhiteSpaces(allowedMethods);
 		std::vector<std::string> methods = ParsingUtils::splitString(allowedMethods, ' ');
 		for (size_t i = 0; i < methods.size(); i++)
+		{
+			if (!methods[i].empty() && methods[i][methods[i].size() - 1] == ';')
+				methods[i].erase(methods[i].size() - 1);
 			locationConfig.addAllowedMethod(methods[i]);
+		}
 	}
 	else if (directive.find("return") != std::string::npos)
 	{

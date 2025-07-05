@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/03 13:51:31 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/05 17:20:40 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -321,13 +321,26 @@ bool NewResponse::isMethodAllowed(const std::string &method, LocationConfig &loc
 bool NewResponse::findMatchingLocation(const std::string &path)
 {
 	std::vector<LocationConfig> locations = _config.getLocations();
+	LocationConfig *bestMatch = NULL;
+	size_t bestLen = 0;
+
 	for (size_t i = 0; i < locations.size(); i++)
 	{
-		if (locations[i].getName() == path)
+		const std::string &locName = locations[i].getName();
+		if (path.compare(0, locName.size(), locName) == 0 &&
+			(path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
 		{
-			this->_matchedLocation = locations[i];
-			return true;
+			if (locName.size() > bestLen)
+			{
+				bestLen = locName.size();
+				bestMatch = &locations[i];
+			}
 		}
+	}
+	if (bestMatch)
+	{
+		this->_matchedLocation = *bestMatch;
+		return true;
 	}
 	return false;
 }
@@ -381,8 +394,7 @@ void NewResponse::generateResponse()
 	if (_request.getMethod() == "GET")
 		return handleGetRequest();
 	else if (_request.getMethod() == "POST")
-	{
-	}
+		return handlePostRequest();
 	else if (_request.getMethod() == "DELETE")
 	{
 	}
@@ -436,8 +448,12 @@ void NewResponse::handleGetRequest()
 		sendResponseToClient();
 		return;
 	}
-	std::string path = normalizePath(_request.getPath());
-	std::string fullPath = joinPath(_matchedLocation.getRoot(), "");
+	std::string normalizedPath = normalizePath(_request.getPath());
+	std::string locationName = _matchedLocation.getName();
+	std::string relativePath = normalizedPath.substr(locationName.size());
+	if (!relativePath.empty() && relativePath[0] == '/')
+		relativePath = relativePath.substr(1);
+	std::string fullPath = joinPath(_matchedLocation.getRoot(), relativePath);
 	if (isDirectory(fullPath))
 		return handleDirectoryRequest(fullPath);
 	else if (fileExists(fullPath))
@@ -455,7 +471,53 @@ void NewResponse::handleGetRequest()
 
 void NewResponse::handlePostRequest()
 {
-	// Implementation for handling POST requests
+	std::cout << "starting POST request handling" << std::endl;
+	if (!findMatchingLocation(_request.getPath()))
+	{
+		this->_statusCode = 404;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+	if (!isMethodAllowed(_request.getMethod(), _matchedLocation))
+	{
+		this->_statusCode = 405;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+	if (_matchedLocation.getRoot().empty())
+	{
+		this->_statusCode = 500;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+	std::string filename = _request.getHeaders()["X-Filename"];
+	if (filename.empty())
+		filename = "upload.txt";
+	std::string uploadPath = joinPath(_matchedLocation.getRoot(), filename);
+	std::ofstream out(uploadPath.c_str(), std::ios::binary);
+
+	if (!out.is_open())
+	{
+		this->_statusCode = 500;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+	out << _request.getBody();
+	out.close();
+
+	this->_statusCode = 201;
+	this->_body = "<html><body><h1>File uploaded successfully</h1></body></html>";
+	this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+	sendResponseToClient();
+	return;
 }
 
 void NewResponse::handleDeleteRequest()
@@ -583,7 +645,7 @@ void NewResponse::sendNextChunk()
 		return;
 	}
 
-	 char buffer[CHUNK_SIZE];
+	char buffer[CHUNK_SIZE];
 
 	ssize_t bytes_read = read(this->_file_fd, buffer, CHUNK_SIZE);
 
@@ -600,7 +662,7 @@ void NewResponse::sendNextChunk()
 	{
 		// Send last chunk to mark the end of the stream
 		const char *last_chunk = "0\r\n\r\n";
-		ssize_t sent = send(this->_clientFd, last_chunk, strlen(last_chunk),0);
+		ssize_t sent = send(this->_clientFd, last_chunk, strlen(last_chunk), 0);
 		if (sent < 0)
 		{
 			perror("send last chunk failed");
