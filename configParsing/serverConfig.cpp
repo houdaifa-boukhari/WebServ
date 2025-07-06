@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 23:29:35 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 20:57:28 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/05 17:42:00 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ std::string ServerConfig::getErrorPage(std::string key)
 	return "";
 }
 
-std::map<std::string, std::string> ServerConfig::getErrorPages()
+const std::map<std::string, std::string> &ServerConfig::getErrorPages() const
 {
 	return _errorPages;
 }

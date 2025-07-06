@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/05 17:20:40 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/06 15:31:03 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ NewResponse::NewResponse()
 	this->_body = "";
 	this->_response_headers = std::map<std::string, std::string>();
 	this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-	this->_response_headers["Connection"] = "close";
+	this->_response_headers["Connection"] = "Keep-Alive";
 	this->_response_headers["Server"] = "WebServ/1.0";
 }
 
@@ -59,7 +59,7 @@ NewResponse::NewResponse(int clientFd, ServerConfig &_config, ParssedRequest &re
 	this->_body = "";
 	this->_response_headers = std::map<std::string, std::string>();
 	this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-	this->_response_headers["Connection"] = "close";
+	this->_response_headers["Connection"] = "Keep-Alive";
 	this->_response_headers["Server"] = "WebServ/1.0";
 }
 
@@ -227,7 +227,22 @@ std::string NewResponse::getFileContent(const std::string &filePath)
 	return content;
 }
 
-std::string NewResponse::getErrorPage(int statusCode)
+std::string NewResponse::getCreatedResponseBody()
+{
+	std::string DefaultResponseBody = "<html><body><h1>Resource Created Successfully</h1></body></html>";
+	std::string filePath = "./pages/success/201.html";
+	if (fileExists(filePath))
+	{
+		std::string fileContent = getFileContent(filePath);
+		if (!fileContent.empty())
+			return fileContent;
+		else
+			return DefaultResponseBody;
+	}
+	return DefaultResponseBody;
+}
+std::string
+NewResponse::getErrorPage(int statusCode)
 {
 	std::string errorTitle = std::to_string(statusCode) + " " + getStatusMessage(statusCode);
 	std::string errorBody =
@@ -250,6 +265,7 @@ std::string NewResponse::getErrorPage(int statusCode)
 					 "    <p><em>WebServ/1.0</em></p>\n"
 					 "</body>\n"
 					 "</html>";
+
 	if (_config.getErrorPages().empty() || _config.getErrorPage(std::to_string(statusCode)) == "")
 		return errorBody;
 	else
@@ -396,8 +412,7 @@ void NewResponse::generateResponse()
 	else if (_request.getMethod() == "POST")
 		return handlePostRequest();
 	else if (_request.getMethod() == "DELETE")
-	{
-	}
+		return handleDeleteRequest();
 	else
 	{
 		this->_statusCode = 405;
@@ -522,7 +537,91 @@ void NewResponse::handlePostRequest()
 
 void NewResponse::handleDeleteRequest()
 {
-	// Implementation for handling DELETE requests
+	std::cout << "starting DELETE request handling" << std::endl;
+
+	if (!findMatchingLocation(_request.getPath()))
+	{
+		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;
+		this->_statusCode = 404;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+	if (!isMethodAllowed(_request.getMethod(), _matchedLocation))
+	{
+		std::cout << "Method not allowed for path: " << _request.getPath() << std::endl;
+		this->_statusCode = 405;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+
+	if (_matchedLocation.getRoot().empty())
+	{
+		std::cout << "Root is empty for location: " << _matchedLocation.getName() << std::endl;
+		this->_statusCode = 500;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+
+	std::string normalizedPath = normalizePath(_request.getPath());
+	std::string locationName = _matchedLocation.getName();
+	std::string relativePath = normalizedPath.substr(locationName.size());
+	if (!relativePath.empty() && relativePath[0] == '/')
+		relativePath = relativePath.substr(1);
+	std::string fullPath = joinPath(_matchedLocation.getRoot(), relativePath);
+
+	if (!fileExists(fullPath))
+	{
+		std::cout << "File not found for deletion: " << fullPath << std::endl;
+		this->_statusCode = 404;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+
+	if (isDirectory(fullPath))
+	{
+		std::cout << "Cannot delete directory: " << fullPath << std::endl;
+		this->_statusCode = 403;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+
+	if (access(fullPath.c_str(), W_OK) != 0)
+	{
+		std::cout << "No write permission for file: " << fullPath << " - " << strerror(errno) << std::endl;
+		this->_statusCode = 403;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+	if (remove(fullPath.c_str()) == 0)
+	{
+		std::cout << "Successfully deleted file: " << fullPath << std::endl;
+		this->_statusCode = 204;
+		this->_body = "";
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
+	else
+	{
+		std::cout << "Failed to delete file: " << fullPath << " - " << strerror(errno) << std::endl;
+		this->_statusCode = 500;
+		this->_body = getErrorPage(this->_statusCode);
+		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+		sendResponseToClient();
+		return;
+	}
 }
 
 void NewResponse::handleDirectoryRequest(std::string &dirPath)
@@ -693,87 +792,7 @@ void NewResponse::sendNextChunk()
 	}
 	std::cout << "move to next chunk " << std::endl;
 
-	this->_byteSent += bytes_read; // Only count payload, not chunk headers
+	this->_byteSent += bytes_read;
 
 	this->_sendStatus = SEND_IN_PROGRESS;
 }
-
-// void NewResponse::sendNextChunk()
-// {
-// 	std::cout << "Sending file in chunks..." << std::endl;
-// 	if (this->_sendStatus == SEND_COMPLETED || this->_sendStatus == SEND_ERROR)
-// 		return;
-
-// 	if (this->_file_fd < 0)
-// 	{
-// 		this->_sendStatus = SEND_ERROR;
-// 		return;
-// 	}
-
-// 	static char buffer[CHUNK_SIZE];
-// 	ssize_t bytes_read = read(this->_file_fd, buffer, CHUNK_SIZE);
-
-// 	if (bytes_read < 0)
-// 	{
-// 		perror("read failed");
-// 		close(this->_file_fd);
-// 		this->_file_fd = -1;
-// 		this->_sendStatus = SEND_ERROR;
-// 		return;
-// 	}
-
-// 	if (bytes_read == 0)
-// 	{
-// 		// End of file, send the last chunk
-// 		const char *last_chunk = "0\r\n\r\n";
-// 		if (sendAll(this->_clientFd, last_chunk, strlen(last_chunk)) < 0)
-// 		{
-// 			perror("send last chunk failed");
-// 			this->_sendStatus = SEND_ERROR;
-// 		}
-// 		else
-// 		{
-// 			this->_sendStatus = SEND_COMPLETED;
-// 		}
-// 		close(this->_file_fd);
-// 		this->_file_fd = -1;
-// 		return;
-// 	}
-
-// 	// Create and send the chunk header (e.g., "400\r\n")
-// 	std::ostringstream chunk_header_stream;
-// 	chunk_header_stream << std::hex << bytes_read << "\r\n";
-// 	std::string chunk_header = chunk_header_stream.str();
-
-// 	if (sendAll(this->_clientFd, chunk_header.c_str(), chunk_header.size()) < 0)
-// 	{
-// 		perror("send chunk header failed");
-// 		this->_sendStatus = SEND_ERROR;
-// 		close(this->_file_fd);
-// 		this->_file_fd = -1;
-// 		return;
-// 	}
-
-// 	// Send the actual file data
-// 	if (sendAll(this->_clientFd, buffer, bytes_read) < 0)
-// 	{
-// 		perror("send chunk data failed");
-// 		this->_sendStatus = SEND_ERROR;
-// 		close(this->_file_fd);
-// 		this->_file_fd = -1;
-// 		return;
-// 	}
-
-// 	// Send the chunk terminator
-// 	if (sendAll(this->_clientFd, "\r\n", 2) < 0)
-// 	{
-// 		perror("send chunk trailer failed");
-// 		this->_sendStatus = SEND_ERROR;
-// 		close(this->_file_fd);
-// 		this->_file_fd = -1;
-// 		return;
-// 	}
-
-// 	this->_byteSent += bytes_read;
-// 	this->_sendStatus = SEND_IN_PROGRESS;
-// }

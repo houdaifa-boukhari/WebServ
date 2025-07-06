@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 12:59:27 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/03 13:52:35 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/06 15:34:49 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ private:
 	std::string normalizePath(const std::string &path);
 	std::string joinPath(const std::string &root, const std::string &path);
 	void prepareFileResponse(const std::string &filePath);
+	std::string getCreatedResponseBody();
 
 	// HTTP request handlers
 	void sendResponseToClient();
@@ -77,7 +78,7 @@ private:
 	void handleDeleteRequest();
 	void handleDirectoryRequest(std::string &dirPath);
 	void generateDirectoryListing(std::string &filePath);
-	size_t sendAll(int sockfd, const void *buf, size_t len );
+	size_t sendAll(int sockfd, const void *buf, size_t len);
 
 public:
 	NewResponse();

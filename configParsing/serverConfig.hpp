@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:40:51 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 20:58:05 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/05 17:42:11 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ public:
 	std::string getMaxBodySize();
 	size_t getMaxBodySizeBytes();
 	std::string getErrorPage(std::string key);
-	std::map<std::string, std::string> getErrorPages();
+	const std::map<std::string, std::string> &getErrorPages() const;
 	std::vector<LocationConfig> getLocations();
 	void printServer();
 };
