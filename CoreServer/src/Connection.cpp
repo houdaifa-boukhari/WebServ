@@ -136,7 +136,6 @@ void Server::handleClientData(int ClientFd)
 }
 
 
-
 SendStatus Connection::getSendStatus() const
 {
 	return _response.getSendStatus();
