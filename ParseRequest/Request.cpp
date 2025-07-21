@@ -41,6 +41,7 @@ void ParssedRequest::printParams()
 
 void ParssedRequest::assign_params(std::string path)
 {
+    clear_params();
     std::string::size_type pos = path.find('?');
     if (pos != std::string::npos)
     {
@@ -50,16 +51,35 @@ void ParssedRequest::assign_params(std::string path)
         std::string param;
         while (std::getline(iss, param, '&'))
         {
-            std::string key = param.substr(0, param.find('='));
-            std::string value = param.substr(param.find('=') + 1);
-            _params[trim(key)] = trim(value);
+            std::size_t eq_pos = param.find('=');
+            if (eq_pos != std::string::npos)
+            {
+                std::string key = param.substr(0, eq_pos);
+                std::string value = param.substr(eq_pos + 1);
+                _params[trim(key)] = trim(value);
+            }
+            else
+            {
+                // Handle case where param has key but no '=' (e.g., ?name1)
+                _params[trim(param)] = "";
+            }
         }
     }
+}
+
+void ParssedRequest::clear_params()
+{
+    _params.clear();
 }
 
 std::map<std::string, std::string> ParssedRequest::getParams()
 {
     return (_params);
+}
+
+bool is_cgi_path(const std::string& path) {
+    std::string prefix = "/cgi-bin/";
+    return path.compare(0, prefix.size(), prefix) == 0 && path.size() > prefix.size();
 }
 
 void ParssedRequest::AssignRequestLine(std::string request)
@@ -80,12 +100,22 @@ void ParssedRequest::AssignRequestLine(std::string request)
     if (iss >> extra)
     {
         std::cerr << "Too many parts in request line.\n";
+        // through error
         return;
     }
 
     std::cout << "Method: " << method << std::endl;
     std::cout << "Path: " << path << std::endl;
     std::cout << "Version: " << version << std::endl;
+}
+
+void ParssedRequest::assign_pwithout_params()
+{
+    std::string::size_type pos = _path.find('?');
+    if (pos != std::string::npos)
+        _path_without_params = _path.substr(0, pos);
+    else
+        _path_without_params = _path;
 }
 
 void ParssedRequest::AssignHeadersLine(std::string request)
@@ -135,7 +165,13 @@ void ParssedRequest::AssignHeadersLine(std::string request)
             return;
         }
     }
+    assignhost_port();
+    if (is_cgi_path(_path))
+        _cgi = true;
+    else
+        _cgi = false;
     assign_params(_path);
+    assign_pwithout_params();
     std::ostringstream body_stream;
     body_stream << stream.rdbuf(); // Reads the rest of the stream
     _body = body_stream.str();
@@ -165,8 +201,9 @@ char **ParssedRequest::get_env()
     std::map<std::string, std::string>::iterator begin = _params.begin();
     std::map<std::string, std::string>::iterator end = _params.end();
     std::string key_val;
-    char **envp = new char *[_params.size() + 1];
-    envp[_params.size()] = NULL;
+    int final_size = _params.size() + 3 + 1;
+    char **envp = new char *[final_size]; // add new cookies
+    envp[final_size - 1] = NULL;
     int i = 0;
     while (begin != end)
     {
@@ -176,7 +213,54 @@ char **ParssedRequest::get_env()
         i++;
         begin++;
     }
+    std::string key = "REQUEST_METHOD";
+    key_val = key + "=" + _method;
+    envp[i] = new char [key_val.size() + 1];
+    std::strcpy(envp[i], key_val.c_str());
+    i++;
+    key = "PATH_INFO";
+    key_val = key + "=" + _path_info;
+    envp[i] = new char [key_val.size() + 1];
+    std::strcpy(envp[i], key_val.c_str());
+    i++;
+    key = "SCRIPT_NAME";
+    key_val = key + "=" + _script_name;
+    envp[i] = new char [key_val.size() + 1];
+    std::strcpy(envp[i], key_val.c_str());
     return envp;
+}
+
+std::string ParssedRequest::get_host()
+{
+    return _host;
+}
+
+std::string ParssedRequest::get_port()
+{
+    return _port;
+}
+
+void ParssedRequest::assignhost_port()
+{
+    std::map<std::string, std::string>::iterator begin = _headers.begin();
+    std::map<std::string, std::string>::iterator end = _headers.end();
+
+    while (begin != end)
+    {
+        if (begin->first == "Host")
+        {
+            std::istringstream host_port(begin->second);
+            if (std::getline(host_port, _host, ':') && std::getline(host_port, _port))
+                return;
+            else
+            {
+                std::cout << "something went wrong with assignhost_port" << std::endl;
+                return ;
+            }
+            return ;
+        }
+        begin++;
+    }
 }
 
 std::map<std::string, std::string> ParssedRequest::getHeaders()
@@ -207,4 +291,51 @@ std::string ParssedRequest::getVersion() const
 void ParssedRequest::AssignBody(std::string request)
 {
     (void)request;
+}
+
+bool ParssedRequest::is_cgi()
+{
+    return _cgi;
+}
+
+void ParssedRequest::assign_full_cgi_path() {
+    std::string cgi_files = "/Users/aet-tale/Desktop/websrv_lst/cgi_files";
+    const std::string prefix = "/cgi-bin/";
+    if (_path_without_params.compare(0, prefix.size(), prefix) == 0) {
+        std::string relative = _path_without_params.substr(prefix.size());  // remove "cgi-bin/"
+        cgi_path = cgi_files + "/" + relative;
+    } else {
+        // Not a valid cgi-bin path
+        cgi_path = "";
+    }
+}
+
+bool ParssedRequest::path_exists()
+{
+    return access(cgi_path.c_str(), F_OK) == 0;
+}
+
+std::string ParssedRequest::get_cgi_path()
+{
+    return cgi_path;
+}
+
+void ParssedRequest::assign_cgi_output(std::string cgi_outpt)
+{
+    this->cgi_output = cgi_outpt;
+}
+
+std::string ParssedRequest::get_cgi_output(void)
+{
+    return cgi_output;
+}
+
+void ParssedRequest::assign_cookies_response(std::string cookies_response)
+{
+    this->cookies_response = cookies_response;
+}
+
+std::string ParssedRequest::get_cookies_response(void)
+{
+    return this->cookies_response;
 }

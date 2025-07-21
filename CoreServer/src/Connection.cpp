@@ -97,30 +97,38 @@ void Server::handleClientData(int ClientFd)
 
 	if (RequestIsComplete(_connections[ClientFd].getClientRequest()))
 	{
-		
 		_connections[ClientFd].setIsComplete(true);
 
 		/////// anour Part ///////
-
+		ParssedRequest &request = _connections[ClientFd].getParceRequest();
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		_connections[ClientFd].getParsedRequest().AssignHeadersLine(_connections[ClientFd].getClientRequest());
-		
-		std::cout << _connections[ClientFd].getParsedRequest().GetReqeustLIne() << std::endl;
-		printMap(_connections[ClientFd].getParsedRequest().getHeaders());
-		std::cout << "Body: " << _connections[ClientFd].getParsedRequest().getBody() << std::endl;
-		
-		_connections[ClientFd].getParsedRequest().assign_params(_connections[ClientFd].getParsedRequest().getBody());
-
-		std::cout << "Params: " << std::endl;
-		_connections[ClientFd].getParsedRequest().printParams();
-		
+		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
+		request.printParams();
+		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
+		{
+			request.assign_full_cgi_path();
+			if (request.path_exists())
+			{
+				char **env = request.get_env();
+				request.assign_cgi_output(execute_cgi(request.get_cgi_path(), env));
+				std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
+				free_envp(env);
+			}else 
+				std::cout << "not a correct cgi path" << std::endl;
+		}
+		else
+			std::cout << "normal request" << std::endl;
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		ParssedRequest request = _connections[ClientFd].getParsedRequest();
+		request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/websrv_lst/cookie_set.py", NULL));
+		std::cout << "cgi_set_cookie : " << request.get_cookies_response() << std::endl;
+
+		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		std::cout << confg.getHost() << ":" << std::endl;
-		_connections[ClientFd].buildResponse(ClientFd, request, confg);
-		
-	
+		_connections[ClientFd].buildResponse(ClientFd, req, confg);
+		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+		//		<< "Request Is complete" << WHIET << std::endl;
+		// std::cout << RED << "			------------------------------------			" << std::endl;
 	}
 	else
 		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "

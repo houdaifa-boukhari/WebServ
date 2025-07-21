@@ -18,14 +18,33 @@ class ParssedRequest
 {
 private:
     std::string _request;
+    std::string _host;
+    std::string _port;
     std::string _method;
     std::string _path;
+    std::string _path_without_params;
+    std::string _path_info;
+    std::string _script_name;
     std::string _version;
     std::map<std::string, std::string> _headers;
     std::map<std::string, std::string> _params;
     std::string _body;
-
+    std::string cgi_output;
+    std::string cookies_response;
+    bool _cgi;
+    std::string cgi_path;
 public:
+    void clear_params();
+    void assign_cgi_output(std::string cgi_outpt);
+    std::string get_cgi_output(void);
+    bool is_cgi();
+    void assign_cookies_response(std::string cookies_response);
+    std::string get_cookies_response();
+    std::string get_cgi_path();
+    void assign_pwithout_params();
+    void assign_full_cgi_path();
+    bool path_exists();
+    void assignhost_port();
     ParssedRequest(std::string request);
     ~ParssedRequest();
     void AssignRequestLine(std::string request);
@@ -38,15 +57,13 @@ public:
     ParssedRequest();
     void AssignHeadersLine(std::string request);
     std::map<std::string, std::string> getHeaders();
+    std::string get_host();
+    std::string get_port();
     std::string GetReqeustLIne();
     void assign_params(std::string path);
     void printParams();
     std::map<std::string, std::string> getParams();
     char **get_env();
-    // void AssignBody(std::string request);
-    // assign request line
-    // assign headers
-    // assign body
 };
 
 std::string execute_cgi(std::string file_path, char **env);

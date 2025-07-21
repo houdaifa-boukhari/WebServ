@@ -39,7 +39,7 @@ class Connection
 		const std::string &getClientResponse() const { return ClientResponse; }
 		time_t getLastActivity() const { return lastActivity; }
 		bool getIsComplete() const { return isComplete; }
-		
+		ParssedRequest &getParceRequest() {return ParseRequest;}
 		void reset();
 		ServerConfig &getServerConfig() { return config; }
 		NewResponse &getResponse() { return _response; }
