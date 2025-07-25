@@ -38,10 +38,11 @@ private:
     std::string cgi_path;
 public:
     // void assign_cookies();
+    std::string generate_session_response();
     void assign_cookies(std::string key_value);
     std::map<std::string, std::string> get_cookies(){return _cookies;};
     void clear_params();
-    bool get_cookie_avai();
+    int get_cookie_avai();
     void is_cgi_path(const std::string& path);
     void assign_cgi_output(std::string cgi_outpt);
     std::string get_cgi_output(void);

@@ -137,12 +137,11 @@ void ParssedRequest::assign_cookies(std::string key_values)
     }
 }
 
-bool ParssedRequest::get_cookie_avai()
+int ParssedRequest::get_cookie_avai()
 {
-    if (_cookies.find("bg-color") != _cookies.end()) {
-        return true;
-    }
-    return false;
+    if (_cookies.find("bg-color") == _cookies.end() || _cookies.find("session-id") == _cookies.end())
+        return 1;
+    return 0;
 }
 
 void ParssedRequest::AssignHeadersLine(std::string request)
@@ -195,11 +194,9 @@ void ParssedRequest::AssignHeadersLine(std::string request)
             return;
         }
     }
+    cookies_response.clear();
     assignhost_port();
     is_cgi_path(_path);
-    //     _cgi = true;
-    // else
-    //     _cgi = false;
     assign_params(_path);
     assign_pwithout_params();
     // assign_cookies();
@@ -365,10 +362,16 @@ std::string ParssedRequest::get_cgi_output(void)
 
 void ParssedRequest::assign_cookies_response(std::string cookies_response)
 {
-    this->cookies_response = cookies_response;
+    this->cookies_response += cookies_response;
 }
 
 std::string ParssedRequest::get_cookies_response(void)
 {
     return this->cookies_response;
 }
+
+
+// std::string ParssedRequest::generate_session_response()
+// {
+    
+// }

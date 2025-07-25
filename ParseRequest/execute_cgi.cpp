@@ -82,6 +82,7 @@ std::string execute_cgi(std::string file_path, char **env)
         if (dup2(output_fd, 1) == -1 || dup2(output_fd, 2) == -1)
         {
             std::cerr << "Failed to dup output file" << std::endl;
+            close(output_fd);
             std::exit(1);
         }
         close(output_fd);
@@ -90,6 +91,11 @@ std::string execute_cgi(std::string file_path, char **env)
     }else
     {
         int output_fd = open(temp_filename.c_str(), O_RDWR | O_CREAT, 0600);
+        if (output_fd == -1)
+        {
+            // std::cerr << "Failed to open output file" << std::endl;
+            return "Failed to open output file";
+        }
         int status;
         waitpid(pid, &status, 0);
         // if (WIFEXITED(status)) {
