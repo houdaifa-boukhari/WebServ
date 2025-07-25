@@ -27,14 +27,22 @@ private:
     std::string _script_name;
     std::string _version;
     std::map<std::string, std::string> _headers;
+    std::map<std::string, std::string> _cookies;
     std::map<std::string, std::string> _params;
     std::string _body;
     std::string cgi_output;
     std::string cookies_response;
+    std::map<std::string, std::map<std::string, std::string> > _sessions;
+    bool cookie_avai;
     bool _cgi;
     std::string cgi_path;
 public:
+    // void assign_cookies();
+    void assign_cookies(std::string key_value);
+    std::map<std::string, std::string> get_cookies(){return _cookies;};
     void clear_params();
+    bool get_cookie_avai();
+    void is_cgi_path(const std::string& path);
     void assign_cgi_output(std::string cgi_outpt);
     std::string get_cgi_output(void);
     bool is_cgi();

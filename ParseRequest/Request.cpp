@@ -77,9 +77,10 @@ std::map<std::string, std::string> ParssedRequest::getParams()
     return (_params);
 }
 
-bool is_cgi_path(const std::string& path) {
+void ParssedRequest::is_cgi_path(const std::string& path) {
     std::string prefix = "/cgi-bin/";
-    return path.compare(0, prefix.size(), prefix) == 0 && path.size() > prefix.size();
+    // _cgi = true;
+    _cgi =  path.compare(0, prefix.size(), prefix) == 0 && path.size() >= prefix.size();
 }
 
 void ParssedRequest::AssignRequestLine(std::string request)
@@ -118,6 +119,32 @@ void ParssedRequest::assign_pwithout_params()
         _path_without_params = _path;
 }
 
+void ParssedRequest::assign_cookies(std::string key_values)
+{
+    std::istringstream stream(key_values);
+    std::string cookie_value;
+    while (std::getline(stream, cookie_value, ';'))
+    {
+        std::string key;
+        std::string value;
+        std::istringstream one_cookie(cookie_value);
+        if (std::getline(one_cookie, key , '=') && std::getline(one_cookie, value))
+        {
+            key = trim(key);
+            value = trim(value);
+            _cookies[key] = value;
+        }
+    }
+}
+
+bool ParssedRequest::get_cookie_avai()
+{
+    if (_cookies.find("bg-color") != _cookies.end()) {
+        return true;
+    }
+    return false;
+}
+
 void ParssedRequest::AssignHeadersLine(std::string request)
 {
     std::istringstream stream(request);
@@ -150,6 +177,7 @@ void ParssedRequest::AssignHeadersLine(std::string request)
     // std::cout << "HEADERS" << std::endl;
     std::string key;
     std::string value;
+    _cookies.clear();
     while (std::getline(stream, line) && !line.empty() && line != "\r")
     {
         iss.clear();
@@ -157,6 +185,8 @@ void ParssedRequest::AssignHeadersLine(std::string request)
         if (std::getline(iss, key, ':') && std::getline(iss, value))
         {
             // maybe check is key has two words
+            if (trim(key) == "Cookie")
+                assign_cookies(trim(value));
             _headers[trim(key)] = trim(value);
         }
         else
@@ -166,12 +196,13 @@ void ParssedRequest::AssignHeadersLine(std::string request)
         }
     }
     assignhost_port();
-    if (is_cgi_path(_path))
-        _cgi = true;
-    else
-        _cgi = false;
+    is_cgi_path(_path);
+    //     _cgi = true;
+    // else
+    //     _cgi = false;
     assign_params(_path);
     assign_pwithout_params();
+    // assign_cookies();
     std::ostringstream body_stream;
     body_stream << stream.rdbuf(); // Reads the rest of the stream
     _body = body_stream.str();
@@ -299,7 +330,7 @@ bool ParssedRequest::is_cgi()
 }
 
 void ParssedRequest::assign_full_cgi_path() {
-    std::string cgi_files = "/Users/aet-tale/Desktop/websrv_lst/cgi_files";
+    std::string cgi_files = "cgi_files";
     const std::string prefix = "/cgi-bin/";
     if (_path_without_params.compare(0, prefix.size(), prefix) == 0) {
         std::string relative = _path_without_params.substr(prefix.size());  // remove "cgi-bin/"
@@ -308,6 +339,8 @@ void ParssedRequest::assign_full_cgi_path() {
         // Not a valid cgi-bin path
         cgi_path = "";
     }
+    std::cout << cgi_path << std::endl;
+    // std::cout << cgi_path <<
 }
 
 bool ParssedRequest::path_exists()

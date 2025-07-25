@@ -61,6 +61,12 @@ void Server::handleNewConnection(int SvFd)
 	
 }
 
+void print_map(const std::map<std::string, std::string>& m) {
+    for (std::map<std::string, std::string>::const_iterator it = m.begin(); it != m.end(); ++it) {
+        std::cout << it->first << " = " << it->second << std::endl;
+    }
+}
+
 void Server::handleClientData(int ClientFd)
 {
 	ssize_t len = 0;
@@ -119,12 +125,18 @@ void Server::handleClientData(int ClientFd)
 		else
 			std::cout << "normal request" << std::endl;
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/websrv_lst/cookie_set.py", NULL));
-		std::cout << "cgi_set_cookie : " << request.get_cookies_response() << std::endl;
-
+		if (!request.get_cookie_avai())
+		{
+			std::cout << "the cookie bg-color has been send in the req" << std::endl;
+			request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/WebServ/cookie_set.py", NULL));
+			// std::cout << request.get_cookies_response() << std::endl;
+		}
+		std::cout << "print cookies" << std::endl;
+		print_map(request.get_cookies());
+		// else no cookies should be sent
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
-		std::cout << confg.getHost() << ":" << std::endl;
+		// std::cout << confg.getHost() << ":" << std::endl;
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
 		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 		//		<< "Request Is complete" << WHIET << std::endl;
