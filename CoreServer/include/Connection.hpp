@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 21:19:37 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/02 21:12:11 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/28 17:09:52 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ class Connection
 	public:
 		Connection() : Client_fd(-1), lastActivity(time(NULL)), ClientRequest(""), ClientResponse(""), isComplete(false) {}
 		Connection(int fd, const ServerConfig &cfg) : Client_fd(fd), config(cfg), lastActivity(time(NULL)), ClientRequest(""), ClientResponse(""), isComplete(false) {}
-
 		int getClientFd() const { return Client_fd; }
 		const std::string &getClientRequest() const { return ClientRequest; }
 		const std::string &getClientResponse() const { return ClientResponse; }

@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/06 15:31:03 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/28 17:22:35 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,18 @@ NewResponse::~NewResponse()
 		close(this->_file_fd);
 	}
 }
+void NewResponse::setStatusCode(int status)
+{
+	this->_statusCode = status;
+}
 
-SendStatus NewResponse::getSendStatus() const
+void NewResponse::assignErrorPage(int code)
+{
+	this->_body = getErrorPage(code);
+}
+
+SendStatus
+NewResponse::getSendStatus() const
 {
 	return this->_sendStatus;
 }
@@ -363,6 +373,7 @@ bool NewResponse::findMatchingLocation(const std::string &path)
 
 void NewResponse::sendResponseToClient()
 {
+	this->_response_headers["Set-Cookie"] = this->_request.get_cookies_response();
 	this->_response_headers["Content-Length"] = std::to_string(this->_body.size());
 	_response = _httpVersion + " " + std::to_string(_statusCode) + " " + this->getStatusMessage(_statusCode) + "\r\n";
 	_response += "Date: " + responseUtils::getCurrentDate() + "\r\n";
@@ -386,6 +397,7 @@ void NewResponse::sendResponseToClient()
 
 void NewResponse::sendOnlyHeaders()
 {
+	this->_response_headers["Set-Cookie"] = this->_request.get_cookies_response();
 	_response = _httpVersion + " " + std::to_string(_statusCode) + " " + this->getStatusMessage(_statusCode) + "\r\n";
 	_response += "Date: " + responseUtils::getCurrentDate() + "\r\n";
 	for (std::map<std::string, std::string>::iterator it = _response_headers.begin(); it != _response_headers.end(); ++it)
@@ -463,24 +475,44 @@ void NewResponse::handleGetRequest()
 		sendResponseToClient();
 		return;
 	}
-	std::string normalizedPath = normalizePath(_request.getPath());
-	std::string locationName = _matchedLocation.getName();
-	std::string relativePath = normalizedPath.substr(locationName.size());
-	if (!relativePath.empty() && relativePath[0] == '/')
-		relativePath = relativePath.substr(1);
-	std::string fullPath = joinPath(_matchedLocation.getRoot(), relativePath);
-	if (isDirectory(fullPath))
-		return handleDirectoryRequest(fullPath);
-	else if (fileExists(fullPath))
-		return prepareFileResponse(fullPath);
+	if (_request.is_cgi())
+	{
+		if (this->_statusCode >= 200 && this->_statusCode <= 308)
+		{
+			this->_body = _request.get_cgi_output();
+			// need to get the content  from CGI
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+		}
+		else
+		{
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+		}
+		return;
+	}
 	else
 	{
-		std::cout << "File not found for path: " << fullPath << std::endl;
-		this->_statusCode = 404;
-		this->_body = getErrorPage(this->_statusCode);
-		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-		sendResponseToClient();
-		return;
+		std::string normalizedPath = normalizePath(_request.getPath());
+		std::string locationName = _matchedLocation.getName();
+		std::string relativePath = normalizedPath.substr(locationName.size());
+		if (!relativePath.empty() && relativePath[0] == '/')
+			relativePath = relativePath.substr(1);
+		std::string fullPath = joinPath(_matchedLocation.getRoot(), relativePath);
+		if (isDirectory(fullPath))
+			return handleDirectoryRequest(fullPath);
+		else if (fileExists(fullPath))
+			return prepareFileResponse(fullPath);
+		else
+		{
+			std::cout << "File not found for path: " << fullPath << std::endl;
+			this->_statusCode = 404;
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+			return;
+		}
 	}
 }
 
@@ -511,28 +543,48 @@ void NewResponse::handlePostRequest()
 		sendResponseToClient();
 		return;
 	}
-	std::string filename = _request.getHeaders()["X-Filename"];
-	if (filename.empty())
-		filename = "upload.txt";
-	std::string uploadPath = joinPath(_matchedLocation.getRoot(), filename);
-	std::ofstream out(uploadPath.c_str(), std::ios::binary);
 
-	if (!out.is_open())
+	if (_request.is_cgi())
 	{
-		this->_statusCode = 500;
-		this->_body = getErrorPage(this->_statusCode);
+		if (this->_statusCode >= 200 && this->_statusCode <= 308)
+		{
+			this->_body = _request.get_cgi_output();
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+		}
+		else
+		{
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+		}
+		return;
+	}
+	else
+	{
+		std::string filename = _request.getHeaders()["X-Filename"];
+		if (filename.empty())
+			filename = "upload.txt";
+		std::string uploadPath = joinPath(_matchedLocation.getRoot(), filename);
+		std::ofstream out(uploadPath.c_str(), std::ios::binary);
+
+		if (!out.is_open())
+		{
+			this->_statusCode = 500;
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+			return;
+		}
+		out << _request.getBody();
+		out.close();
+
+		this->_statusCode = 201;
+		this->_body = "<html><body><h1>File uploaded successfully</h1></body></html>";
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
 	}
-	out << _request.getBody();
-	out.close();
-
-	this->_statusCode = 201;
-	this->_body = "<html><body><h1>File uploaded successfully</h1></body></html>";
-	this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-	sendResponseToClient();
-	return;
 }
 
 void NewResponse::handleDeleteRequest()
@@ -568,59 +620,78 @@ void NewResponse::handleDeleteRequest()
 		return;
 	}
 
-	std::string normalizedPath = normalizePath(_request.getPath());
-	std::string locationName = _matchedLocation.getName();
-	std::string relativePath = normalizedPath.substr(locationName.size());
-	if (!relativePath.empty() && relativePath[0] == '/')
-		relativePath = relativePath.substr(1);
-	std::string fullPath = joinPath(_matchedLocation.getRoot(), relativePath);
-
-	if (!fileExists(fullPath))
+	if (_request.is_cgi())
 	{
-		std::cout << "File not found for deletion: " << fullPath << std::endl;
-		this->_statusCode = 404;
-		this->_body = getErrorPage(this->_statusCode);
-		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-		sendResponseToClient();
-		return;
-	}
-
-	if (isDirectory(fullPath))
-	{
-		std::cout << "Cannot delete directory: " << fullPath << std::endl;
-		this->_statusCode = 403;
-		this->_body = getErrorPage(this->_statusCode);
-		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-		sendResponseToClient();
-		return;
-	}
-
-	if (access(fullPath.c_str(), W_OK) != 0)
-	{
-		std::cout << "No write permission for file: " << fullPath << " - " << strerror(errno) << std::endl;
-		this->_statusCode = 403;
-		this->_body = getErrorPage(this->_statusCode);
-		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-		sendResponseToClient();
-		return;
-	}
-	if (remove(fullPath.c_str()) == 0)
-	{
-		std::cout << "Successfully deleted file: " << fullPath << std::endl;
-		this->_statusCode = 204;
-		this->_body = "";
-		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-		sendResponseToClient();
+		if (this->_statusCode >= 200 && this->_statusCode <= 308)
+		{
+			this->_body = _request.get_cgi_output();
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+		}
+		else
+		{
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+		}
 		return;
 	}
 	else
 	{
-		std::cout << "Failed to delete file: " << fullPath << " - " << strerror(errno) << std::endl;
-		this->_statusCode = 500;
-		this->_body = getErrorPage(this->_statusCode);
-		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-		sendResponseToClient();
-		return;
+		std::string normalizedPath = normalizePath(_request.getPath());
+		std::string locationName = _matchedLocation.getName();
+		std::string relativePath = normalizedPath.substr(locationName.size());
+		if (!relativePath.empty() && relativePath[0] == '/')
+			relativePath = relativePath.substr(1);
+		std::string fullPath = joinPath(_matchedLocation.getRoot(), relativePath);
+
+		if (!fileExists(fullPath))
+		{
+			std::cout << "File not found for deletion: " << fullPath << std::endl;
+			this->_statusCode = 404;
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+			return;
+		}
+
+		if (isDirectory(fullPath))
+		{
+			std::cout << "Cannot delete directory: " << fullPath << std::endl;
+			this->_statusCode = 403;
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+			return;
+		}
+
+		if (access(fullPath.c_str(), W_OK) != 0)
+		{
+			std::cout << "No write permission for file: " << fullPath << " - " << strerror(errno) << std::endl;
+			this->_statusCode = 403;
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+			return;
+		}
+		if (remove(fullPath.c_str()) == 0)
+		{
+			std::cout << "Successfully deleted file: " << fullPath << std::endl;
+			this->_statusCode = 204;
+			this->_body = "";
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+			return;
+		}
+		else
+		{
+			std::cout << "Failed to delete file: " << fullPath << " - " << strerror(errno) << std::endl;
+			this->_statusCode = 500;
+			this->_body = getErrorPage(this->_statusCode);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+			return;
+		}
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 12:59:27 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/06 15:34:49 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/27 16:56:36 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,6 @@ private:
 	std::string getCreatedResponseBody();
 
 	// HTTP request handlers
-	void sendResponseToClient();
 	void sendOnlyHeaders();
 	void handleGetRequest();
 	void handlePostRequest();
@@ -101,6 +100,11 @@ public:
 	void setClientFd(int clientFd);
 	void setRequest(ParssedRequest &request);
 	void setServerConfig(ServerConfig &config);
+	
+	// call these 
+	void setStatusCode(int code);
+	void assignErrorPage(int code);
+	void sendResponseToClient();
 };
 
 #endif
