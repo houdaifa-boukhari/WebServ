@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 21:19:37 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/28 17:09:52 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/29 12:15:51 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ class Connection
 		void setParsedRequest(const ParssedRequest &parsed) { ParseRequest = parsed; }
 		void updateLastActivity() { lastActivity = time(NULL); }
 
-
+		bool RequestIsComplete(const std::string &request);
 		// Response related methods
 	void buildResponse(int clientFd, ParssedRequest &request, ServerConfig &config);
 	SendStatus getSendStatus() const;

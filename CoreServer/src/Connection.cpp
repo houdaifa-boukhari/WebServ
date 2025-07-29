@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/05 17:36:35 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/29 12:24:35 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,13 +58,14 @@ void Server::handleNewConnection(int SvFd)
 	_poll_fds.push_back(pfd);
 
 	_connections[ClientFd] = newConnecion;
-	
 }
 
-void print_map(const std::map<std::string, std::string>& m) {
-    for (std::map<std::string, std::string>::const_iterator it = m.begin(); it != m.end(); ++it) {
-        std::cout << it->first << " = " << it->second << std::endl;
-    }
+void print_map(const std::map<std::string, std::string> &m)
+{
+	for (std::map<std::string, std::string>::const_iterator it = m.begin(); it != m.end(); ++it)
+	{
+		std::cout << it->first << " = " << it->second << std::endl;
+	}
 }
 
 void Server::handleClientData(int ClientFd)
@@ -84,7 +85,7 @@ void Server::handleClientData(int ClientFd)
 		{
 			std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 					  << "Client " << ClientFd << " disconnected gracefully" << WHIET << std::endl;
-		}			
+		}
 		else
 		{
 			std::cout << YELLOW << currentTime() << RED << " [ERROR] "
@@ -101,7 +102,7 @@ void Server::handleClientData(int ClientFd)
 	// 		  << "Received data from client ------ \n\n"
 	// 		  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
 
-	if (RequestIsComplete(_connections[ClientFd].getClientRequest()))
+	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequest()))
 	{
 		_connections[ClientFd].setIsComplete(true);
 
@@ -117,14 +118,20 @@ void Server::handleClientData(int ClientFd)
 			{
 				char **env = request.get_env();
 				request.assign_cgi_output(execute_cgi(request.get_cgi_path(), env));
-				std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
+				std::cout << GREEN << "output_cgi : " << std::endl
+						  << request.get_cgi_output() << WHIET << std::endl;
 				free_envp(env);
-			}else 
+			}
+			else
 				std::cout << "not a correct cgi path" << std::endl;
 		}
 		else
 			std::cout << "normal request" << std::endl;
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
+		// std::cout << request.getBody() << std::endl;
+		// print_map(request.getHeaders());
+		// std::cout << RED << "			------------------------------			" << WHIET << std::endl;
+
 		if (request.get_cookie_avai())
 		{
 			// maybe send only the ones that aren't ava
@@ -140,6 +147,7 @@ void Server::handleClientData(int ClientFd)
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		// std::cout << confg.getHost() << ":" << std::endl;
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
+
 		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 		//		<< "Request Is complete" << WHIET << std::endl;
 		// std::cout << RED << "			------------------------------------			" << std::endl;
@@ -148,7 +156,6 @@ void Server::handleClientData(int ClientFd)
 		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 				  << "Request not complete yet" << WHIET << std::endl;
 }
-
 
 SendStatus Connection::getSendStatus() const
 {

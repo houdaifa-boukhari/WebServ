@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/28 17:22:35 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/29 11:50:21 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -479,6 +479,16 @@ void NewResponse::handleGetRequest()
 	{
 		if (this->_statusCode >= 200 && this->_statusCode <= 308)
 		{
+			// if (send(this->_clientFd, this->_body.c_str(), this->_body.size(), 0) < 0)
+			// {
+			// 	perror("send");
+			// 	this->_sendStatus = SEND_ERROR;
+			// 	return;
+			// }
+			// else
+			// {
+			// 	this->_sendStatus = SEND_COMPLETED;
+			// }
 			this->_body = _request.get_cgi_output();
 			// need to get the content  from CGI
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";

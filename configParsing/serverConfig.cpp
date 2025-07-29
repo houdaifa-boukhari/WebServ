@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 23:29:35 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/05 17:42:00 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/29 12:21:58 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,10 +98,6 @@ size_t ServerConfig::parseBodySizeToBytes(const std::string &sizeStr)
 		multiplier = 1024 * 1024 * 1024;
 	else
 		throw std::invalid_argument("Invalid body size suffix: " + suffix);
-
-	// if (number > (LLONG_MAX / multiplier))
-	// 	throw std::overflow_error("Body size too large");
-
 	return static_cast<size_t>(number * multiplier);
 }
 
