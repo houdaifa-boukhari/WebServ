@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverConfiguration.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:42:31 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 20:49:09 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/29 13:32:36 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 #include <vector>
 #include "serverConfig.hpp"
 
-class         ServerConfiguration
+class ServerConfiguration
 {
 private:
 	std::vector<ServerConfig> _servers;
@@ -36,7 +36,7 @@ public:
 	ServerConfiguration();
 	~ServerConfiguration();
 	void addServer(ServerConfig server);
-	std::vector<ServerConfig> getServers();
+	std::vector<ServerConfig> &getServers();
 	void printConfig();
 };
 #endif

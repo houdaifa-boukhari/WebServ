@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/29 10:54:21 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/30 18:52:32 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,9 +116,9 @@ bool FileParser::checkFileExistence()
 	return true;
 }
 
-ServerConfiguration FileParser::getServerConfiguration()
+const ServerConfiguration &FileParser::getServerConfiguration() const
 {
-	return this->_serverConfiguration;
+	return _serverConfiguration;
 }
 
 bool FileParser::checkBrackets()

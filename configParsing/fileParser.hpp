@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:29:26 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/29 10:49:11 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/30 18:52:38 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ public:
 	FileParser(int argc, char **argv);
 	void start();
 	void parseFile();
-	ServerConfiguration getServerConfiguration();
+	const ServerConfiguration &getServerConfiguration() const;
 	class WrongExtentionException : public std::exception
 	{
 		virtual const char *what() const throw();

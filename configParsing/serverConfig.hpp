@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:40:51 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/05 17:42:11 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/29 13:27:48 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,14 +56,14 @@ public:
 	void setMaxBodySize(std::string maxBodySize);
 	void addErrorPage(std::string key, std::string value);
 	void addLocation(LocationConfig location);
-	std::vector<int> getPorts();
-	std::string getHost();
-	std::string getServerName();
-	std::string getMaxBodySize();
-	size_t getMaxBodySizeBytes();
-	std::string getErrorPage(std::string key);
+	std::vector<int> getPorts() const;
+	std::string getHost() const;
+	std::string getServerName() const;
+	std::string getMaxBodySize() const;
+	size_t getMaxBodySizeBytes() const;
+	std::string getErrorPage(std::string key) const;
 	const std::map<std::string, std::string> &getErrorPages() const;
-	std::vector<LocationConfig> getLocations();
+	std::vector<LocationConfig> getLocations() const;
 	void printServer();
 };
 
