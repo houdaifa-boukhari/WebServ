@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/29 12:34:27 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/31 12:37:15 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,6 @@ bool Connection::RequestIsComplete(const std::string &request)
 	size_t pos, start, end, len, body_start, body_size;
 	std::string header, contentLengthStr;
 
-	std::cout << "size File" << this->config.getMaxBodySizeBytes() << std::endl;
-	// Check if headers are complete
 	pos = request.find("\r\n\r\n");
 	if (pos == std::string::npos)
 	{
@@ -61,8 +59,10 @@ bool Connection::RequestIsComplete(const std::string &request)
 	header = request.substr(0, line_end);
 
 	if (header.find("GET") == 0 || header.find("DELETE") == 0)
+	{
 		return (true);
-	if (header.find("POST") == 0)
+	}
+	else if (header.find("POST") == 0)
 	{
 		if (request.find("Transfer-Encoding: chunked") != std::string::npos)
 			return (chunkedRequest(request));
@@ -80,12 +80,10 @@ bool Connection::RequestIsComplete(const std::string &request)
 		std::cout << "len is " << len << "\n";
 		if (len > this->config.getMaxBodySizeBytes())
 		{
-			ParssedRequest req = ParssedRequest();
-			NewResponse res = NewResponse(Client_fd, config, req);
-			res.setStatusCode(413);
-			res.assignErrorPage(413);
-			res.sendResponseToClient();
-			// exit(0);
+			std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
+					  << "Request is larger than defined max body size  " << WHIET << std::endl;
+			NewResponse::sendSimpleErrorResponse(Client_fd, 413, config);
+			return false;
 		}
 		// Body starts right after \r\n\r\n
 		body_start = request.find("\r\n\r\n") + 4;
@@ -94,49 +92,21 @@ bool Connection::RequestIsComplete(const std::string &request)
 			return (false);
 		else if (body_size > len)
 		{
-			// Errror: Body size is larger than Content-Length (youssef)
-			ParssedRequest req = ParssedRequest();
-			NewResponse res = NewResponse(Client_fd, config, req);
-			res.setStatusCode(413);
-			res.assignErrorPage(413);
-			res.sendResponseToClient();
+			NewResponse::sendSimpleErrorResponse(Client_fd, 413, config);
 			std::cerr
 				<< YELLOW << currentTime() << RED << " [ERROR] "
 				<< "Body size is larger than Content-Length From Client" << WHIET << std::endl;
 			return (false);
 		}
-
 		return (true);
 	}
-	// Error Unknown method
-	std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
-			  << "Unknown method From Client" << WHIET << std::endl;
-	return (false);
-}
-
-void Server::generateResponse(int ClientFd)
-{
-	std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
-			  << "Generating Response For Client " << ClientFd << WHIET << std::endl;
-	std::string exampleHtml = "<html><body><h1> <center> Welcome to 1337 | testing Webserv </center></h1></body></html>";
-	std::string response = "HTTP/1.1 200 OK\r\n"
-						   "Content-Type: text/html\r\n"
-						   "Content-Length: " +
-						   std::to_string(exampleHtml.size()) + "\r\n"
-																"Access-Control-Allow-Origin: *\r\n"
-																"Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n"
-																"Access-Control-Allow-Headers: Content-Type, Authorization\r\n"
-																"\r\n" +
-						   exampleHtml;
-	if (send(ClientFd, response.c_str(), response.size(), 0) < 0)
+	else
 	{
+		NewResponse::sendSimpleErrorResponse(Client_fd, 405, config);
 		std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
-				  << "Failed to send response to client " << ClientFd << WHIET << std::endl;
-		closeConnection(ClientFd);
-		return;
+				  << "Unknown method From Client" << WHIET << std::endl;
 	}
-	std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
-			  << "Response sent to client " << ClientFd << WHIET << std::endl;
+	return (false);
 }
 
 void Server::checkTimeouts()

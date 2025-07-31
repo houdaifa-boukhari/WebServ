@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/29 12:24:35 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/31 16:47:00 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,10 +135,10 @@ void Server::handleClientData(int ClientFd)
 		if (request.get_cookie_avai())
 		{
 			// maybe send only the ones that aren't ava
-			std::cout << "the cookie bg-color has been send in the req" << std::endl;
-			request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/WebServ/cookie_set.py", NULL));
-			request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/WebServ/session_set.py", NULL));
-			std::cout << request.get_cookies_response() << std::endl;
+			// std::cout << "the cookie bg-color has been send in the req" << std::endl;
+			// request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/WebServ/cookie_set.py", NULL));
+			// request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/WebServ/session_set.py", NULL));
+			// std::cout << request.get_cookies_response() << std::endl;
 		}
 		std::cout << "print cookies" << std::endl;
 		print_map(request.get_cookies());
@@ -164,7 +164,6 @@ SendStatus Connection::getSendStatus() const
 
 void Connection::generateResponse()
 {
-	std::cout << "starting  generateResponse" << std::endl;
 	this->_response.generateResponse();
 }
 

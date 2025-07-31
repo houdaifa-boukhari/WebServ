@@ -3,99 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Status</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>File Upload - Webserv</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* * Base styles for the page
-         * A gradient background is used for a modern look.
-         * The content is centered using Flexbox.
-        */
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #fff;
+            font-family: 'Inter', sans-serif;
         }
-
-        /* * Main container for the content
-         * It has a semi-transparent background with a backdrop filter for a "frosted glass" effect.
-         * This creates a nice depth effect against the gradient background.
-        */
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 3rem 4rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 90%;
-            width: 600px;
+        /* Basic styling for the file input */
+        input[type="file"]::file-selector-button {
+            background-color: #0e7490; /* cyan-700 */
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-
-        /* * Success Icon Styling
-         * An SVG is used for the checkmark icon for scalability and crispness.
-         * A subtle animation is added to draw the user's attention.
-        */
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            animation: pop-in 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
-        }
-
-        @keyframes pop-in {
-            0% {
-                transform: scale(0);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* * Main heading style
-         * A large, bold font is used to make the message prominent.
-         * Text shadow adds depth and improves readability.
-        */
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin: 0;
-            line-height: 1.2;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-        }
-
-        /* Responsive adjustments for smaller screens */
-        @media (max-width: 600px) {
-            .container {
-                padding: 2rem 1.5rem;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-            .success-icon {
-                width: 60px;
-                height: 60px;
-            }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #155e75; /* cyan-800 */
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <!-- Success Icon SVG -->
-        <div class="success-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #4ade80;">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-        </div>
-        <h1>This file has been uploaded and retrieved back</h1>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <div class="max-w-xl w-full mx-auto p-8 rounded-lg shadow-2xl bg-gray-800">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-cyan-400 mb-2">File Upload</h1>
+            <p class="text-lg text-gray-400">Test the POST method.</p>
+        </header>
+
+        <main>
+            <!-- The action attribute should point to the location your server is configured to handle uploads -->
+            <form action="/uploads" method="post" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label for="file-upload" class="block mb-2 text-sm font-medium text-gray-300">Choose a file to upload:</label>
+                    <input type="file" name="fileUpload" id="file-upload" class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700 cursor-pointer">
+                </div>
+                
+                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-cyan-500">
+                    Upload File
+                </button>
+            </form>
+        </main>
+
+        <footer class="mt-8 text-center">
+            <a href="/" class="text-cyan-400 hover:text-cyan-300 transition duration-300">&larr; Back to Home</a>
+        </footer>
     </div>
 </body>
 </html>

@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/29 13:35:36 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/31 17:11:01 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ bool ConfigFileValidator::validateAllowedMethods(const LocationConfig &location)
 
 bool ConfigFileValidator::validateLocation(const LocationConfig &location) const
 {
-	if (location.getRoot().empty())
+	if (!location.isRedirection() && location.getRoot().empty())
 		return false;
 	if (!validateAllowedMethods(location))
 		return false;

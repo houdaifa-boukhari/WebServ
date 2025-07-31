@@ -6,26 +6,11 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/29 11:50:21 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/31 17:03:04 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "NewResponse.hpp"
-
-void NewResponse::setClientFd(int clientFd)
-{
-	this->_clientFd = clientFd;
-}
-
-void NewResponse::setRequest(ParssedRequest &request)
-{
-	this->_request = request;
-}
-
-void NewResponse::setServerConfig(ServerConfig &config)
-{
-	this->_config = config;
-}
 
 NewResponse::NewResponse()
 {
@@ -70,14 +55,39 @@ NewResponse::~NewResponse()
 		close(this->_file_fd);
 	}
 }
-void NewResponse::setStatusCode(int status)
+
+void NewResponse::sendSimpleErrorResponse(int clientFd, int statusCode, const ServerConfig _config)
 {
-	this->_statusCode = status;
+	std::string statusMessage = getStatusMessage(statusCode);
+	std::string body = getErrorPage(statusCode, _config);
+	std::string response =
+		"HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n"
+																		 "Content-Type: text/html; charset=UTF-8\r\n"
+																		 "Content-Length: " +
+		std::to_string(body.size()) + "\r\n"
+									  "Connection: close\r\n"
+									  "\r\n" +
+		body;
+
+	if (send(clientFd, response.c_str(), response.size(), 0) < 0)
+	{
+		std::cerr << "Unable to send response to client : " << clientFd << std::endl;
+	}
 }
 
-void NewResponse::assignErrorPage(int code)
+void NewResponse::setClientFd(int clientFd)
 {
-	this->_body = getErrorPage(code);
+	this->_clientFd = clientFd;
+}
+
+void NewResponse::setRequest(ParssedRequest &request)
+{
+	this->_request = request;
+}
+
+void NewResponse::setServerConfig(ServerConfig &config)
+{
+	this->_config = config;
 }
 
 SendStatus
@@ -252,7 +262,7 @@ std::string NewResponse::getCreatedResponseBody()
 	return DefaultResponseBody;
 }
 std::string
-NewResponse::getErrorPage(int statusCode)
+NewResponse::getErrorPage(int statusCode, ServerConfig _config)
 {
 	std::string errorTitle = std::to_string(statusCode) + " " + getStatusMessage(statusCode);
 	std::string errorBody =
@@ -385,7 +395,6 @@ void NewResponse::sendResponseToClient()
 	_response += _body;
 	if (send(this->_clientFd, _response.c_str(), _response.size(), 0) < 0)
 	{
-		perror("send");
 		this->_sendStatus = SEND_ERROR;
 		return;
 	}
@@ -407,7 +416,6 @@ void NewResponse::sendOnlyHeaders()
 	_response += "\r\n";
 	if (send(this->_clientFd, _response.c_str(), _response.size(), 0) < 0)
 	{
-		perror("sendOnlyHeaders failed");
 		this->_sendStatus = SEND_ERROR;
 		return;
 	}
@@ -418,7 +426,6 @@ void NewResponse::sendOnlyHeaders()
 
 void NewResponse::generateResponse()
 {
-	std::cout << "Generating response for client fd: " << this->_clientFd << " Method : " << _request.getMethod() << std::endl;
 	if (_request.getMethod() == "GET")
 		return handleGetRequest();
 	else if (_request.getMethod() == "POST")
@@ -428,7 +435,7 @@ void NewResponse::generateResponse()
 	else
 	{
 		this->_statusCode = 405;
-		this->_response = getErrorPage(this->_statusCode);
+		this->_response = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -437,12 +444,12 @@ void NewResponse::generateResponse()
 
 void NewResponse::handleGetRequest()
 {
-	std::cout << "starting GET request handling" << std::endl;
+	std::cout << "request path : " << _request.getPath() << std::endl;
 	if (!findMatchingLocation(_request.getPath()))
 	{
 		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;
 		this->_statusCode = 404;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -451,7 +458,7 @@ void NewResponse::handleGetRequest()
 	{
 		std::cout << "Method not allowed for path: " << _request.getPath() << std::endl;
 		this->_statusCode = 405;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -460,7 +467,7 @@ void NewResponse::handleGetRequest()
 	{
 		std::cout << "Root is empty for location: " << _matchedLocation.getName() << std::endl;
 		this->_statusCode = 500;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -470,7 +477,7 @@ void NewResponse::handleGetRequest()
 		std::cout << "Redirection found for path: " << _request.getPath() << std::endl;
 		this->_statusCode = _matchedLocation.getRedirectionCode();
 		this->_response_headers["Location"] = _matchedLocation.getRedirectionTo();
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -481,7 +488,7 @@ void NewResponse::handleGetRequest()
 		{
 			// if (send(this->_clientFd, this->_body.c_str(), this->_body.size(), 0) < 0)
 			// {
-			// 	perror("send");
+
 			// 	this->_sendStatus = SEND_ERROR;
 			// 	return;
 			// }
@@ -496,7 +503,7 @@ void NewResponse::handleGetRequest()
 		}
 		else
 		{
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 		}
@@ -518,7 +525,7 @@ void NewResponse::handleGetRequest()
 		{
 			std::cout << "File not found for path: " << fullPath << std::endl;
 			this->_statusCode = 404;
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 			return;
@@ -532,7 +539,7 @@ void NewResponse::handlePostRequest()
 	if (!findMatchingLocation(_request.getPath()))
 	{
 		this->_statusCode = 404;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -540,7 +547,7 @@ void NewResponse::handlePostRequest()
 	if (!isMethodAllowed(_request.getMethod(), _matchedLocation))
 	{
 		this->_statusCode = 405;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -548,7 +555,7 @@ void NewResponse::handlePostRequest()
 	if (_matchedLocation.getRoot().empty())
 	{
 		this->_statusCode = 500;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -564,7 +571,7 @@ void NewResponse::handlePostRequest()
 		}
 		else
 		{
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 		}
@@ -581,7 +588,7 @@ void NewResponse::handlePostRequest()
 		if (!out.is_open())
 		{
 			this->_statusCode = 500;
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 			return;
@@ -590,7 +597,28 @@ void NewResponse::handlePostRequest()
 		out.close();
 
 		this->_statusCode = 201;
-		this->_body = "<html><body><h1>File uploaded successfully</h1></body></html>";
+		this->_body =
+			"<!DOCTYPE html>\n"
+			"<html lang=\"en\">\n"
+			"<head>\n"
+			"  <meta charset=\"UTF-8\">\n"
+			"  <title>Upload Successful</title>\n"
+			"  <style>\n"
+			"    body { font-family: Arial, sans-serif; background: #f9f9f9; text-align: center; margin-top: 60px; }\n"
+			"    .success { color: #388e3c; font-size: 2em; margin-bottom: 20px; }\n"
+			"    .info { color: #555; }\n"
+			"    a { color: #1976d2; text-decoration: none; }\n"
+			"    a:hover { text-decoration: underline; }\n"
+			"  </style>\n"
+			"</head>\n"
+			"<body>\n"
+			"  <div class=\"success\">&#10003; File uploaded successfully!</div>\n"
+			"  <div class=\"info\">Your file has been received by the server.</div>\n"
+			"  <p><a href=\"/\">Return to Home</a></p>\n"
+			"  <hr>\n"
+			"  <p><em>WebServ/1.0</em></p>\n"
+			"</body>\n"
+			"</html>";
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -605,7 +633,7 @@ void NewResponse::handleDeleteRequest()
 	{
 		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;
 		this->_statusCode = 404;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -614,7 +642,7 @@ void NewResponse::handleDeleteRequest()
 	{
 		std::cout << "Method not allowed for path: " << _request.getPath() << std::endl;
 		this->_statusCode = 405;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -624,7 +652,7 @@ void NewResponse::handleDeleteRequest()
 	{
 		std::cout << "Root is empty for location: " << _matchedLocation.getName() << std::endl;
 		this->_statusCode = 500;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -640,7 +668,7 @@ void NewResponse::handleDeleteRequest()
 		}
 		else
 		{
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 		}
@@ -659,7 +687,7 @@ void NewResponse::handleDeleteRequest()
 		{
 			std::cout << "File not found for deletion: " << fullPath << std::endl;
 			this->_statusCode = 404;
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 			return;
@@ -669,7 +697,7 @@ void NewResponse::handleDeleteRequest()
 		{
 			std::cout << "Cannot delete directory: " << fullPath << std::endl;
 			this->_statusCode = 403;
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 			return;
@@ -679,7 +707,7 @@ void NewResponse::handleDeleteRequest()
 		{
 			std::cout << "No write permission for file: " << fullPath << " - " << strerror(errno) << std::endl;
 			this->_statusCode = 403;
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 			return;
@@ -697,7 +725,7 @@ void NewResponse::handleDeleteRequest()
 		{
 			std::cout << "Failed to delete file: " << fullPath << " - " << strerror(errno) << std::endl;
 			this->_statusCode = 500;
-			this->_body = getErrorPage(this->_statusCode);
+			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 			return;
@@ -722,7 +750,7 @@ void NewResponse::handleDirectoryRequest(std::string &dirPath)
 	else
 	{
 		this->_statusCode = 403;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -771,7 +799,7 @@ void NewResponse::prepareFileResponse(const std::string &filePath)
 	if (this->_file_fd < 0)
 	{
 		this->_statusCode = 403;
-		this->_body = getErrorPage(this->_statusCode);
+		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 		sendResponseToClient();
 		return;
@@ -832,7 +860,6 @@ void NewResponse::sendNextChunk()
 	if (bytes_read < 0)
 	{
 		std::cout << "error in read " << std::endl;
-		perror("read failed");
 		close(this->_file_fd);
 		this->_file_fd = -1;
 		this->_sendStatus = SEND_ERROR;
@@ -845,7 +872,7 @@ void NewResponse::sendNextChunk()
 		ssize_t sent = send(this->_clientFd, last_chunk, strlen(last_chunk), 0);
 		if (sent < 0)
 		{
-			perror("send last chunk failed");
+
 			this->_sendStatus = SEND_ERROR;
 		}
 		else
@@ -865,7 +892,6 @@ void NewResponse::sendNextChunk()
 	ssize_t bytes_sent_now = send(this->_clientFd, chunk.c_str(), chunk.size(), 0);
 	if (bytes_sent_now < 0)
 	{
-		perror("send chunk failed");
 		close(this->_file_fd);
 		this->_file_fd = -1;
 		this->_sendStatus = SEND_ERROR;
