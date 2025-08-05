@@ -10,7 +10,7 @@
 #include <vector>
 #include <sys/wait.h>
 #include <fcntl.h>
-
+#include <ctime>
 std::string trim(const std::string &str);
 void printMap(std::map<std::string, std::string> myMap);
 
@@ -33,6 +33,7 @@ private:
     std::string cgi_output;
     std::string cookies_response;
     std::map<std::string, std::map<std::string, std::string> > _sessions;
+    int status_code;
     bool cookie_avai;
     bool _cgi;
     std::string cgi_path;
@@ -72,10 +73,12 @@ public:
     void assign_params(std::string path);
     void printParams();
     std::map<std::string, std::string> getParams();
+    void set_status_code(int stts_cd){this->status_code = stts_cd;};
+    int get_status_code(){return (this->status_code);};
     char **get_env();
 };
-
-std::string execute_cgi(std::string file_path, char **env);
+std::string execute_cgi(ParssedRequest &request, std::string file_path, char **env);
+// std::string execute_cgi(std::string file_path, char **env);
 void free_envp(char **envp);
 
 #endif

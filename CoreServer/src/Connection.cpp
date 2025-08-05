@@ -116,11 +116,15 @@ void Server::handleClientData(int ClientFd)
 			if (request.path_exists())
 			{
 				char **env = request.get_env();
-				request.assign_cgi_output(execute_cgi(request.get_cgi_path(), env));
+				request.assign_cgi_output(execute_cgi(request, request.get_cgi_path(), env));
 				std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
+				// std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
 				free_envp(env);
-			}else 
+			}else
+			{
+				request.set_status_code(404);
 				std::cout << "not a correct cgi path" << std::endl;
+			}
 		}
 		else
 			std::cout << "normal request" << std::endl;
@@ -129,8 +133,8 @@ void Server::handleClientData(int ClientFd)
 		{
 			// maybe send only the ones that aren't ava
 			std::cout << "the cookie bg-color has been send in the req" << std::endl;
-			request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/WebServ/cookie_set.py", NULL));
-			request.assign_cookies_response(execute_cgi("/Users/aet-tale/Desktop/WebServ/session_set.py", NULL));
+			request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/cookie_set.py" , NULL));
+			request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/session_set.py" , NULL));
 			std::cout << request.get_cookies_response() << std::endl;
 		}
 		std::cout << "print cookies" << std::endl;

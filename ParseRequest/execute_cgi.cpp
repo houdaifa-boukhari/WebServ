@@ -43,11 +43,14 @@ char **return_envparams(std::map<std::string, std::string> params)
     return envp;
 }
 
-std::string execute_cgi(std::string file_path, char **env)
+unsigned int simple_random(unsigned int seed) {
+    return (1103515245 * seed + 12345) % 100000;
+}
+
+std::string execute_cgi(ParssedRequest &request, std::string file_path, char **env)
 {
     std::string c_path;
     std::string output;
-    // (void)env;
     if (is_suffix(file_path, ".py"))
     {
         c_path = "/usr/local/bin/python3.7";
@@ -66,52 +69,56 @@ std::string execute_cgi(std::string file_path, char **env)
         NULL
     };
 
+    std::clock_t clk = std::clock(); // processor clock ticks
+    unsigned int seed = static_cast<unsigned int>(clk);
 
-    std::string temp_filename = "/tmp/cgi_output_" +  std::to_string(time(NULL)) + "_";
-    std::string temp_outfilename = "/tmp/cgi_input" +  std::to_string(time(NULL)) + "_";
+    unsigned int unique_id = simple_random(seed);
+
+    std::ostringstream oss;
+    oss << clk << "_" << unique_id;
+
+    std::string timestamp = oss.str();
+    std::string temp_filename = "/tmp/cgi_output_" + timestamp;
+    std::string temp_inputfilename = "/tmp/cgi_input_" + timestamp;
+    int input_fd = open(temp_inputfilename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
+    int writing_in = write(input_fd, request.getBody().c_str(), request.getBody().length());
+    close(input_fd);
+    if (writing_in == -1)
+    {
+        request.set_status_code(500);
+        return "";
+    }
     int pid = fork();
     if (pid == 0)
     {
-        // child process
-        // change with
-        int output_fd = open(temp_filename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
-        if (output_fd == -1) {
-            std::cerr << "Failed to open output file" << std::endl;
+        int output_fd = open(temp_filename.c_str(), O_RDWR);
+        int new_input_fd = open(temp_inputfilename.c_str(), O_RDONLY);
+        if (output_fd == -1 || new_input_fd == -1)
             std::exit(1);
-        }
-        if (dup2(output_fd, 1) == -1 || dup2(output_fd, 2) == -1)
+        if (dup2(output_fd, 1) == -1 || dup2(output_fd, 2) == -1 || dup2(new_input_fd, 0) == -1)
         {
-            std::cerr << "Failed to dup output file" << std::endl;
             close(output_fd);
             std::exit(1);
         }
         close(output_fd);
+        close(new_input_fd);
         execve(c_path.c_str(), args, env);
-        write(2, "execve failed\n", 15);
-    }else
+        std::exit(127);
+    }else if (pid > 0)
     {
-        int output_fd = open(temp_filename.c_str(), O_RDWR | O_CREAT, 0600);
+        int output_fd = open(temp_filename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
         if (output_fd == -1)
         {
-            // std::cerr << "Failed to open output file" << std::endl;
-            return "Failed to open output file";
+            request.set_status_code(500);
+            return "";
         }
         int status;
         waitpid(pid, &status, 0);
-        // if (WIFEXITED(status)) {
-        //     int exit_code = WEXITSTATUS(status);
-        //     if (exit_code == 1) {
-        //         std::cerr << "Child exited with code 1 (open or dup2 failure)\n";
-        //     } else if (exit_code == 127) {
-        //         std::cerr << "execve failed in child\n";
-        //     } else if (exit_code != 0) {
-        //         std::cerr << "Child exited with error code: " << exit_code << std::endl;
-        //     }
-        // } else if (WIFSIGNALED(status)) {
-        //     std::cerr << "Child terminated by signal: " << WTERMSIG(status) << std::endl;
-        // } else {
-        //     std::cerr << "Unknown child termination\n";
-        // }
+        if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+            request.set_status_code(500);
+            close(output_fd);
+            return "";
+        }
         char buffer[128];
         int bytesRead;
         while ((bytesRead = read(output_fd, buffer, sizeof(buffer) - 1)) > 0)
@@ -119,9 +126,11 @@ std::string execute_cgi(std::string file_path, char **env)
             buffer[bytesRead] = '\0';
             output += buffer;
         }
-        if (output == "execve failed\n")
-            std::cout << "execve failedd" << std::endl;
         close(output_fd);
     }
+    else
+        request.set_status_code(500);
+    if (request.get_status_code() != 500)
+        request.set_status_code(200);
     return output;
 }
