@@ -129,16 +129,16 @@ void Server::handleClientData(int ClientFd)
 		else
 			std::cout << "normal request" << std::endl;
 		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		if (request.get_cookie_avai())
-		{
-			// maybe send only the ones that aren't ava
-			std::cout << "the cookie bg-color has been send in the req" << std::endl;
-			request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/cookie_set.py" , NULL));
-			request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/session_set.py" , NULL));
-			std::cout << request.get_cookies_response() << std::endl;
-		}
-		std::cout << "print cookies" << std::endl;
-		print_map(request.get_cookies());
+		// if (request.get_cookie_avai())
+		// {
+		// 	// maybe send only the ones that aren't ava
+		// 	std::cout << "the cookie bg-color has been send in the req" << std::endl;
+		// 	// request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/cookie_set.py" , NULL));
+		// 	// request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/session_set.py" , NULL));
+		// 	// std::cout << request.get_cookies_response() << std::endl;
+		// }
+		// std::cout << "print cookies" << std::endl;
+		// print_map(request.get_cookies());
 		// else no cookies should be sent
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
