@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 12:59:27 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/06 15:34:49 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/31 12:25:48 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,24 +55,24 @@ private:
 	// Private Function declarations
 
 	// Utility functions
-	bool fileExists(const std::string &filePath);
+	static bool fileExists(const std::string &filePath);
+	static std::string getFileContent(const std::string &filePath);
+	static std::string getStatusMessage(int code);
+	static std::string getErrorPage(int statusCode, ServerConfig _config);
 	bool isDirectory(const std::string &path);
 	bool isMethodAllowed(const std::string &method, LocationConfig &location);
 	bool findMatchingLocation(const std::string &path);
 
 	std::string getMimeType(const std::string &filePath);
-	std::string getStatusMessage(int code);
 	size_t getFileSize(const std::string &filePath);
-	std::string getFileContent(const std::string &filePath);
-	std::string getErrorPage(int statusCode);
 	std::string normalizePath(const std::string &path);
 	std::string joinPath(const std::string &root, const std::string &path);
 	void prepareFileResponse(const std::string &filePath);
 	std::string getCreatedResponseBody();
 
 	// HTTP request handlers
-	void sendResponseToClient();
 	void sendOnlyHeaders();
+	void sendResponseToClient();
 	void handleGetRequest();
 	void handlePostRequest();
 	void handleDeleteRequest();
@@ -101,6 +101,8 @@ public:
 	void setClientFd(int clientFd);
 	void setRequest(ParssedRequest &request);
 	void setServerConfig(ServerConfig &config);
+
+	static void sendSimpleErrorResponse(int clientFd, int statusCode, const ServerConfig _config);
 };
 
 #endif

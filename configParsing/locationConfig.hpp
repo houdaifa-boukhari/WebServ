@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   locationConfig.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:41:47 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 21:04:37 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/29 13:24:16 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,22 +50,22 @@ public:
 	void setRedirection(bool has_redirection, int redirection_code, std::string redirection_to);
 	void setCgi(bool has_cgi, std::string cgi_extension, std::string cgi_path);
 	void setUpload(bool has_upload, std::string upload_path);
-	std::string getName();
-	std::string getRoot();
-	std::vector<std::string> getIndex();
-	std::string getIndexPath();
-	bool getAutoIndex();
-	std::vector<std::string> getAllowedMethods();
-	bool isAutoIndex();
-	bool isRedirection();
-	int getRedirectionCode();
-	std::string getRedirectionTo();
-	bool isCgi();
-	std::string getCgiExtension();
-	std::string getCgiPath();
-	bool isUpload();
-	std::string getUploadPath();
-	void printLocation();
+	std::string getName() const;
+	std::string getRoot() const;
+	std::vector<std::string> getIndex() const;
+	std::string getIndexPath() const;
+	bool getAutoIndex() const;
+	std::vector<std::string> getAllowedMethods() const;
+	bool isAutoIndex() const;
+	bool isRedirection() const;
+	int getRedirectionCode() const;
+	std::string getRedirectionTo() const;
+	bool isCgi() const;
+	std::string getCgiExtension() const;
+	std::string getCgiPath() const;
+	bool isUpload() const;
+	std::string getUploadPath() const;
+	void printLocation() const;
 };
 
 #endif

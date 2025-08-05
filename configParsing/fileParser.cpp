@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/05 16:41:58 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/30 18:52:32 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,22 @@
 
 FileParser::FileParser(int argc, char **argv)
 {
-	if (argc != 2)
+	if (argc == 2)
+	{
+		_filename = argv[1];
+		_serverConfiguration = ServerConfiguration();
+		_is_default = false;
+	}
+	else if (argc == 1)
+	{
+		_filename = "";
+		_serverConfiguration = ServerConfiguration();
+		_is_default = true;
+	}
+	else
+	{
 		throw WrongFileException();
-	_filename = argv[1];
-	_serverConfiguration = ServerConfiguration();
+	}
 }
 
 bool FileParser::checkFileExtension()
@@ -35,14 +47,48 @@ bool FileParser::checkFileExtension()
 
 void FileParser::start()
 {
-	if (!this->checkFileExtension())
-		throw WrongExtentionException();
-	if (!this->checkFileExistence())
-		throw FileDoesNotExistException();
-	this->readConfigFile();
-	if (!this->checkBrackets() || !this->checkEndOfLine())
-		throw WrongFileFormatException();
-	this->parseFile();
+	if (_is_default)
+	{
+		createDefaultConfig();
+	}
+	else
+	{
+		if (!this->checkFileExtension())
+			throw WrongExtentionException();
+		if (!this->checkFileExistence())
+			throw FileDoesNotExistException();
+		this->readConfigFile();
+		if (!this->checkBrackets() || !this->checkEndOfLine())
+			throw WrongFileFormatException();
+		this->parseFile();
+	}
+}
+
+void FileParser::createDefaultConfig()
+{
+	ServerConfig defaultServer;
+
+	defaultServer.addPort(8080);
+	defaultServer.setHost("127.0.0.1");
+	defaultServer.setServerName("default_server");
+
+	defaultServer.setMaxBodySize("1M");
+
+	defaultServer.addErrorPage("404", "./pages/errors/404.html");
+	defaultServer.addErrorPage("500", "./pages/errors/500.html");
+
+	LocationConfig defaultLocation;
+	defaultLocation.setName("/");
+	defaultLocation.setRoot("./");
+	defaultLocation.setAutoIndex(false);
+	defaultLocation.addIndex("index.html");
+	defaultLocation.addAllowedMethod("GET");
+	defaultLocation.addAllowedMethod("POST");
+	defaultLocation.addAllowedMethod("DELETE");
+
+	defaultServer.addLocation(defaultLocation);
+
+	_serverConfiguration.addServer(defaultServer);
 }
 
 void FileParser::readConfigFile()
@@ -70,9 +116,9 @@ bool FileParser::checkFileExistence()
 	return true;
 }
 
-ServerConfiguration FileParser::getServerConfiguration()
+const ServerConfiguration &FileParser::getServerConfiguration() const
 {
-	return this->_serverConfiguration;
+	return _serverConfiguration;
 }
 
 bool FileParser::checkBrackets()

@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 23:29:35 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/05 17:42:00 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/29 13:27:42 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,10 +98,6 @@ size_t ServerConfig::parseBodySizeToBytes(const std::string &sizeStr)
 		multiplier = 1024 * 1024 * 1024;
 	else
 		throw std::invalid_argument("Invalid body size suffix: " + suffix);
-
-	// if (number > (LLONG_MAX / multiplier))
-	// 	throw std::overflow_error("Body size too large");
-
 	return static_cast<size_t>(number * multiplier);
 }
 
@@ -111,7 +107,7 @@ void ServerConfig::setMaxBodySize(std::string maxBodySize)
 	_max_Body_Size_Bytes = parseBodySizeToBytes(maxBodySize);
 }
 
-size_t ServerConfig::getMaxBodySizeBytes()
+size_t ServerConfig::getMaxBodySizeBytes() const
 {
 	return _max_Body_Size_Bytes;
 }
@@ -125,29 +121,29 @@ void ServerConfig::addLocation(LocationConfig location)
 	_locations.push_back(location);
 }
 
-std::vector<int> ServerConfig::getPorts()
+std::vector<int> ServerConfig::getPorts() const
 {
 	return _ports;
 }
 
-std::string ServerConfig::getHost()
+std::string ServerConfig::getHost() const
 {
 	return _host;
 }
 
-std::string ServerConfig::getServerName()
+std::string ServerConfig::getServerName() const
 {
 	return _serverName;
 }
 
-std::string ServerConfig::getMaxBodySize()
+std::string ServerConfig::getMaxBodySize() const
 {
 	return _max_Body_Size;
 }
 
-std::string ServerConfig::getErrorPage(std::string key)
+std::string ServerConfig::getErrorPage(std::string key) const
 {
-	std::map<std::string, std::string>::iterator it = _errorPages.find(key);
+	std::map<std::string, std::string>::const_iterator it = _errorPages.find(key);
 	if (it != _errorPages.end())
 		return it->second;
 	return "";
@@ -158,7 +154,7 @@ const std::map<std::string, std::string> &ServerConfig::getErrorPages() const
 	return _errorPages;
 }
 
-std::vector<LocationConfig> ServerConfig::getLocations()
+std::vector<LocationConfig> ServerConfig::getLocations() const
 {
 	return _locations;
 }

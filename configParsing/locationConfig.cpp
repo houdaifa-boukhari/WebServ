@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   locationConfig.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:42:15 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 21:04:20 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/29 13:25:28 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,84 +77,84 @@ void LocationConfig::setUpload(bool has_upload, std::string upload_path)
 	_upload_path = upload_path;
 }
 
-std::string LocationConfig::getName()
+std::string LocationConfig::getName() const
 {
 	return _name;
 }
 
-std::string LocationConfig::getRoot()
+std::string LocationConfig::getRoot() const
 {
 	return _root;
 }
 
-std::vector<std::string> LocationConfig::getIndex()
+std::vector<std::string> LocationConfig::getIndex() const
 {
 	return _index;
 }
 
-bool LocationConfig::getAutoIndex()
+bool LocationConfig::getAutoIndex() const
 {
 	return _autoIndex;
 }
 
-std::vector<std::string> LocationConfig::getAllowedMethods()
+std::vector<std::string> LocationConfig::getAllowedMethods() const
 {
 	return _allowedMethods;
 }
 
-bool LocationConfig::isAutoIndex()
+bool LocationConfig::isAutoIndex() const
 {
 	return _autoIndex;
 }
 
-bool LocationConfig::isRedirection()
+bool LocationConfig::isRedirection() const
 {
 	return _has_redirection;
 }
 
-int LocationConfig::getRedirectionCode()
+int LocationConfig::getRedirectionCode() const
 {
 	return _redirection_code;
 }
 
-std::string LocationConfig::getRedirectionTo()
+std::string LocationConfig::getRedirectionTo() const
 {
 	return _redirection_to;
 }
 
-bool LocationConfig::isCgi()
+bool LocationConfig::isCgi() const
 {
 	return _has_cgi;
 }
 
-std::string LocationConfig::getCgiExtension()
+std::string LocationConfig::getCgiExtension() const
 {
 	return _cgi_extension;
 }
 
-std::string LocationConfig::getCgiPath()
+std::string LocationConfig::getCgiPath() const
 {
 	return _cgi_path;
 }
 
-bool LocationConfig::isUpload()
+bool LocationConfig::isUpload() const
 {
 	return _has_upload;
 }
 
-std::string LocationConfig::getUploadPath()
+std::string LocationConfig::getUploadPath() const
 {
 	return _upload_path;
 }
 
-std::string LocationConfig::getIndexPath()
+std::string LocationConfig::getIndexPath() const
 {
 	if (_index.empty())
 		return "";
 	return "/" + _index[0];
 }
 
-void LocationConfig::printLocation()
+void LocationConfig::printLocation() const
 {
 	std::cout << "Location Name: " << _name << std::endl;
 	std::cout << "Root: " << _root << std::endl;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serverConfiguration.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:42:53 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/02 20:57:10 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/07/29 13:32:22 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void ServerConfiguration::addServer(ServerConfig server)
 	_servers.push_back(server);
 }
 
-std::vector<ServerConfig> ServerConfiguration::getServers()
+std::vector<ServerConfig> &ServerConfiguration::getServers()
 {
 	return _servers;
 }

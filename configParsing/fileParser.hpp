@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:29:26 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/05/02 22:22:37 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/07/30 18:52:38 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 class FileParser
 {
 private:
+	bool _is_default;
 	std::string _filename;
 	std::ifstream _configFile;
 	std::vector<std::string> _configLines;
@@ -35,12 +36,13 @@ private:
 	std::vector<std::string>::iterator handleServerBlock(std::vector<std::string>::iterator &it);
 	void parseServerDirective(const std::string &directive, ServerConfig &serverConfig);
 	void parseLocationDirective(const std::string &directive, LocationConfig &locationConfig);
+	void createDefaultConfig();
 
 public:
 	FileParser(int argc, char **argv);
 	void start();
 	void parseFile();
-	ServerConfiguration getServerConfiguration();
+	const ServerConfiguration &getServerConfiguration() const;
 	class WrongExtentionException : public std::exception
 	{
 		virtual const char *what() const throw();
