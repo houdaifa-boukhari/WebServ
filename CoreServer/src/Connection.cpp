@@ -108,9 +108,10 @@ void Server::handleClientData(int ClientFd)
 
 		/////// anour Part ///////
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
-		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
+		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
 		request.printParams();
+		print_map(request.get_cookies());
 		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
 		{
 			request.assign_full_cgi_path();
@@ -118,7 +119,7 @@ void Server::handleClientData(int ClientFd)
 			{
 				char **env = request.get_env();
 				request.assign_cgi_output(execute_cgi(request, request.get_cgi_path(), env));
-				std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
+				// std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
 				// std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
 				free_envp(env);
 			}else
@@ -129,7 +130,7 @@ void Server::handleClientData(int ClientFd)
 		}
 		else
 			std::cout << "normal request" << std::endl;
-		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
+		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		// if (request.get_cookie_avai())
 		// {
 		// 	// maybe send only the ones that aren't ava

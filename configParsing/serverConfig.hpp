@@ -26,6 +26,7 @@
 #define BLUE "\033[34m"
 #define MAGENTA "\033[35m"
 #define CYAN "\033[36m"
+#define WHIET "\033[0m"
 
 class ServerConfig
 {

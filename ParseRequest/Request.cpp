@@ -119,20 +119,52 @@ void ParssedRequest::assign_pwithout_params()
         _path_without_params = _path;
 }
 
-void ParssedRequest::assign_cookies(std::string key_values)
-{
+// void ParssedRequest::assign_cookies(std::string key_values)
+// {
+//     std::istringstream stream(key_values);
+//     std::string cookie_value;
+//     while (std::getline(stream, cookie_value, ';'))
+//     {
+//         std::string key;
+//         std::string value;
+//         std::istringstream one_cookie(cookie_value);
+//         if (std::getline(one_cookie, key , '=') && std::getline(one_cookie, value))
+//         {
+//             key = trim(key);
+//             value = trim(value);
+//             _cookies[key] = value;
+//         }
+//     }
+// }
+
+void ParssedRequest::assign_cookies(std::string key_values) {
     std::istringstream stream(key_values);
-    std::string cookie_value;
-    while (std::getline(stream, cookie_value, ';'))
-    {
-        std::string key;
-        std::string value;
-        std::istringstream one_cookie(cookie_value);
-        if (std::getline(one_cookie, key , '=') && std::getline(one_cookie, value))
-        {
+    std::string cookie_pair;
+    
+    while (std::getline(stream, cookie_pair, ';')) {
+        // Trim whitespace from the entire cookie pair first
+        cookie_pair = trim(cookie_pair);
+        if (cookie_pair.empty()) continue;
+
+        size_t equals_pos = cookie_pair.find('=');
+        
+        // Case 1: "key=value" format
+        if (equals_pos != std::string::npos) {
+            std::string key = cookie_pair.substr(0, equals_pos);
+            std::string value = cookie_pair.substr(equals_pos + 1);
             key = trim(key);
             value = trim(value);
-            _cookies[key] = value;
+            
+            if (!key.empty()) {  // Only insert valid keys
+                _cookies[key] = value;
+            }
+        }
+        // Case 2: Malformed cookie (no '='), treat as empty value
+        else if (!cookie_pair.empty()) {
+            std::string key = trim(cookie_pair);
+            if (!key.empty()) {
+                _cookies[key] = "";  // Explicit empty value
+            }
         }
     }
 }
@@ -229,7 +261,11 @@ char **ParssedRequest::get_env()
     std::map<std::string, std::string>::iterator begin = _params.begin();
     std::map<std::string, std::string>::iterator end = _params.end();
     std::string key_val;
+    // set cookies array
+    int cookie_size = _cookies.size();
     int final_size = _params.size() + 3 + 1;
+    if (cookie_size > 0)
+        final_size += 1; // add HTTP_COOKIE if we have cookies
     char **envp = new char *[final_size]; // add new cookies
     envp[final_size - 1] = NULL;
     int i = 0;
@@ -240,6 +276,28 @@ char **ParssedRequest::get_env()
         std::strcpy(envp[i], key_val.c_str());
         i++;
         begin++;
+    }
+    std::map<std::string, std::string>::iterator cookies_begin = _cookies.begin();
+    std::map<std::string, std::string>::iterator cookies_end = _cookies.end();
+
+    // Only set HTTP_COOKIE if we have cookies
+    if (cookies_begin != cookies_end) {
+        std::string key_val = "HTTP_COOKIE=";
+        bool first = true;
+        
+        while (cookies_begin != cookies_end) {
+            if (!first) {
+                key_val += "; ";
+            }
+            // Should URL-encode names/values here in production
+            key_val += cookies_begin->first + "=" + cookies_begin->second;
+            first = false;
+            cookies_begin++;
+        }
+        
+        envp[i] = new char[key_val.size() + 1];
+        std::strcpy(envp[i], key_val.c_str());
+        i++;  // Don't forget to increment envp index!
     }
     std::string key = "REQUEST_METHOD";
     key_val = key + "=" + _method;
