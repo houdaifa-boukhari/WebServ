@@ -54,7 +54,7 @@ body = f"""<html>
     <style>
         body {{
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: {bg_value};
             color: {text_value};
             height: 100vh;
             margin: 0;
@@ -64,15 +64,16 @@ body = f"""<html>
         }}
 
         form {{
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+            background: rgba(255, 255, 255, 0.9);
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-width: 300px;
-            border: 1px solid rgba(102, 126, 234, 0.2);
+            border: 2px solid {text_value};
+            backdrop-filter: blur(10px);
         }}
 
         h1 {{
@@ -80,10 +81,7 @@ body = f"""<html>
             width: 100%;
             margin-bottom: 30px;
             font-size: 24px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: {text_value};
             font-weight: bold;
         }}
 
@@ -92,7 +90,7 @@ body = f"""<html>
             align-items: center;
             margin-bottom: 20px;
             font-size: 16px;
-            color: #555;
+            color: {text_value};
             width: 100%;
             justify-content: space-between;
         }}
@@ -102,7 +100,7 @@ body = f"""<html>
         }}
 
         input[type="color"] {{
-            border: 2px solid #e1e8ff;
+            border: 2px solid {text_value};
             border-radius: 8px;
             width: 50px;
             height: 35px;
@@ -111,31 +109,42 @@ body = f"""<html>
         }}
 
         input[type="color"]:hover {{
-            border-color: #667eea;
+            border-color: {bg_value};
             transform: scale(1.05);
         }}
 
         input[type="submit"] {{
             padding: 12px 30px;
             font-size: 16px;
-            border: none;
+            border: 2px solid {text_value};
             border-radius: 25px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
+            background-color: {text_value};
+            color: {bg_value};
             cursor: pointer;
             margin-top: 10px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }}
 
         input[type="submit"]:hover {{
+            background-color: {bg_value};
+            color: {text_value};
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }}
+
+        .demo-text {{
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: {text_value};
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }}
     </style>
 </head>
 <body>
-    zaba w chta saba
     <form method="POST">
         <h1>Customize Colors</h1>
         <label><span>Text Color:</span>
@@ -155,44 +164,3 @@ headers += f"Content-Length: {len(body.encode('utf-8'))}\r\n"
 headers += "\r\n"
 
 sys.stdout.write(headers + body)
-
-# if new_text and new_bg:
-#     # Print headers one by one with proper line endings
-#     print("Status: 303 See Other")
-#     if new_text:
-#         print(f"Set-Cookie: textColor={new_text}; Path=/")
-#     if new_bg:
-#         print(f"Set-Cookie: bgColor={new_bg}; Path=/")
-#     print("Location: /cgi-bin/cookie_set.py")
-#     print("Content-Type: text/html")
-#     print("Content-Length: 0")
-#     print()  # Empty line to separate headers from body
-# else:
-#     html = f"""<!DOCTYPE html>
-# <html>
-# <head>
-#     <title>Set Colors</title>
-#     <style>
-#         body {{
-#             font-family: Arial, sans-serif;
-#             color: {text_value};
-#             background-color: {bg_value};
-#             padding: 2em;
-#         }}
-#     </style>
-# </head>
-# <body>
-#     <h1>Choose Colors</h1>
-#     <form method="POST">
-#         <label>Text Color: <input type="color" name="textColor" value="{text_value}"></label><br><br>
-#         <label>Background Color: <input type="color" name="bgColor" value="{bg_value}"></label><br><br>
-#         <input type="submit" value="Save Colors">
-#     </form>
-# </body>
-# </html>"""
-    
-#     html_bytes = html.encode('utf-8')
-#     print("Content-Type: text/html")
-#     print(f"Content-Length: {len(html_bytes)}")
-#     print()  # Empty line to separate headers from body
-#     print(html)
