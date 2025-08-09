@@ -28,7 +28,6 @@ if new_text is not None or new_bg is not None:
     headers += "Location: /cgi-bin/cookie_set.py\r\n"
     headers += "\r\n"
     sys.stdout.write(headers)
-    print("here kkkk")
     sys.exit(0)
 
 body = f"""<html>
