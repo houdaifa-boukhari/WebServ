@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilise.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/31 12:37:15 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/09 20:54:31 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,73 +40,74 @@ bool chunkedRequest(const std::string &request)
 	return (false);
 }
 
-bool Connection::RequestIsComplete(const std::string &request)
+bool Connection::RequestIsComplete(const std::vector<char> &request)
 {
-	size_t pos, start, end, len, body_start, body_size;
-	std::string header, contentLengthStr;
+    size_t pos, start, end, len, body_start, body_size;
+    std::string header, contentLengthStr;
 
-	pos = request.find("\r\n\r\n");
-	if (pos == std::string::npos)
-	{
-		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
-				  << "Headers not complete yet" << WHIET << std::endl;
-		return (false);
-	}
-	// Get first line (request line)
-	size_t line_end = request.find("\r\n");
-	if (line_end == std::string::npos)
-		return (false);
-	header = request.substr(0, line_end);
+    pos = std::search(request.begin(), request.end(), "\r\n\r\n", "\r\n\r\n" + 4) - request.begin();
+    if (pos >= request.size())
+    {
+        std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
+                  << "Headers not complete yet" << WHIET << std::endl;
+        return (false);
+    }
+    body_start = pos + 4;
+    size_t line_end = std::search(request.begin(), request.end(), "\r\n", "\r\n" + 2) - request.begin();
+    if (line_end >= request.size())
+        return (false);
+    header = std::string(request.begin(), request.begin() + line_end);
+    if (header.find("GET") == 0 || header.find("DELETE") == 0)
+        return (true);
+    else if (header.find("POST") == 0)
+    {
+        if (std::search(request.begin(), request.end(), "Transfer-Encoding: chunked",
+                        "Transfer-Encoding: chunked" + 25) != request.end())
+            // return chunkedRequest(request);
+            return (true); //need to back to this later
+        pos = std::search(request.begin(), request.end(), "Content-Length:", "Content-Length:" + 15) - request.begin();
+        if (pos >= request.size())
+            return (false);
 
-	if (header.find("GET") == 0 || header.find("DELETE") == 0)
-	{
-		return (true);
-	}
-	else if (header.find("POST") == 0)
-	{
-		if (request.find("Transfer-Encoding: chunked") != std::string::npos)
-			return (chunkedRequest(request));
-		pos = request.find("Content-Length:");
-		if (pos == std::string::npos)
-			return (false);
-		start = pos + 15;
-		while (start < request.size() && (request[start] == ' ' || request[start] == '\t'))
-			start++;
-		end = request.find("\r\n", start);
-		if (end == std::string::npos)
-			return (false);
-		contentLengthStr = request.substr(start, end - start);
-		len = ::atoi(contentLengthStr.c_str());
-		std::cout << "len is " << len << "\n";
-		if (len > this->config.getMaxBodySizeBytes())
-		{
-			std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
-					  << "Request is larger than defined max body size  " << WHIET << std::endl;
-			NewResponse::sendSimpleErrorResponse(Client_fd, 413, config);
-			return false;
-		}
-		// Body starts right after \r\n\r\n
-		body_start = request.find("\r\n\r\n") + 4;
-		body_size = request.size() - body_start;
-		if (body_size < len)
-			return (false);
-		else if (body_size > len)
-		{
-			NewResponse::sendSimpleErrorResponse(Client_fd, 413, config);
-			std::cerr
-				<< YELLOW << currentTime() << RED << " [ERROR] "
-				<< "Body size is larger than Content-Length From Client" << WHIET << std::endl;
-			return (false);
-		}
-		return (true);
-	}
-	else
-	{
-		NewResponse::sendSimpleErrorResponse(Client_fd, 405, config);
-		std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
-				  << "Unknown method From Client" << WHIET << std::endl;
-	}
-	return (false);
+        start = pos + 15;
+        while (start < request.size() && (request[start] == ' ' || request[start] == '\t'))
+            start++;
+        end = std::search(request.begin() + start, request.end(), "\r\n", "\r\n" + 2) - request.begin();
+        if (end >= request.size())
+            return (false);
+        contentLengthStr = std::string(request.begin() + start, request.begin() + end);
+        len = ::atoi(contentLengthStr.c_str());
+        std::cout << "len is " << len << "\n";
+        if (len > this->config.getMaxBodySizeBytes())
+        {
+            std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
+                      << "Request is larger than defined max body size  " << WHIET << std::endl;
+            NewResponse::sendSimpleErrorResponse(Client_fd, 413, config);
+            return (false);
+        }
+        body_size = request.size() - body_start;
+        std::cout << "Request size: " << request.size() << std::endl;
+        std::cout << "Body start: " << body_start << std::endl;
+        std::cout << "Calculated body size: " << body_size << std::endl;
+        if (body_size < len)
+            return (false);
+        else if (body_size > len)
+        {
+            NewResponse::sendSimpleErrorResponse(Client_fd, 413, config);
+            std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
+                      << "Body size is larger than Content-Length From Client" << WHIET << std::endl;
+            std::cout << "Raw request data: " << std::string(request.begin(), request.end()) << std::endl;
+            return (false);
+        }
+        return (true);
+    }
+    else
+    {
+        NewResponse::sendSimpleErrorResponse(Client_fd, 405, config);
+        std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
+                  << "Unknown method From Client" << WHIET << std::endl;
+    }
+    return (false);
 }
 
 void Server::checkTimeouts()

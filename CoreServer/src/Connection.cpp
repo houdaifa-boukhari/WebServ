@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/31 16:47:00 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/09 20:30:28 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,14 +71,14 @@ void print_map(const std::map<std::string, std::string> &m)
 void Server::handleClientData(int ClientFd)
 {
 	ssize_t len = 0;
-	char buffer[4096];
+	std::vector<char> buffer(1024);
 
 	if (ClientFd < 0)
 		return;
 	_connections[ClientFd].updateLastActivity();
 	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 			  << "Reading from client " << ClientFd << WHIET << std::endl;
-	len = recv(ClientFd, buffer, 4095, 0); // 0 for non bloking socket
+	len = recv(ClientFd, buffer.data(), buffer.size(), 0); // 0 for non bloking socket
 	if (len <= 0)
 	{
 		if (len == 0)
@@ -94,15 +94,14 @@ void Server::handleClientData(int ClientFd)
 		closeConnection(ClientFd);
 		return;
 	}
-
-	buffer[len] = '\0';
+	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
 
 	// std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
 	// 		  << "Received data from client ------ \n\n"
 	// 		  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
 
-	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequest()))
+	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
 		_connections[ClientFd].setIsComplete(true);
 
@@ -122,7 +121,8 @@ void Server::handleClientData(int ClientFd)
 				// std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
 				// std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
 				free_envp(env);
-			}else
+			}
+			else
 			{
 				request.set_status_code(404);
 				std::cout << "not a correct cgi path" << std::endl;
@@ -151,9 +151,9 @@ void Server::handleClientData(int ClientFd)
 		//		<< "Request Is complete" << WHIET << std::endl;
 		// std::cout << RED << "			------------------------------------			" << std::endl;
 	}
-	else
-		std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-				  << "Request not complete yet" << WHIET << std::endl;
+	// else
+	// 	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+	// 			  << "Request not complete yet" << WHIET << std::endl;
 }
 
 SendStatus Connection::getSendStatus() const
