@@ -31,23 +31,6 @@ if new_text is not None or new_bg is not None:
     print("here kkkk")
     sys.exit(0)
 
-# Otherwise, show the form with current colors
-# body = f"""<!DOCTYPE html>
-# <html>
-# <head>
-#     <title>Color Cookie Setter</title>
-# </head>
-# <body style="color:{text_value}; background-color:{bg_value};">
-#     <h1> text_value: {text_value} bg_value: {bg_value} </h1>
-#     <form method="POST">
-#         <label>Teext Color: <input type="color" name="textColor" value="{text_value}"></label><br><br>
-#         <label>Background Color: <input type="color" name="bgColor" value="{bg_value}"></label><br><br>
-#         <input type="submit" value="Save Colors">
-#     </form>
-# </body>
-# </html>"""
-
-
 body = f"""<html>
 <head>
     <title>Color Cookie Setter</title>
