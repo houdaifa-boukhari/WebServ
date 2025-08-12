@@ -400,6 +400,9 @@ void ParssedRequest::assign_full_cgi_path() {
 
 bool ParssedRequest::path_exists()
 {
+    // std::cout << MAGENTA << "checking if path exists: " << cgi_path << WHIET<<  std::endl;
+    if (cgi_path == "cgi_files/")
+        return (false);
     return access(cgi_path.c_str(), F_OK) == 0;
 }
 
@@ -427,9 +430,3 @@ std::string ParssedRequest::get_cookies_response(void)
 {
     return this->cookies_response;
 }
-
-
-// std::string ParssedRequest::generate_session_response()
-// {
-    
-// }

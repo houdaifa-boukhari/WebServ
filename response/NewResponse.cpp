@@ -496,8 +496,8 @@ void NewResponse::handleGetRequest()
 			// headers += this->_request.get_cgi_output();
 			// if (send(this->_clientFd, headers.c_str(), headers.length(), 0) < 0)
 			std::string cgi_response = _request.get_cgi_output();
-			// std::cout << RED << cgi_response << WHIET << std::endl;
-			std::cout << "=== RAW RESPONSE START ===\n" << cgi_response << "\n=== RAW RESPONSE END ===" << std::endl;
+			// // std::cout << RED << cgi_response << WHIET << std::endl;
+			// std::cout << "=== RAW RESPONSE START ===\n" << cgi_response << "\n=== RAW RESPONSE END ===" << std::endl;
 			if (send(this->_clientFd, cgi_response.c_str(), cgi_response.length(), 0) < 0)
 			{
 				this->_sendStatus = SEND_ERROR;
@@ -516,7 +516,7 @@ void NewResponse::handleGetRequest()
 		}
 		else
 		{
-			std::cout << "llll" << std::endl;
+			// std::cout << "llll" << std::endl;
 			this->_body = getErrorPage(this->_request.get_status_code(), this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();

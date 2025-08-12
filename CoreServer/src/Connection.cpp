@@ -139,8 +139,15 @@ void Server::handleClientData(int ClientFd)
 		// 	// request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/session_set.py" , NULL));
 		// 	// std::cout << request.get_cookies_response() << std::endl;
 		// }
-		// std::cout << "print cookies" << std::endl;
-		// print_map(request.get_cookies());
+		std::cout << MAGENTA << "cookies : " << WHIET << std::endl;
+		print_map(request.get_cookies());
+		std::cout << MAGENTA << "params : " << WHIET << std::endl;
+		print_map(request.getParams());
+		std::cout << MAGENTA << "raw path : " << WHIET  << std::endl;
+		std::cout << request.get_path_without_params() << std::endl;
+		std::cout << MAGENTA << "raw request : "<< WHIET  << std::endl;
+		std::cout << request.getPath()	<< std::endl;
+		// std::cout << "headers : " << std::endl;
 		// else no cookies should be sent
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();

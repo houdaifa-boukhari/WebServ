@@ -15,8 +15,8 @@ cookie = cookies.SimpleCookie(os.environ.get('HTTP_COOKIE', ''))
 # Extract cookie values safely
 text_color = cookie.get('textColor')
 bg_color = cookie.get('bgColor')
-text_value = text_color.value if text_color else '#ff0000'
-bg_value = bg_color.value if bg_color else '#00ff00'
+text_value = text_color.value if text_color else '#4A90E2'  # cool blue
+bg_value = bg_color.value if bg_color else '#50E3C2'      # teal green
 
 # If user submitted new values, set cookies and redirect
 if new_text is not None or new_bg is not None:

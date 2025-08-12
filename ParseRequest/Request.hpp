@@ -11,6 +11,14 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <ctime>
+
+#define WHIET "\033[0m"
+#define GREEN "\033[32m"
+#define BLUE "\033[34m"
+#define RED "\033[31m"
+#define YELLOW "\033[33m"
+#define CYAN "\033[36m"
+#define MAGENTA "\033[35m"
 std::string trim(const std::string &str);
 void printMap(std::map<std::string, std::string> myMap);
 
@@ -39,7 +47,7 @@ private:
     std::string cgi_path;
 public:
     // void assign_cookies();
-    std::string generate_session_response();
+    // std::string generate_session_response();
     void assign_cookies(std::string key_value);
     std::map<std::string, std::string> get_cookies(){return _cookies;};
     void clear_params();
@@ -56,6 +64,7 @@ public:
     bool path_exists();
     void assignhost_port();
     ParssedRequest(std::string request);
+    std::string get_path_without_params() {return _path_without_params;};
     ~ParssedRequest();
     void AssignRequestLine(std::string request);
     void AssignHeaders(std::string request);
