@@ -140,14 +140,14 @@ void ParssedRequest::assign_cookies(std::string key_values) {
             value = trim(value);
             
             if (!key.empty()) {  // Only insert valid keys
-                _content_type_values[key] = value;
+                _cookies[key] = value;
             }
         }
         // Case 2: Malformed cookie (no '='), treat as empty value
         else if (!cookie_pair.empty()) {
             std::string key = trim(cookie_pair);
             if (!key.empty()) {
-                _content_type_values[key] = "";  // Explicit empty value
+                _cookies[key] = "";  // Explicit empty value
             }
         }
     }

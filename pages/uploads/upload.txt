@@ -1,32 +1,44 @@
-------geckoformboundary465789db4847df344e95dadd3b100441
-Content-Disposition: form-data; name="fileUpload"; filename="Dockerfile"
+------WebKitFormBoundaryABHElAYra0cerFQP
+Content-Disposition: form-data; name="fileUpload"; filename="main.cpp"
 Content-Type: application/octet-stream
 
-FROM debian:12
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/08 15:47:22 by yel-moun          #+#    #+#             */
+/*   Updated: 2025/07/05 16:36:06 by yel-moun         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-RUN apt-get update && \
-    apt-get install -y \
-    curl \
-    php-fpm \
-    php-mysql \
-    php-curl \
-    php-gd \
-    php-mbstring \
-    php-xml \
-    php-zip \
-    wget \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+#include "./configParsing/fileParser.hpp"
+#include "./CoreServer/include/Server.hpp"
 
-# Download and extract WordPress
-COPY setup.sh /usr/local/bin/setup.sh
-RUN chmod +x /usr/local/bin/setup.sh
+int main(int argc, char *argv[])
+{
 
-# Expose port 9000 for PHP-FPM
-EXPOSE 9000
-
-# Start PHP-FPM in foreground
-# CMD ["php-fpm8.2", "--nodaemonize"]
-CMD ["/usr/local/bin/setup.sh"]
-
-------geckoformboundary465789db4847df344e95dadd3b100441--
+	try
+	{
+		FileParser *fp = new FileParser(argc, argv);
+		fp->start();
+		fp->getServerConfiguration().printConfig();
+		Server sv(fp->getServerConfiguration().getServers());
+		sv.run();
+		delete fp;
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << e.what() << '\n';
+		std::exit(1);
+	}
+	catch (const char *e)
+	{
+		std::cerr << e << std::endl;
+		std::exit(1);
+	}
+	return 0;
+}
+------WebKitFormBoundaryABHElAYra0cerFQP--
