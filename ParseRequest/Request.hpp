@@ -38,11 +38,14 @@ private:
     std::map<std::string, std::string> _cookies;
     std::map<std::string, std::string> _params;
     std::map<std::string, std::string> _content_type_values;
+    std::map<std::string, std::string> Content_Disposition_values;
     std::string _boundary;
-    // std::string _content_type;
     std::string _body;
     std::string cgi_output;
     std::string cookies_response;
+    std::string content_type_valbody;
+    std::string nameValue;
+    std::string filenameValue;
     std::map<std::string, std::map<std::string, std::string> > _sessions;
     int status_code;
     bool cookie_avai;
@@ -51,10 +54,17 @@ private:
 public:
     // void assign_cookies();
     // std::string generate_session_response();
+    std::string getNameValue() { return nameValue; };
+    std::string getFilenameValue() { return filenameValue; };
+    void assign_Disposition_map(std::string key_values);
     void assign_cookies(std::string key_value);
+    // void assign_file_name() {this->file_name = file_name;};
+    std::string parse_body();
     void assign_boundary();
+    std::map<std::string, std::string> GetcontentdisPositionMap() {return Content_Disposition_values;};
     std::string get_boundary() {return _boundary;};
     std::map<std::string, std::string> get_cookies(){return _cookies;};
+    std::string getcontent_type_valbody() {return content_type_valbody;};
     void clear_params();
     int get_cookie_avai();
     void is_cgi_path(const std::string& path);

@@ -109,8 +109,7 @@ void Server::handleClientData(int ClientFd)
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
 		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
-		request.printParams();
-		print_map(request.get_cookies());
+
 		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
 		{
 			request.assign_full_cgi_path();
@@ -131,14 +130,6 @@ void Server::handleClientData(int ClientFd)
 		else
 			std::cout << "normal request" << std::endl;
 		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
-		// if (request.get_cookie_avai())
-		// {
-		// 	// maybe send only the ones that aren't ava
-		// 	std::cout << "the cookie bg-color has been send in the req" << std::endl;
-		// 	// request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/cookie_set.py" , NULL));
-		// 	// request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/session_set.py" , NULL));
-		// 	// std::cout << request.get_cookies_response() << std::endl;
-		// }
 		std::cout << MAGENTA << "cookies : " << WHIET << std::endl;
 		print_map(request.get_cookies());
 		std::cout << MAGENTA << "params : " << WHIET << std::endl;
@@ -155,6 +146,14 @@ void Server::handleClientData(int ClientFd)
 		std::cout << request.get_boundary() << std::endl;
 		std::cout << MAGENTA << "body : "<< WHIET  << std::endl;
 		std::cout << request.getBody() << std::endl;
+		// std::cout << request.parse_body() << std::endl;
+		// std::cout << MAGENTA << "body without boundy : "<< WHIET  << std::endl;
+		// std::cout << request.parse_body() << std::endl;
+		// std::cout << MAGENTA << "body headers : "<< WHIET  << std::endl;
+		// print_map(request.GetcontentdisPositionMap());
+		std::cout <<  MAGENTA << "the two vals "<< WHIET  << std::endl;
+		std::cout << "name : " << request.getNameValue() << " ; " << "filename : " << request.getFilenameValue() << std::endl;
+		std::cout << "content type : " << request.getcontent_type_valbody() << std::endl;
 		std::cout << "-----------------------------" << std::endl;
 		// std::cout << "headers : " << std::endl;
 		// else no cookies should be sent

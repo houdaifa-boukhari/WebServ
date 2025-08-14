@@ -212,6 +212,99 @@ void ParssedRequest::assign_boundary()
     }
 }
 
+void ParssedRequest::assign_Disposition_map(std::string key_values)
+{
+    std::istringstream stream(key_values);
+    std::string cookie_pair;
+    Content_Disposition_values.clear();
+    
+    while (std::getline(stream, cookie_pair, ';')) {
+        // Trim whitespace from the entire cookie pair first
+        cookie_pair = trim(cookie_pair);
+        if (cookie_pair.empty()) continue;
+
+        size_t equals_pos = cookie_pair.find('=');
+        
+        // Case 1: "key=value" format
+        if (equals_pos != std::string::npos) {
+            std::string key = cookie_pair.substr(0, equals_pos);
+            std::string value = cookie_pair.substr(equals_pos + 1);
+            key = trim(key);
+            value = trim(value);
+            
+            if (!key.empty()) {  // Only insert valid keys
+                Content_Disposition_values[key] = value;
+            }
+        }
+        // Case 2: Malformed cookie (no '='), treat as empty value
+        else if (!cookie_pair.empty()) {
+            std::string key = trim(cookie_pair);
+            if (!key.empty()) {
+                Content_Disposition_values[key] = "";  // Explicit empty value
+            }
+        }
+    }
+}
+
+std::string ParssedRequest::parse_body()
+{
+    std::string full_boundary = "--" + _boundary;
+    std::string end_boundary = full_boundary + "--";
+    std::string result;
+
+    size_t pos = 0;
+
+    while (true) {
+        // Find the start of the next boundary
+        size_t start = _body.find(full_boundary, pos);
+        if (start == std::string::npos) break;
+        start += full_boundary.size();
+
+        // Skip optional CRLF after boundary
+        if (_body.substr(start, 2) == "\r\n") start += 2;
+
+        // Find the next boundary
+        size_t end = _body.find(full_boundary, start);
+        if (end == std::string::npos) {
+            end = _body.find(end_boundary, start);
+            if (end == std::string::npos) break; // malformed
+        }
+
+        std::string part = _body.substr(start, end - start);
+
+        // Remove trailing CRLF
+        if (!part.empty() && part.back() == '\n') {
+            part.pop_back();
+            if (!part.empty() && part.back() == '\r') part.pop_back();
+        }
+
+        // --- Separate headers from body ---
+        size_t header_end = part.find("\r\n\r\n");
+        if (header_end != std::string::npos) {
+            std::string headers_str = part.substr(0, header_end);
+            std::string body_str = part.substr(header_end + 4); // Skip \r\n\r\n
+
+            // Parse headers
+            std::istringstream stream(headers_str);
+            std::string line, key, value;
+            while (std::getline(stream, line) && !line.empty() && line != "\r") {
+                std::istringstream iss(line);
+                if (std::getline(iss, key, ':') && std::getline(iss, value)) {
+                    if (trim(key) == "Content-Disposition")
+                        assign_Disposition_map(trim(value));
+                    else if (trim(key) == "Content-Type")
+                        content_type_valbody = trim(value);
+                }
+            }
+
+            // Append only the body part to result
+            result += body_str;
+        }
+        pos = end;
+    }
+    return result;
+}
+
 void ParssedRequest::AssignHeadersLine(std::string request)
 {
     std::istringstream stream(request);
@@ -240,8 +333,6 @@ void ParssedRequest::AssignHeadersLine(std::string request)
         std::cerr << "Too many parts in request line.\n";
         return;
     }
-    // std::cout << "request line: " << line << std::endl;
-    // std::cout << "HEADERS" << std::endl;
     std::string key;
     std::string value;
     _cookies.clear();
@@ -269,12 +360,19 @@ void ParssedRequest::AssignHeadersLine(std::string request)
     is_cgi_path(_path);
     assign_params(_path);
     assign_pwithout_params();
-    assign_content_type(); // Default content type, can be changed later
+    assign_content_type();
     assign_boundary();
-    // assign_cookies();
     std::ostringstream body_stream;
-    body_stream << stream.rdbuf(); // Reads the rest of the stream
+    body_stream << stream.rdbuf();
     _body = body_stream.str();
+    parse_body();
+    nameValue = (Content_Disposition_values.count("name") > 0) 
+    ? Content_Disposition_values["name"] 
+    : "";
+
+    filenameValue = (Content_Disposition_values.count("filename") > 0) 
+        ? Content_Disposition_values["filename"] 
+        : "";
 }
 
 void printMap(std::map<std::string, std::string> myMap)
