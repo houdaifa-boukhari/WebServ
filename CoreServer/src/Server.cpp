@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/05 16:44:10 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/09 20:18:19 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,8 +109,8 @@ void Server::run()
 				}
 				else
 				{
-					std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-							  << "Reading data from client fd=" << _poll_fds[i].fd << WHIET << std::endl;
+					// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+					// 		  << "Reading data from client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 					handleClientData(_poll_fds[i].fd);
 				}
 			}
