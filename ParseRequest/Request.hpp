@@ -46,6 +46,7 @@ private:
     std::string content_type_valbody;
     std::string nameValue;
     std::string filenameValue;
+    std::string parssed_body;
     std::map<std::string, std::map<std::string, std::string> > _sessions;
     int status_code;
     bool cookie_avai;
@@ -58,8 +59,9 @@ public:
     std::string getFilenameValue() { return filenameValue; };
     void assign_Disposition_map(std::string key_values);
     void assign_cookies(std::string key_value);
+    std::string getparssed_body() { return parssed_body; };
     // void assign_file_name() {this->file_name = file_name;};
-    std::string parse_body();
+    void parse_body();
     void assign_boundary();
     std::map<std::string, std::string> GetcontentdisPositionMap() {return Content_Disposition_values;};
     std::string get_boundary() {return _boundary;};

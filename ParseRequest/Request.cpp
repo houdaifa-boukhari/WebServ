@@ -246,8 +246,13 @@ void ParssedRequest::assign_Disposition_map(std::string key_values)
     }
 }
 
-std::string ParssedRequest::parse_body()
+void ParssedRequest::parse_body()
 {
+    if (_boundary.empty())
+    {
+        std::cerr << "Boundary is not set, cannot parse body.\n";
+        return;
+    }
     std::string full_boundary = "--" + _boundary;
     std::string end_boundary = full_boundary + "--";
     std::string result;
@@ -302,7 +307,8 @@ std::string ParssedRequest::parse_body()
         }
         pos = end;
     }
-    return result;
+    parssed_body = result;
+    // return result;
 }
 
 void ParssedRequest::AssignHeadersLine(std::string request)

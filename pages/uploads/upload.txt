@@ -1,44 +1,108 @@
-------WebKitFormBoundary7RejnhMcc8e3y3NN
-Content-Disposition: form-data; name="fileUpload"; filename="main.cpp"
-Content-Type: application/octet-stream
+------WebKitFormBoundarylQ8qA22PV7BeF1Js
+Content-Disposition: form-data; name="fileUpload"; filename="index.html"
+Content-Type: text/html
 
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/08 15:47:22 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/05 16:36:06 by yel-moun         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "./configParsing/fileParser.hpp"
-#include "./CoreServer/include/Server.hpp"
-
-int main(int argc, char *argv[])
-{
-
-	try
-	{
-		FileParser *fp = new FileParser(argc, argv);
-		fp->start();
-		fp->getServerConfiguration().printConfig();
-		Server sv(fp->getServerConfiguration().getServers());
-		sv.run();
-		delete fp;
-	}
-	catch (const std::exception &e)
-	{
-		std::cerr << e.what() << '\n';
-		std::exit(1);
-	}
-	catch (const char *e)
-	{
-		std::cerr << e << std::endl;
-		std::exit(1);
-	}
-	return 0;
-}
-------WebKitFormBoundary7RejnhMcc8e3y3NN--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to Mini-NGINX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: linear-gradient(135deg, #34495e 0%, #0f2027 100%);
+      color: #f4f4f4;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: rgba(25, 32, 52, 0.97);
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      padding: 48px 36px;
+      max-width: 400px;
+      text-align: center;
+      margin: 32px 0;
+    }
+    .logo {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 22px;
+      display: inline-block;
+      background: linear-gradient(135deg, #2ecc71 55%, #27ae60 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8em;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 2px 16px rgba(39, 174, 96, 0.28);
+      letter-spacing: -2px;
+    }
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 2em;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+    p {
+      color: #b7c9d6;
+      font-size: 1.07em;
+      margin-bottom: 28px;
+      margin-top: 0;
+    }
+    .info {
+      background: #232b37;
+      border-radius: 10px;
+      padding: 13px 0;
+      margin-bottom: 10px;
+      font-size: 1em;
+      color: #7fffa6;
+      box-shadow: 0 1px 5px rgba(46, 204, 113,0.07);
+      font-family: monospace, monospace;
+    }
+    footer {
+      margin-top: 22px;
+      color: #7f8c8d;
+      font-size: 0.97em;
+    }
+    @media (max-width: 520px) {
+      .container {
+        max-width: 98vw;
+        padding: 24px 4vw;
+      }
+      h1 { font-size: 1.25em; }
+      .logo { width: 50px; height: 50px; font-size: 1.5em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">N</div>
+    <h1>Welcome to Mini-NGINX</h1>
+    <p>
+      This is the landing page for your <b>Mini-NGINX</b> server clone.<br>
+      Your server is up and running!
+    </p>
+    <div class="info">
+      <span>Server: Mini-NGINX/1.0</span><br>
+      <span>Status: <b>Online</b></span>
+    </div>
+    <p>
+      <i>To configure your site, edit your server settings.<br>
+      For more information, check the documentation.</i>
+    </p>
+  </div>
+  <footer>
+    &copy; 2025 Mini-NGINX. Inspired by <a href="https://nginx.org/" style="color:#2ecc71;text-decoration:none;">NGINX</a>.
+  </footer>
+</body>
+</html>
+------WebKitFormBoundarylQ8qA22PV7BeF1Js--

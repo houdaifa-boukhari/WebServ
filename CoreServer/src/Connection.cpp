@@ -154,6 +154,8 @@ void Server::handleClientData(int ClientFd)
 		std::cout <<  MAGENTA << "the two vals "<< WHIET  << std::endl;
 		std::cout << "name : " << request.getNameValue() << " ; " << "filename : " << request.getFilenameValue() << std::endl;
 		std::cout << "content type : " << request.getcontent_type_valbody() << std::endl;
+		std::cout << MAGENTA << "passed body : " << WHIET << std::endl;
+		std::cout << request.getparssed_body() << std::endl;
 		std::cout << "-----------------------------" << std::endl;
 		// std::cout << "headers : " << std::endl;
 		// else no cookies should be sent
@@ -161,7 +163,6 @@ void Server::handleClientData(int ClientFd)
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		// std::cout << confg.getHost() << ":" << std::endl;
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
-
 		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 		//		<< "Request Is complete" << WHIET << std::endl;
 		// std::cout << RED << "			------------------------------------			" << std::endl;
