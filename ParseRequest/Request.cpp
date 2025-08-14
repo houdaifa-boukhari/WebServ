@@ -119,23 +119,7 @@ void ParssedRequest::assign_pwithout_params()
         _path_without_params = _path;
 }
 
-// void ParssedRequest::assign_cookies(std::string key_values)
-// {
-//     std::istringstream stream(key_values);
-//     std::string cookie_value;
-//     while (std::getline(stream, cookie_value, ';'))
-//     {
-//         std::string key;
-//         std::string value;
-//         std::istringstream one_cookie(cookie_value);
-//         if (std::getline(one_cookie, key , '=') && std::getline(one_cookie, value))
-//         {
-//             key = trim(key);
-//             value = trim(value);
-//             _cookies[key] = value;
-//         }
-//     }
-// }
+
 
 void ParssedRequest::assign_cookies(std::string key_values) {
     std::istringstream stream(key_values);
@@ -156,14 +140,14 @@ void ParssedRequest::assign_cookies(std::string key_values) {
             value = trim(value);
             
             if (!key.empty()) {  // Only insert valid keys
-                _cookies[key] = value;
+                _content_type_values[key] = value;
             }
         }
         // Case 2: Malformed cookie (no '='), treat as empty value
         else if (!cookie_pair.empty()) {
             std::string key = trim(cookie_pair);
             if (!key.empty()) {
-                _cookies[key] = "";  // Explicit empty value
+                _content_type_values[key] = "";  // Explicit empty value
             }
         }
     }
@@ -174,6 +158,58 @@ int ParssedRequest::get_cookie_avai()
     if (_cookies.find("bg-color") == _cookies.end() || _cookies.find("session-id") == _cookies.end())
         return 1;
     return 0;
+}
+
+void ParssedRequest::assign_content_type()
+{
+    // std::map<std::string, std::string>::iterator it = _headers.find("Content-Type");
+    std::string content_type_value = _headers["Content-Type"];
+    std::istringstream stream(content_type_value);
+    std::string cookie_pair;
+    
+    std::cout << RED << content_type_value << WHIET <<  std::endl; // multipart/form-data; boundary=----geckoformboundarya62674fb9d5e16f0d6991b29e3e0e5d5
+    _content_type_values.clear();
+    while (std::getline(stream, cookie_pair, ';')) {
+        // Trim whitespace from the entire cookie pair first
+        cookie_pair = trim(cookie_pair);
+        if (cookie_pair.empty()) continue;
+
+        size_t equals_pos = cookie_pair.find('=');
+        
+        // Case 1: "key=value" format
+        if (equals_pos != std::string::npos) {
+            std::string key = cookie_pair.substr(0, equals_pos);
+            std::string value = cookie_pair.substr(equals_pos + 1);
+            key = trim(key);
+            value = trim(value);
+            
+            if (!key.empty()) {  // Only insert valid keys
+                _content_type_values[key] = value;
+            }
+        }
+        // Case 2: Malformed cookie (no '='), treat as empty value
+        else if (!cookie_pair.empty()) {
+            std::string key = trim(cookie_pair);
+            if (!key.empty()) {
+                _content_type_values[key] = "";  // Explicit empty value
+            }
+        }
+    }
+}
+
+void ParssedRequest::assign_boundary()
+{
+    std::map<std::string, std::string>::iterator it = _content_type_values.find("boundary");
+    if (it != _content_type_values.end())
+    {
+        _boundary = it->second;
+        // std::cout << "Boundary: " << _boundary << std::endl;
+    }
+    else
+    {
+        std::cerr << "Boundary not found in Content-Type header.\n";
+        _boundary = "";
+    }
 }
 
 void ParssedRequest::AssignHeadersLine(std::string request)
@@ -218,6 +254,8 @@ void ParssedRequest::AssignHeadersLine(std::string request)
             // maybe check is key has two words
             if (trim(key) == "Cookie")
                 assign_cookies(trim(value));
+            // else if (trim(key) == "Content-Type")
+            //     assign_content_type(trim(value));
             _headers[trim(key)] = trim(value);
         }
         else
@@ -231,6 +269,8 @@ void ParssedRequest::AssignHeadersLine(std::string request)
     is_cgi_path(_path);
     assign_params(_path);
     assign_pwithout_params();
+    assign_content_type(); // Default content type, can be changed later
+    assign_boundary();
     // assign_cookies();
     std::ostringstream body_stream;
     body_stream << stream.rdbuf(); // Reads the rest of the stream

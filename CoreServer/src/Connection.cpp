@@ -147,6 +147,15 @@ void Server::handleClientData(int ClientFd)
 		std::cout << request.get_path_without_params() << std::endl;
 		std::cout << MAGENTA << "raw request : "<< WHIET  << std::endl;
 		std::cout << request.getPath()	<< std::endl;
+		std::cout << MAGENTA << "headers : "<< WHIET  << std::endl;
+		print_map(request.getHeaders());
+		std::cout << MAGENTA << "content type value : "<< WHIET << std::endl;
+		print_map(request.get_content_type_values());
+		std::cout << MAGENTA << "get boundary : "<< WHIET << std::endl;
+		std::cout << request.get_boundary() << std::endl;
+		std::cout << MAGENTA << "body : "<< WHIET  << std::endl;
+		std::cout << request.getBody() << std::endl;
+		std::cout << "-----------------------------" << std::endl;
 		// std::cout << "headers : " << std::endl;
 		// else no cookies should be sent
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();

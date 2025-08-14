@@ -1,0 +1,32 @@
+------geckoformboundary465789db4847df344e95dadd3b100441
+Content-Disposition: form-data; name="fileUpload"; filename="Dockerfile"
+Content-Type: application/octet-stream
+
+FROM debian:12
+
+RUN apt-get update && \
+    apt-get install -y \
+    curl \
+    php-fpm \
+    php-mysql \
+    php-curl \
+    php-gd \
+    php-mbstring \
+    php-xml \
+    php-zip \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and extract WordPress
+COPY setup.sh /usr/local/bin/setup.sh
+RUN chmod +x /usr/local/bin/setup.sh
+
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
+
+# Start PHP-FPM in foreground
+# CMD ["php-fpm8.2", "--nodaemonize"]
+CMD ["/usr/local/bin/setup.sh"]
+
+------geckoformboundary465789db4847df344e95dadd3b100441--

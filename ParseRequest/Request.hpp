@@ -37,6 +37,9 @@ private:
     std::map<std::string, std::string> _headers;
     std::map<std::string, std::string> _cookies;
     std::map<std::string, std::string> _params;
+    std::map<std::string, std::string> _content_type_values;
+    std::string _boundary;
+    // std::string _content_type;
     std::string _body;
     std::string cgi_output;
     std::string cookies_response;
@@ -49,14 +52,18 @@ public:
     // void assign_cookies();
     // std::string generate_session_response();
     void assign_cookies(std::string key_value);
+    void assign_boundary();
+    std::string get_boundary() {return _boundary;};
     std::map<std::string, std::string> get_cookies(){return _cookies;};
     void clear_params();
     int get_cookie_avai();
     void is_cgi_path(const std::string& path);
     void assign_cgi_output(std::string cgi_outpt);
+    std::map<std::string, std::string> get_content_type_values() {return _content_type_values;};
     std::string get_cgi_output(void);
     bool is_cgi();
     void assign_cookies_response(std::string cookies_response);
+    void assign_content_type();
     std::string get_cookies_response();
     std::string get_cgi_path();
     void assign_pwithout_params();
