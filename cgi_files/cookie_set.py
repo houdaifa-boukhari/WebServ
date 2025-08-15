@@ -26,6 +26,8 @@ if new_text is not None or new_bg is not None:
     if new_bg and bg_value != new_bg:
         headers += f"Set-Cookie: bgColor={new_bg}; Path=/\r\n"
     headers += "Location: /cgi-bin/cookie_set.py\r\n"
+    headers += "Content-Length: 0\r\n"
+    headers += "Connection: close\r\n"
     headers += "\r\n"
     sys.stdout.write(headers)
     sys.exit(0)

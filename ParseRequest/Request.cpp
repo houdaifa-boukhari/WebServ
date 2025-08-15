@@ -246,6 +246,7 @@ void ParssedRequest::assign_Disposition_map(std::string key_values)
     }
 }
 
+
 void ParssedRequest::parse_body()
 {
     if (_boundary.empty())
@@ -311,6 +312,87 @@ void ParssedRequest::parse_body()
     // return result;
 }
 
+void ParssedRequest::check_body_size()
+{
+    correct_size = true;
+    chunked = false;
+    std::string::size_type pos = 0;
+
+    if (_headers.find("Transfer-Encoding") != _headers.end() &&
+        _headers["Transfer-Encoding"] == "chunked")
+    {
+        chunked = true;
+        int i = 0;
+
+        while (pos < _body.size())
+        {
+            // Find the CRLF after the chunk size
+            std::string::size_type end_line = _body.find("\r\n", pos);
+            if (end_line == std::string::npos)
+            {
+                std::cout << RED << "end_line not found" << WHIET << std::endl;
+                correct_size = false;
+                return;
+            }
+
+            // Extract and parse chunk size (hex)
+            std::string hex_size = _body.substr(pos, end_line - pos);
+            size_t chunk_size;
+            std::stringstream ss;
+            ss << std::hex << hex_size;
+            if (!(ss >> chunk_size))
+            {
+                std::cout << RED << "invalid chunk size" << WHIET << std::endl;
+                correct_size = false;
+                return;
+            }
+
+            pos = end_line + 2; // Move past CRLF
+
+            // Zero-length chunk means end of body
+            if (chunk_size == 0)
+            {
+                // Expect final CRLF after zero-size chunk
+                if (_body.substr(pos, 2) != "\r\n")
+                {
+                    std::cout << RED << "missing final CRLF after last chunk" << WHIET << std::endl;
+                    correct_size = false;
+                }
+                return; // Done parsing
+            }
+
+            // Check if chunk data fits in body
+            if (pos + chunk_size + 2 > _body.size())
+            {
+                std::cout << RED << "not enough data for chunk" << WHIET << std::endl;
+                correct_size = false;
+                return;
+            }
+
+            // Extract chunk data
+            std::string chunk_data = _body.substr(pos, chunk_size);
+            pos += chunk_size;
+
+            // Each chunk must end with CRLF
+            if (_body.substr(pos, 2) != "\r\n")
+            {
+                std::cout << RED << "missing CRLF after chunk data" << WHIET << std::endl;
+                correct_size = false;
+                return;
+            }
+            pos += 2;
+
+            std::cout << "i :" << i++ << ", size: " << chunk_size << std::endl;
+        }
+
+        // If we exit loop without seeing 0-size chunk, it's invalid
+        std::cout << RED << "no final zero-size chunk found" << WHIET << std::endl;
+        correct_size = false;
+    }
+
+    std::cout << GREEN << pos << WHIET << std::endl;
+}
+
 void ParssedRequest::AssignHeadersLine(std::string request)
 {
     std::istringstream stream(request);
@@ -371,12 +453,13 @@ void ParssedRequest::AssignHeadersLine(std::string request)
     std::ostringstream body_stream;
     body_stream << stream.rdbuf();
     _body = body_stream.str();
+    check_body_size();
     parse_body();
-    nameValue = (Content_Disposition_values.count("name") > 0) 
+    nameValue = (Content_Disposition_values.count("name") > 0)
     ? Content_Disposition_values["name"] 
     : "";
 
-    filenameValue = (Content_Disposition_values.count("filename") > 0) 
+    filenameValue = (Content_Disposition_values.count("filename") > 0)
         ? Content_Disposition_values["filename"] 
         : "";
 }

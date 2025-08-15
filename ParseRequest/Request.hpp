@@ -51,10 +51,14 @@ private:
     int status_code;
     bool cookie_avai;
     bool _cgi;
+    bool correct_size;
+    bool chunked;
     std::string cgi_path;
 public:
     // void assign_cookies();
     // std::string generate_session_response();
+    void check_body_size();
+    bool get_correct_size() { return correct_size; };
     std::string getNameValue() { return nameValue; };
     std::string getFilenameValue() { return filenameValue; };
     void assign_Disposition_map(std::string key_values);

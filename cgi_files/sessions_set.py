@@ -10,7 +10,7 @@ import time
 cgitb.enable()
 
 SESSION_FILE = "/tmp/sessions.json"
-print("http/1.1 200 OK")
+print("HTTP/1.1 200 OK")
 
 def load_sessions():
     if not os.path.exists(SESSION_FILE):
@@ -199,5 +199,6 @@ html = f"""
 </html>"""
 html_bytes = html.encode('utf-8')
 print(f"Content-Length: {len(html_bytes)}")
+print("Connection: close")
 print()
 print(html)

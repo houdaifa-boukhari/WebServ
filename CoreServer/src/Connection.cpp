@@ -156,6 +156,9 @@ void Server::handleClientData(int ClientFd)
 		std::cout << "content type : " << request.getcontent_type_valbody() << std::endl;
 		std::cout << MAGENTA << "passed body : " << WHIET << std::endl;
 		std::cout << request.getparssed_body() << std::endl;
+		std::cout << MAGENTA << "correct size : " << WHIET << std::endl;
+		std::cout << (request.get_correct_size() ? "true" : "false") << std::endl;
+		// std::cout << MAGENTA << "full cgi path : " << WHIET << std::endl;
 		std::cout << "-----------------------------" << std::endl;
 		// std::cout << "headers : " << std::endl;
 		// else no cookies should be sent
