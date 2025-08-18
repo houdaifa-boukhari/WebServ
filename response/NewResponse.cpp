@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   NewResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/31 17:03:04 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:38:08 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -732,8 +732,7 @@ void NewResponse::handleDeleteRequest()
 		{
 			this->_body = getErrorPage(this->_request.get_status_code(), this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-			// std::
-			sendResponseToClient();
+sod			sendResponseToClient();
 		}
 		return;
 	}

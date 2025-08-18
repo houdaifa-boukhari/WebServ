@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/17 19:36:10 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:28:41 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,7 +176,8 @@ void Server::handleClientData(int ClientFd)
 		//		<< "Request Is complete" << WHIET << std::endl;
 		// std::cout << RED << "			------------------------------------			" << std::endl;
 	}
-	// else
+	else if (_connections[ClientFd].getNeedClose())
+		closeConnection(ClientFd);
 	// 	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 	// 			  << "Request not complete yet" << WHIET << std::endl;
 }

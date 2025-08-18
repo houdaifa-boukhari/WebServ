@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/17 18:51:48 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 14:26:59 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ bool Connection::RequestIsComplete(const std::vector<char> &request)
             NewResponse::sendSimpleErrorResponse(Client_fd, 413, config);
             std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
                       << "Body size is larger than Content-Length From Client" << WHIET << std::endl;
-            std::cout << "Raw request data: " << std::string(request.begin(), request.end()) << std::endl;
+            setNeedClose(true);
             return (false);
         }
         return (true);
