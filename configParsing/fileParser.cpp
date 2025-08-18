@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/30 18:52:32 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 16:22:12 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,6 +275,8 @@ std::vector<std::string>::iterator FileParser::handleServerBlock(std::vector<std
 
 void FileParser::parseLocationDirective(const std::string &directive, LocationConfig &locationConfig)
 {
+	// std::cout << directive << std::endl;
+
 	if (directive.find("root") != std::string::npos)
 	{
 		std::string root = directive.substr(directive.find("root") + 5, directive.find(";", directive.find("root") + 5) - (directive.find("root") + 5));
@@ -292,6 +294,15 @@ void FileParser::parseLocationDirective(const std::string &directive, LocationCo
 		else
 			throw WrongFileContentException();
 	}
+	else if (directive.find("default_file") != std::string::npos)
+	{
+		std::string defaultFile = directive.substr(directive.find("default_file") + 13, directive.find(";", directive.find("default_file") + 13) - (directive.find("default_file") + 13));
+		defaultFile = ParsingUtils::removeWhiteSpaces(defaultFile);
+		if (defaultFile[0] == ':')
+			defaultFile = defaultFile.substr(1);
+		defaultFile = ParsingUtils::removeWhiteSpaces(defaultFile);
+		locationConfig.setDefaultFile(defaultFile);
+	}
 	else if (directive.find("index") != std::string::npos)
 	{
 		std::string indexString = directive.substr(directive.find("index") + 6, directive.find(";", directive.find("index") + 6) - (directive.find("index") + 6));
@@ -303,6 +314,7 @@ void FileParser::parseLocationDirective(const std::string &directive, LocationCo
 			locationConfig.addIndex(indexFile);
 		}
 	}
+
 	else if (directive.find("allowed_methods") != std::string::npos)
 	{
 		std::string allowedMethods = directive.substr(directive.find("allowed_methods") + 15, directive.find(";", directive.find("allow_methods") + 14) - (directive.find("allow_methods") + 14));

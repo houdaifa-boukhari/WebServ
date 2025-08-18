@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/31 12:37:15 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/09 18:19:44 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ bool Connection::RequestIsComplete(const std::string &request)
 			return (false);
 		contentLengthStr = request.substr(start, end - start);
 		len = ::atoi(contentLengthStr.c_str());
-		std::cout << "len is " << len << "\n";
+		//std::cout << "len is " << len << "\n";
 		if (len > this->config.getMaxBodySizeBytes())
 		{
 			std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
@@ -88,6 +88,7 @@ bool Connection::RequestIsComplete(const std::string &request)
 		// Body starts right after \r\n\r\n
 		body_start = request.find("\r\n\r\n") + 4;
 		body_size = request.size() - body_start;
+		std::cout << RED << "body_size is " << body_size << ", expect len is " << len;
 		if (body_size < len)
 			return (false);
 		else if (body_size > len)

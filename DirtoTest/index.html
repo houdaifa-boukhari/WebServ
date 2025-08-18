@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Server</title>
+    <!-- Use a modern, easy-to-read font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+    <!-- Load Tailwind CSS for utility-first styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Main container for centering content -->
+    <div class="flex items-center justify-center min-h-screen p-4">
+
+        <!-- Card-like container for the main content -->
+        <div class="bg-white rounded-xl shadow-lg p-8 md:p-12 w-full max-w-2xl text-center transition-all duration-300 ease-in-out">
+
+            <!-- Header section with a title and an optional icon -->
+            <div class="mb-6">
+                <!-- Simple SVG for a server icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zM5 5h14v2H5V5zm14 14H5v-2h14v2zm0-4H5v-2h14v2zm0-4H5V9h14v2z"/>
+                </svg>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">Welcome to My Web Server</h1>
+            </div>
+
+            <!-- Main content area with a description -->
+            <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                This is a simple, responsive, and aesthetically pleasing landing page. It's a great starting point for any project or server.
+            </p>
+
+            <!-- Buttons for user actions -->
+            <div class="space-y-4 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row justify-center">
+                <!-- "Learn More" button -->
+                <a href="#" class="inline-block bg-blue-500 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-200">
+                    Learn More
+                </a>
+                <!-- "Contact" button -->
+                <a href="#" class="inline-block bg-white text-blue-500 font-semibold py-3 px-8 rounded-lg border-2 border-blue-500 hover:bg-gray-50 transition-colors duration-200">
+                    Contact Us
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

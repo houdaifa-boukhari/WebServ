@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/31 17:03:04 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:08:41 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -486,18 +486,8 @@ void NewResponse::handleGetRequest()
 	{
 		if (this->_statusCode >= 200 && this->_statusCode <= 308)
 		{
-			// if (send(this->_clientFd, this->_body.c_str(), this->_body.size(), 0) < 0)
-			// {
 
-			// 	this->_sendStatus = SEND_ERROR;
-			// 	return;
-			// }
-			// else
-			// {
-			// 	this->_sendStatus = SEND_COMPLETED;
-			// }
 			this->_body = _request.get_cgi_output();
-			// need to get the content  from CGI
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 		}
@@ -640,6 +630,13 @@ void NewResponse::handleDeleteRequest()
 	}
 	if (!isMethodAllowed(_request.getMethod(), _matchedLocation))
 	{
+		// print allowed methods
+		std::cout << "Allowed methods for location: " << _matchedLocation.getName() << " are: ";
+		std::vector<std::string> allowedMethods = _matchedLocation.getAllowedMethods();
+		for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
+		{
+			std::cout << *it << " ";
+		}
 		std::cout << "Method not allowed for path: " << _request.getPath() << std::endl;
 		this->_statusCode = 405;
 		this->_body = getErrorPage(this->_statusCode, this->_config);
@@ -735,6 +732,14 @@ void NewResponse::handleDeleteRequest()
 
 void NewResponse::handleDirectoryRequest(std::string &dirPath)
 {
+	std::string defaultFile = _matchedLocation.getDefaultFile();
+	if (!defaultFile.empty())
+	{
+		std::string defaultFilePath = joinPath(dirPath, defaultFile);
+		if (fileExists(defaultFilePath))
+			return prepareFileResponse(defaultFilePath);
+	}
+
 	std::vector<std::string> indexFiles = _matchedLocation.getIndex();
 	for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); ++it)
 	{

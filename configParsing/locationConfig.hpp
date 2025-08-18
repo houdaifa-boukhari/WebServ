@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:41:47 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/29 13:24:16 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 13:29:24 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ private:
 	// upload variables
 	bool _has_upload;
 	std::string _upload_path;
+	std::string _default_file;
 
 public:
 	LocationConfig();
@@ -50,6 +51,8 @@ public:
 	void setRedirection(bool has_redirection, int redirection_code, std::string redirection_to);
 	void setCgi(bool has_cgi, std::string cgi_extension, std::string cgi_path);
 	void setUpload(bool has_upload, std::string upload_path);
+	void setDefaultFile(std::string file);
+	std::string getDefaultFile() const;
 	std::string getName() const;
 	std::string getRoot() const;
 	std::vector<std::string> getIndex() const;
