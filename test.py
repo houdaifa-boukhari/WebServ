@@ -308,15 +308,15 @@ def main():
             proc = start_server(args.start_cmd, args.wait)
 
         # sequence of tests
-        # results.append(("connection", test_connection(args.base)))
-        # results.append(("static_file", test_static_file(args.base)))
-        # results.append(("directory_listing", test_directory_listing(args.base)))
-        # results.append(("upload", test_upload(args.base)))
+        results.append(("connection", test_connection(args.base)))
+        results.append(("static_file", test_static_file(args.base)))
+        results.append(("directory_listing", test_directory_listing(args.base)))
+        results.append(("upload", test_upload(args.base)))
         results.append(("delete", test_delete(args.base)))
-        # results.append(("chunked", test_chunked(args.base)))
+        results.append(("chunked", test_chunked(args.base)))
         # results.append(("cgi", test_cgi(args.base)))
-        # results.append(("max_body", test_max_body_size(args.base)))
-        # results.append(("keep-alive", test_keepalive(args.base)))
+        results.append(("max_body", test_max_body_size(args.base)))
+        results.append(("keep-alive", test_keepalive(args.base)))
 
         # if not args.no_stress:
         #     results.append(("stress", stress_test(args.base, "/", concurrency=args.concurrency, requests_count=args.requests)))

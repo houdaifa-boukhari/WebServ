@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 17:19:54 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:25:19 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ bool Connection::RequestIsComplete(const std::vector<char> &request)
             return (false);
         contentLengthStr = std::string(request.begin() + start, request.begin() + end);
         len = ::atoi(contentLengthStr.c_str());
-        std::cout << "len is " << len << "\n";
+        // std::cout << "len is " << len << "\n";
         if (len > this->config.getMaxBodySizeBytes())
         {
             std::cerr << YELLOW << currentTime() << RED << " [ERROR] "

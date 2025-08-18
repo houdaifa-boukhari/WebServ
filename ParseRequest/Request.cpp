@@ -77,10 +77,11 @@ std::map<std::string, std::string> ParssedRequest::getParams()
     return (_params);
 }
 
-void ParssedRequest::is_cgi_path(const std::string& path) {
+void ParssedRequest::is_cgi_path(const std::string &path)
+{
     std::string prefix = "/cgi-bin/";
     // _cgi = true;
-    _cgi =  path.compare(0, prefix.size(), prefix) == 0 && path.size() >= prefix.size();
+    _cgi = path.compare(0, prefix.size(), prefix) == 0 && path.size() >= prefix.size();
 }
 
 void ParssedRequest::AssignRequestLine(std::string request)
@@ -119,35 +120,40 @@ void ParssedRequest::assign_pwithout_params()
         _path_without_params = _path;
 }
 
-
-
-void ParssedRequest::assign_cookies(std::string key_values) {
+void ParssedRequest::assign_cookies(std::string key_values)
+{
     std::istringstream stream(key_values);
     std::string cookie_pair;
-    
-    while (std::getline(stream, cookie_pair, ';')) {
+
+    while (std::getline(stream, cookie_pair, ';'))
+    {
         // Trim whitespace from the entire cookie pair first
         cookie_pair = trim(cookie_pair);
-        if (cookie_pair.empty()) continue;
+        if (cookie_pair.empty())
+            continue;
 
         size_t equals_pos = cookie_pair.find('=');
-        
+
         // Case 1: "key=value" format
-        if (equals_pos != std::string::npos) {
+        if (equals_pos != std::string::npos)
+        {
             std::string key = cookie_pair.substr(0, equals_pos);
             std::string value = cookie_pair.substr(equals_pos + 1);
             key = trim(key);
             value = trim(value);
-            
-            if (!key.empty()) {  // Only insert valid keys
+
+            if (!key.empty())
+            { // Only insert valid keys
                 _cookies[key] = value;
             }
         }
         // Case 2: Malformed cookie (no '='), treat as empty value
-        else if (!cookie_pair.empty()) {
+        else if (!cookie_pair.empty())
+        {
             std::string key = trim(cookie_pair);
-            if (!key.empty()) {
-                _cookies[key] = "";  // Explicit empty value
+            if (!key.empty())
+            {
+                _cookies[key] = ""; // Explicit empty value
             }
         }
     }
@@ -166,32 +172,38 @@ void ParssedRequest::assign_content_type()
     std::string content_type_value = _headers["Content-Type"];
     std::istringstream stream(content_type_value);
     std::string cookie_pair;
-    
-    std::cout << RED << content_type_value << WHIET <<  std::endl; // multipart/form-data; boundary=----geckoformboundarya62674fb9d5e16f0d6991b29e3e0e5d5
+
+    std::cout << RED << content_type_value << WHIET << std::endl; // multipart/form-data; boundary=----geckoformboundarya62674fb9d5e16f0d6991b29e3e0e5d5
     _content_type_values.clear();
-    while (std::getline(stream, cookie_pair, ';')) {
+    while (std::getline(stream, cookie_pair, ';'))
+    {
         // Trim whitespace from the entire cookie pair first
         cookie_pair = trim(cookie_pair);
-        if (cookie_pair.empty()) continue;
+        if (cookie_pair.empty())
+            continue;
 
         size_t equals_pos = cookie_pair.find('=');
-        
+
         // Case 1: "key=value" format
-        if (equals_pos != std::string::npos) {
+        if (equals_pos != std::string::npos)
+        {
             std::string key = cookie_pair.substr(0, equals_pos);
             std::string value = cookie_pair.substr(equals_pos + 1);
             key = trim(key);
             value = trim(value);
-            
-            if (!key.empty()) {  // Only insert valid keys
+
+            if (!key.empty())
+            { // Only insert valid keys
                 _content_type_values[key] = value;
             }
         }
         // Case 2: Malformed cookie (no '='), treat as empty value
-        else if (!cookie_pair.empty()) {
+        else if (!cookie_pair.empty())
+        {
             std::string key = trim(cookie_pair);
-            if (!key.empty()) {
-                _content_type_values[key] = "";  // Explicit empty value
+            if (!key.empty())
+            {
+                _content_type_values[key] = ""; // Explicit empty value
             }
         }
     }
@@ -217,35 +229,40 @@ void ParssedRequest::assign_Disposition_map(std::string key_values)
     std::istringstream stream(key_values);
     std::string cookie_pair;
     Content_Disposition_values.clear();
-    
-    while (std::getline(stream, cookie_pair, ';')) {
+
+    while (std::getline(stream, cookie_pair, ';'))
+    {
         // Trim whitespace from the entire cookie pair first
         cookie_pair = trim(cookie_pair);
-        if (cookie_pair.empty()) continue;
+        if (cookie_pair.empty())
+            continue;
 
         size_t equals_pos = cookie_pair.find('=');
-        
+
         // Case 1: "key=value" format
-        if (equals_pos != std::string::npos) {
+        if (equals_pos != std::string::npos)
+        {
             std::string key = cookie_pair.substr(0, equals_pos);
             std::string value = cookie_pair.substr(equals_pos + 1);
             key = trim(key);
             value = trim(value);
-            
-            if (!key.empty()) {  // Only insert valid keys
+
+            if (!key.empty())
+            { // Only insert valid keys
                 Content_Disposition_values[key] = value;
             }
         }
         // Case 2: Malformed cookie (no '='), treat as empty value
-        else if (!cookie_pair.empty()) {
+        else if (!cookie_pair.empty())
+        {
             std::string key = trim(cookie_pair);
-            if (!key.empty()) {
-                Content_Disposition_values[key] = "";  // Explicit empty value
+            if (!key.empty())
+            {
+                Content_Disposition_values[key] = ""; // Explicit empty value
             }
         }
     }
 }
-
 
 void ParssedRequest::parse_body()
 {
@@ -260,42 +277,52 @@ void ParssedRequest::parse_body()
 
     size_t pos = 0;
 
-    while (true) {
+    while (true)
+    {
         // Find the start of the next boundary
         size_t start = _body.find(full_boundary, pos);
-        if (start == std::string::npos) break;
+        if (start == std::string::npos)
+            break;
         start += full_boundary.size();
 
         // Skip optional CRLF after boundary
-        if (_body.substr(start, 2) == "\r\n") start += 2;
+        if (_body.substr(start, 2) == "\r\n")
+            start += 2;
 
         // Find the next boundary
         size_t end = _body.find(full_boundary, start);
-        if (end == std::string::npos) {
+        if (end == std::string::npos)
+        {
             end = _body.find(end_boundary, start);
-            if (end == std::string::npos) break; // malformed
+            if (end == std::string::npos)
+                break; // malformed
         }
 
         std::string part = _body.substr(start, end - start);
 
         // Remove trailing CRLF
-        if (!part.empty() && part.back() == '\n') {
+        if (!part.empty() && part.back() == '\n')
+        {
             part.pop_back();
-            if (!part.empty() && part.back() == '\r') part.pop_back();
+            if (!part.empty() && part.back() == '\r')
+                part.pop_back();
         }
 
         // --- Separate headers from body ---
         size_t header_end = part.find("\r\n\r\n");
-        if (header_end != std::string::npos) {
+        if (header_end != std::string::npos)
+        {
             std::string headers_str = part.substr(0, header_end);
             std::string body_str = part.substr(header_end + 4); // Skip \r\n\r\n
 
             // Parse headers
             std::istringstream stream(headers_str);
             std::string line, key, value;
-            while (std::getline(stream, line) && !line.empty() && line != "\r") {
+            while (std::getline(stream, line) && !line.empty() && line != "\r")
+            {
                 std::istringstream iss(line);
-                if (std::getline(iss, key, ':') && std::getline(iss, value)) {
+                if (std::getline(iss, key, ':') && std::getline(iss, value))
+                {
                     if (trim(key) == "Content-Disposition")
                         assign_Disposition_map(trim(value));
                     else if (trim(key) == "Content-Type")
@@ -456,12 +483,17 @@ void ParssedRequest::AssignHeadersLine(std::string request)
     check_body_size();
     parse_body();
     nameValue = (Content_Disposition_values.count("name") > 0)
-    ? Content_Disposition_values["name"] 
-    : "";
+                    ? Content_Disposition_values["name"]
+                    : "";
 
     filenameValue = (Content_Disposition_values.count("filename") > 0)
-        ? Content_Disposition_values["filename"] 
-        : "";
+                        ? Content_Disposition_values["filename"]
+                        : "";
+
+    if (!filenameValue.empty() && filenameValue.front() == '"' && filenameValue.back() == '"')
+    {
+        filenameValue = filenameValue.substr(1, filenameValue.length() - 2);
+    }
 }
 
 void printMap(std::map<std::string, std::string> myMap)
@@ -492,7 +524,7 @@ char **ParssedRequest::get_env()
     int cookie_size = _cookies.size();
     int final_size = _params.size() + 3 + 1;
     if (cookie_size > 0)
-        final_size += 1; // add HTTP_COOKIE if we have cookies
+        final_size += 1;                  // add HTTP_COOKIE if we have cookies
     char **envp = new char *[final_size]; // add new cookies
     envp[final_size - 1] = NULL;
     int i = 0;
@@ -508,12 +540,15 @@ char **ParssedRequest::get_env()
     std::map<std::string, std::string>::iterator cookies_end = _cookies.end();
 
     // Only set HTTP_COOKIE if we have cookies
-    if (cookies_begin != cookies_end) {
+    if (cookies_begin != cookies_end)
+    {
         std::string key_val = "HTTP_COOKIE=";
         bool first = true;
-        
-        while (cookies_begin != cookies_end) {
-            if (!first) {
+
+        while (cookies_begin != cookies_end)
+        {
+            if (!first)
+            {
                 key_val += "; ";
             }
             // Should URL-encode names/values here in production
@@ -521,24 +556,24 @@ char **ParssedRequest::get_env()
             first = false;
             cookies_begin++;
         }
-        
+
         envp[i] = new char[key_val.size() + 1];
         std::strcpy(envp[i], key_val.c_str());
-        i++;  // Don't forget to increment envp index!
+        i++; // Don't forget to increment envp index!
     }
     std::string key = "REQUEST_METHOD";
     key_val = key + "=" + _method;
-    envp[i] = new char [key_val.size() + 1];
+    envp[i] = new char[key_val.size() + 1];
     std::strcpy(envp[i], key_val.c_str());
     i++;
     key = "PATH_INFO";
     key_val = key + "=" + _path_info;
-    envp[i] = new char [key_val.size() + 1];
+    envp[i] = new char[key_val.size() + 1];
     std::strcpy(envp[i], key_val.c_str());
     i++;
     key = "SCRIPT_NAME";
     key_val = key + "=" + _script_name;
-    envp[i] = new char [key_val.size() + 1];
+    envp[i] = new char[key_val.size() + 1];
     std::strcpy(envp[i], key_val.c_str());
     return envp;
 }
@@ -568,9 +603,9 @@ void ParssedRequest::assignhost_port()
             else
             {
                 std::cout << "something went wrong with assignhost_port" << std::endl;
-                return ;
+                return;
             }
-            return ;
+            return;
         }
         begin++;
     }
@@ -611,13 +646,17 @@ bool ParssedRequest::is_cgi()
     return _cgi;
 }
 
-void ParssedRequest::assign_full_cgi_path() {
+void ParssedRequest::assign_full_cgi_path()
+{
     std::string cgi_files = "cgi_files";
     const std::string prefix = "/cgi-bin/";
-    if (_path_without_params.compare(0, prefix.size(), prefix) == 0) {
-        std::string relative = _path_without_params.substr(prefix.size());  // remove "cgi-bin/"
+    if (_path_without_params.compare(0, prefix.size(), prefix) == 0)
+    {
+        std::string relative = _path_without_params.substr(prefix.size()); // remove "cgi-bin/"
         cgi_path = cgi_files + "/" + relative;
-    } else {
+    }
+    else
+    {
         // Not a valid cgi-bin path
         cgi_path = "";
     }

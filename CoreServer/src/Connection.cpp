@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 17:19:41 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:26:20 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,11 +96,10 @@ void Server::handleClientData(int ClientFd)
 	}
 	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
-	
 
-	std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
-			  << "Received data from client ------ \n\n"
-			  << _connections[ClientFd].getClientRequest().size() << WHIET << std::endl;
+	// std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
+	// 		  << "Received data from client ------ \n\n"
+	// 		  << _connections[ClientFd].getClientRequest().size() << WHIET << std::endl;
 
 	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
@@ -115,7 +114,7 @@ void Server::handleClientData(int ClientFd)
 			NewResponse::sendSimpleErrorResponse(ClientFd, 400, _connections[ClientFd].getServerConfig());
 			_connections[ClientFd].setIsComplete(false);
 			closeConnection(ClientFd);
-			return ;
+			return;
 		}
 		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
 		{
@@ -141,25 +140,26 @@ void Server::handleClientData(int ClientFd)
 		print_map(request.get_cookies());
 		std::cout << MAGENTA << "params : " << WHIET << std::endl;
 		print_map(request.getParams());
-		std::cout << MAGENTA << "raw path : " << WHIET  << std::endl;
+		std::cout << MAGENTA << "raw path : " << WHIET << std::endl;
 		std::cout << request.get_path_without_params() << std::endl;
-		std::cout << MAGENTA << "raw request : "<< WHIET  << std::endl;
-		std::cout << request.getPath()	<< std::endl;
-		std::cout << MAGENTA << "headers : "<< WHIET  << std::endl;
+		std::cout << MAGENTA << "raw request : " << WHIET << std::endl;
+		std::cout << request.getPath() << std::endl;
+		std::cout << MAGENTA << "headers : " << WHIET << std::endl;
 		print_map(request.getHeaders());
-		std::cout << MAGENTA << "content type value : "<< WHIET << std::endl;
+		std::cout << MAGENTA << "content type value : " << WHIET << std::endl;
 		print_map(request.get_content_type_values());
-		std::cout << MAGENTA << "get boundary : "<< WHIET << std::endl;
+		std::cout << MAGENTA << "get boundary : " << WHIET << std::endl;
 		std::cout << request.get_boundary() << std::endl;
-		std::cout << MAGENTA << "body : "<< WHIET  << std::endl;
+		std::cout << MAGENTA << "body : " << WHIET << std::endl;
 		std::cout << request.getBody() << std::endl;
 		// std::cout << request.parse_body() << std::endl;
 		// std::cout << MAGENTA << "body without boundy : "<< WHIET  << std::endl;
 		// std::cout << request.parse_body() << std::endl;
 		// std::cout << MAGENTA << "body headers : "<< WHIET  << std::endl;
 		// print_map(request.GetcontentdisPositionMap());
-		std::cout <<  MAGENTA << "the two vals "<< WHIET  << std::endl;
-		std::cout << "name : " << request.getNameValue() << " ; " << "filename : " << request.getFilenameValue() << std::endl;
+		std::cout << MAGENTA << "the two vals " << WHIET << std::endl;
+		std::cout << "name : " << request.getNameValue() << " ; "
+				  << "filename : " << request.getFilenameValue() << std::endl;
 		std::cout << "content type : " << request.getcontent_type_valbody() << std::endl;
 		std::cout << MAGENTA << "passed body : " << WHIET << std::endl;
 		std::cout << request.getparssed_body() << std::endl;
