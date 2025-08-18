@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/18 17:08:41 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:17:53 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -393,6 +393,8 @@ void NewResponse::sendResponseToClient()
 	}
 	_response += "\r\n";
 	_response += _body;
+	// std::cout << RED;
+	// std::cout << _response << WHIET << std::endl;
 	if (send(this->_clientFd, _response.c_str(), _response.size(), 0) < 0)
 	{
 		this->_sendStatus = SEND_ERROR;
@@ -484,7 +486,7 @@ void NewResponse::handleGetRequest()
 	}
 	if (_request.is_cgi())
 	{
-		if (this->_statusCode >= 200 && this->_statusCode <= 308)
+		if (this->_request.get_status_code() >= 200 && this->_request.get_status_code() <= 308)
 		{
 
 			this->_body = _request.get_cgi_output();
@@ -493,7 +495,8 @@ void NewResponse::handleGetRequest()
 		}
 		else
 		{
-			this->_body = getErrorPage(this->_statusCode, this->_config);
+			// std::cout << "llll" << std::endl;
+			this->_body = getErrorPage(this->_request.get_status_code(), this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 		}
@@ -553,15 +556,40 @@ void NewResponse::handlePostRequest()
 
 	if (_request.is_cgi())
 	{
-		if (this->_statusCode >= 200 && this->_statusCode <= 308)
+		if (this->_request.get_status_code() >= 200 && this->_request.get_status_code() <= 308)
 		{
-			this->_body = _request.get_cgi_output();
-			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-			sendResponseToClient();
+			// std::string headers =
+			// 	"HTTP/1.1 200 OK\r\n"
+			// 	"Content-Type: text/plain\r\n"
+			// 	"Content-Length: 11\r\n"
+			// 	"\r\n";
+			// headers += this->_request.get_cgi_output();
+			// if (send(this->_clientFd, headers.c_str(), headers.length(), 0) < 0)
+			// std::cout << RED << _request.get_cgi_output() << WHIET << std::endl;
+			// std::string cgi_response =  + _request.get_cgi_output();
+			std::string cgi_response = _request.get_cgi_output();
+			// std::cout << RED << cgi_response << WHIET << std::endl;
+			std::cout << "=== RAW RESPONSE START ===\n"
+					  << cgi_response << "\n=== RAW RESPONSE END ===" << std::endl;
+			if (send(this->_clientFd, _request.get_cgi_output().c_str(), _request.get_cgi_output().length(), 0) < 0)
+			{
+				this->_sendStatus = SEND_ERROR;
+				return;
+			}
+			else
+			{
+				this->_sendStatus = SEND_COMPLETED;
+			}
+			std::cout << "here" << std::endl;
+			// // need to get the content  from CGI
+
+			// this->_body = _request.get_cgi_output();
+			// this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			// sendResponseToClient();
 		}
 		else
 		{
-			this->_body = getErrorPage(this->_statusCode, this->_config);
+			this->_body = getErrorPage(this->_request.get_status_code(), this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 		}
@@ -630,13 +658,6 @@ void NewResponse::handleDeleteRequest()
 	}
 	if (!isMethodAllowed(_request.getMethod(), _matchedLocation))
 	{
-		// print allowed methods
-		std::cout << "Allowed methods for location: " << _matchedLocation.getName() << " are: ";
-		std::vector<std::string> allowedMethods = _matchedLocation.getAllowedMethods();
-		for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
-		{
-			std::cout << *it << " ";
-		}
 		std::cout << "Method not allowed for path: " << _request.getPath() << std::endl;
 		this->_statusCode = 405;
 		this->_body = getErrorPage(this->_statusCode, this->_config);
@@ -657,15 +678,40 @@ void NewResponse::handleDeleteRequest()
 
 	if (_request.is_cgi())
 	{
-		if (this->_statusCode >= 200 && this->_statusCode <= 308)
+		if (this->_request.get_status_code() >= 200 && this->_request.get_status_code() <= 308)
 		{
-			this->_body = _request.get_cgi_output();
-			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-			sendResponseToClient();
+			// std::string headers =
+			// 	"HTTP/1.1 200 OK\r\n"
+			// 	"Content-Type: text/plain\r\n"
+			// 	"Content-Length: 11\r\n"
+			// 	"\r\n";
+			// headers += this->_request.get_cgi_output();
+			// if (send(this->_clientFd, headers.c_str(), headers.length(), 0) < 0)
+			// std::cout << RED << _request.get_cgi_output() << WHIET << std::endl;
+			// std::string cgi_response = _request.get_cgi_output();
+			std::string cgi_response = _request.get_cgi_output();
+			// std::cout << RED << cgi_response << WHIET << std::endl;
+			std::cout << "=== RAW RESPONSE START ===\n"
+					  << cgi_response << "\n=== RAW RESPONSE END ===" << std::endl;
+			if (send(this->_clientFd, _request.get_cgi_output().c_str(), _request.get_cgi_output().length(), 0) < 0)
+			{
+				this->_sendStatus = SEND_ERROR;
+				return;
+			}
+			else
+			{
+				this->_sendStatus = SEND_COMPLETED;
+			}
+			// std::cout << "here" << std::endl;
+			// // need to get the content  from CGI
+
+			// this->_body = _request.get_cgi_output();
+			// this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			// sendResponseToClient();
 		}
 		else
 		{
-			this->_body = getErrorPage(this->_statusCode, this->_config);
+			this->_body = getErrorPage(this->_request.get_status_code(), this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 		}

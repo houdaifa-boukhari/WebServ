@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/09 18:18:58 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:19:41 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,14 +71,14 @@ void print_map(const std::map<std::string, std::string> &m)
 void Server::handleClientData(int ClientFd)
 {
 	ssize_t len = 0;
-	char buffer[4096];
+	std::vector<char> buffer(1024);
 
 	if (ClientFd < 0)
 		return;
 	_connections[ClientFd].updateLastActivity();
-	// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-	// 		  << "Reading from client " << ClientFd << WHIET << std::endl;
-	len = recv(ClientFd, buffer, 4095, 0); // 0 for non bloking socket
+	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+			  << "Reading from client " << ClientFd << WHIET << std::endl;
+	len = recv(ClientFd, buffer.data(), buffer.size(), 0); // 0 for non bloking socket
 	if (len <= 0)
 	{
 		if (len == 0)
@@ -94,8 +94,7 @@ void Server::handleClientData(int ClientFd)
 		closeConnection(ClientFd);
 		return;
 	}
-
-	buffer[len] = '\0';
+	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
 	
 
@@ -103,15 +102,21 @@ void Server::handleClientData(int ClientFd)
 			  << "Received data from client ------ \n\n"
 			  << _connections[ClientFd].getClientRequest().size() << WHIET << std::endl;
 
-	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequest()))
+	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
 		_connections[ClientFd].setIsComplete(true);
 
 		/////// anour Part ///////
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
-		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
+		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
-		request.printParams();
+		if (request.get_correct_size() == false)
+		{
+			NewResponse::sendSimpleErrorResponse(ClientFd, 400, _connections[ClientFd].getServerConfig());
+			_connections[ClientFd].setIsComplete(false);
+			closeConnection(ClientFd);
+			return ;
+		}
 		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
 		{
 			request.assign_full_cgi_path();
@@ -119,10 +124,11 @@ void Server::handleClientData(int ClientFd)
 			{
 				char **env = request.get_env();
 				request.assign_cgi_output(execute_cgi(request, request.get_cgi_path(), env));
-				std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
+				// std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
 				// std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
 				free_envp(env);
-			}else
+			}
+			else
 			{
 				request.set_status_code(404);
 				std::cout << "not a correct cgi path" << std::endl;
@@ -130,28 +136,49 @@ void Server::handleClientData(int ClientFd)
 		}
 		else
 			std::cout << "normal request" << std::endl;
-		std::cout << RED << "			------------------------------			" << WHIET << std::endl;
-		// if (request.get_cookie_avai())
-		// {
-		// 	// maybe send only the ones that aren't ava
-		// 	std::cout << "the cookie bg-color has been send in the req" << std::endl;
-		// 	// request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/cookie_set.py" , NULL));
-		// 	// request.assign_cookies_response(execute_cgi(request ,"/Users/aet-tale/Desktop/WebServ/session_set.py" , NULL));
-		// 	// std::cout << request.get_cookies_response() << std::endl;
-		// }
-		// std::cout << "print cookies" << std::endl;
-		// print_map(request.get_cookies());
+		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
+		std::cout << MAGENTA << "cookies : " << WHIET << std::endl;
+		print_map(request.get_cookies());
+		std::cout << MAGENTA << "params : " << WHIET << std::endl;
+		print_map(request.getParams());
+		std::cout << MAGENTA << "raw path : " << WHIET  << std::endl;
+		std::cout << request.get_path_without_params() << std::endl;
+		std::cout << MAGENTA << "raw request : "<< WHIET  << std::endl;
+		std::cout << request.getPath()	<< std::endl;
+		std::cout << MAGENTA << "headers : "<< WHIET  << std::endl;
+		print_map(request.getHeaders());
+		std::cout << MAGENTA << "content type value : "<< WHIET << std::endl;
+		print_map(request.get_content_type_values());
+		std::cout << MAGENTA << "get boundary : "<< WHIET << std::endl;
+		std::cout << request.get_boundary() << std::endl;
+		std::cout << MAGENTA << "body : "<< WHIET  << std::endl;
+		std::cout << request.getBody() << std::endl;
+		// std::cout << request.parse_body() << std::endl;
+		// std::cout << MAGENTA << "body without boundy : "<< WHIET  << std::endl;
+		// std::cout << request.parse_body() << std::endl;
+		// std::cout << MAGENTA << "body headers : "<< WHIET  << std::endl;
+		// print_map(request.GetcontentdisPositionMap());
+		std::cout <<  MAGENTA << "the two vals "<< WHIET  << std::endl;
+		std::cout << "name : " << request.getNameValue() << " ; " << "filename : " << request.getFilenameValue() << std::endl;
+		std::cout << "content type : " << request.getcontent_type_valbody() << std::endl;
+		std::cout << MAGENTA << "passed body : " << WHIET << std::endl;
+		std::cout << request.getparssed_body() << std::endl;
+		std::cout << MAGENTA << "correct size : " << WHIET << std::endl;
+		std::cout << (request.get_correct_size() ? "true" : "false") << std::endl;
+		// std::cout << MAGENTA << "full cgi path : " << WHIET << std::endl;
+		std::cout << "-----------------------------" << std::endl;
+		// std::cout << "headers : " << std::endl;
 		// else no cookies should be sent
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		// std::cout << confg.getHost() << ":" << std::endl;
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
-
 		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 		//		<< "Request Is complete" << WHIET << std::endl;
 		// std::cout << RED << "			------------------------------------			" << std::endl;
 	}
-	// else
+	else if (_connections[ClientFd].getNeedClose())
+		closeConnection(ClientFd);
 	// 	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 	// 			  << "Request not complete yet" << WHIET << std::endl;
 }

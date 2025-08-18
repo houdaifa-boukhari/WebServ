@@ -31,3 +31,8 @@ clean:
 	@if [ -n "$$(docker network ls -q | grep -v 'bridge\|host\|none')" ]; then docker network rm $$(docker network ls -q | grep -v 'bridge\|host\|none'); fi
 	@echo "Cleanup complete!"
 ----------------------------683348189274141443924742--
+--8abb4040873f9bebf30f2d36c0b52bfb
+Content-Disposition: form-data; name="file"; filename="testfile.txt"
+
+hello-webserv-test-b3TbDVBa
+--8abb4040873f9bebf30f2d36c0b52bfb--

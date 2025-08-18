@@ -83,10 +83,11 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
     int input_fd = open(temp_inputfilename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
     int writing_in = write(input_fd, request.getBody().c_str(), request.getBody().length());
     close(input_fd);
+    // perror("write");
     if (writing_in == -1)
     {
         request.set_status_code(500);
-        return "";
+        return "1";
     }
     int pid = fork();
     if (pid == 0)
@@ -94,15 +95,21 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
         int output_fd = open(temp_filename.c_str(), O_RDWR);
         int new_input_fd = open(temp_inputfilename.c_str(), O_RDONLY);
         if (output_fd == -1 || new_input_fd == -1)
-            std::exit(1);
+            std::exit(12);
         if (dup2(output_fd, 1) == -1 || dup2(output_fd, 2) == -1 || dup2(new_input_fd, 0) == -1)
         {
+            // std::cout << "Error duplicating file descriptors: " << strerror(errno) << std::endl;
             close(output_fd);
-            std::exit(1);
+            std::exit(12);
         }
         close(output_fd);
         close(new_input_fd);
+        // int file_int = fopen("tst.txt", O_RDWR | O_CREAT | O_TRUNC, 0600);
         execve(c_path.c_str(), args, env);
+        // FILE *file_int = fopen("/Users/aet-tale/Desktop/WebServ copy 2/tst.txt", "w");
+
+        // fprintf(file_int, "Error executing CGI script: %s\n", strerror(errno));
+        // perror("execve failed");
         std::exit(127);
     }else if (pid > 0)
     {
@@ -110,14 +117,15 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
         if (output_fd == -1)
         {
             request.set_status_code(500);
-            return "";
+            return "2";
         }
         int status;
         waitpid(pid, &status, 0);
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+            std::cerr << "CGI exited with code: " << WEXITSTATUS(status) << std::endl;
             request.set_status_code(500);
             close(output_fd);
-            return "";
+            return "3";
         }
         char buffer[128];
         int bytesRead;
