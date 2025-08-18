@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 17:28:12 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:31:16 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ void Server::handleClientData(int ClientFd)
 			NewResponse::sendSimpleErrorResponse(ClientFd, 400, _connections[ClientFd].getServerConfig());
 			_connections[ClientFd].setIsComplete(false);
 			closeConnection(ClientFd);
-			return ;
+			return;
 		}
 		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
 		{

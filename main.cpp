@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 15:47:22 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/18 17:14:57 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:33:00 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 		ServerConfiguration config = fp->getServerConfiguration();
 		ConfigFileValidator *validator = new ConfigFileValidator(config.getServers());
 		validator->validate();
+		// config.printConfig();
 		// config.printConfig();
 		Server sv(config.getServers());
 		sv.run();

@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/18 17:55:30 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:29:19 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -488,35 +488,21 @@ void NewResponse::handleGetRequest()
 	{
 		if (this->_request.get_status_code() >= 200 && this->_request.get_status_code() <= 308)
 		{
-			// std::string headers = 
-			// 	"HTTP/1.1 200 OK\r\n"
-			// 	"Content-Type: text/plain\r\n"
-			// 	"Content-Length: 11\r\n"
-			// 	"\r\n";
-			// headers += this->_request.get_cgi_output();
-			// if (send(this->_clientFd, headers.c_str(), headers.length(), 0) < 0)
+
 			std::string cgi_response = _request.get_cgi_output();
-			// // std::cout << RED << cgi_response << WHIET << std::endl;
-			// std::cout << "=== RAW RESPONSE START ===\n" << cgi_response << "\n=== RAW RESPONSE END ===" << std::endl;
-			if (send(this->_clientFd, cgi_response.c_str(), cgi_response.length(), 0) < 0)
+
+			if (send(this->_clientFd, _request.get_cgi_output().c_str(), _request.get_cgi_output().length(), 0) < 0)
 			{
 				this->_sendStatus = SEND_ERROR;
-				return ;
+				return;
 			}
 			else
 			{
 				this->_sendStatus = SEND_COMPLETED;
 			}
-			std::cout << "here" << std::endl;
-			// // need to get the content  from CGI
-
-			// this->_body = _request.get_cgi_output();
-			// this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-			// sendResponseToClient();
 		}
 		else
 		{
-			// std::cout << "llll" << std::endl;
 			this->_body = getErrorPage(this->_request.get_status_code(), this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
@@ -542,7 +528,7 @@ void NewResponse::handleGetRequest()
 			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
-			return ;
+			return;
 		}
 	}
 }
@@ -579,33 +565,18 @@ void NewResponse::handlePostRequest()
 	{
 		if (this->_request.get_status_code() >= 200 && this->_request.get_status_code() <= 308)
 		{
-			// std::string headers = 
-			// 	"HTTP/1.1 200 OK\r\n"
-			// 	"Content-Type: text/plain\r\n"
-			// 	"Content-Length: 11\r\n"
-			// 	"\r\n";
-			// headers += this->_request.get_cgi_output();
-			// if (send(this->_clientFd, headers.c_str(), headers.length(), 0) < 0)
-			// std::cout << RED << _request.get_cgi_output() << WHIET << std::endl;
-			// std::string cgi_response =  + _request.get_cgi_output();
-			std::string cgi_response =  _request.get_cgi_output();
-			// std::cout << RED << cgi_response << WHIET << std::endl;
-			std::cout << "=== RAW RESPONSE START ===\n" << cgi_response << "\n=== RAW RESPONSE END ===" << std::endl;
+
+			std::string cgi_response = _request.get_cgi_output();
+
 			if (send(this->_clientFd, _request.get_cgi_output().c_str(), _request.get_cgi_output().length(), 0) < 0)
 			{
 				this->_sendStatus = SEND_ERROR;
-				return ;
+				return;
 			}
 			else
 			{
 				this->_sendStatus = SEND_COMPLETED;
 			}
-			std::cout << "here" << std::endl;
-			// // need to get the content  from CGI
-
-			// this->_body = _request.get_cgi_output();
-			// this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-			// sendResponseToClient();
 		}
 		else
 		{
@@ -617,7 +588,7 @@ void NewResponse::handlePostRequest()
 	}
 	else
 	{
-		std::string filename = _request.getHeaders()["X-Filename"];
+		std::string filename = _request.getFilenameValue();
 		if (filename.empty())
 			filename = "upload.txt";
 		std::string uploadPath = joinPath(_matchedLocation.getRoot(), filename);
@@ -700,33 +671,18 @@ void NewResponse::handleDeleteRequest()
 	{
 		if (this->_request.get_status_code() >= 200 && this->_request.get_status_code() <= 308)
 		{
-			// std::string headers = 
-			// 	"HTTP/1.1 200 OK\r\n"
-			// 	"Content-Type: text/plain\r\n"
-			// 	"Content-Length: 11\r\n"
-			// 	"\r\n";
-			// headers += this->_request.get_cgi_output();
-			// if (send(this->_clientFd, headers.c_str(), headers.length(), 0) < 0)
-			// std::cout << RED << _request.get_cgi_output() << WHIET << std::endl;
-			// std::string cgi_response = _request.get_cgi_output();
-			std::string cgi_response =  _request.get_cgi_output();
-			// std::cout << RED << cgi_response << WHIET << std::endl;
-			std::cout << "=== RAW RESPONSE START ===\n" << cgi_response << "\n=== RAW RESPONSE END ===" << std::endl;
+
+			std::string cgi_response = _request.get_cgi_output();
+
 			if (send(this->_clientFd, _request.get_cgi_output().c_str(), _request.get_cgi_output().length(), 0) < 0)
 			{
 				this->_sendStatus = SEND_ERROR;
-				return ;
+				return;
 			}
 			else
 			{
 				this->_sendStatus = SEND_COMPLETED;
 			}
-			// std::cout << "here" << std::endl;
-			// // need to get the content  from CGI
-
-			// this->_body = _request.get_cgi_output();
-			// this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-			// sendResponseToClient();
 		}
 		else
 		{
@@ -797,6 +753,14 @@ void NewResponse::handleDeleteRequest()
 
 void NewResponse::handleDirectoryRequest(std::string &dirPath)
 {
+	std::string defaultFile = _matchedLocation.getDefaultFile();
+	if (!defaultFile.empty())
+	{
+		std::string defaultFilePath = joinPath(dirPath, defaultFile);
+		if (fileExists(defaultFilePath))
+			return prepareFileResponse(defaultFilePath);
+	}
+
 	std::vector<std::string> indexFiles = _matchedLocation.getIndex();
 	for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); ++it)
 	{
@@ -823,7 +787,7 @@ void NewResponse::generateDirectoryListing(std::string &filePath)
 {
 	std::string html = "<!DOCTYPE html>\n<html>\n<head>\n<title>Directory Listing</title>\n";
 	html += "<style>body{font-family:Arial,sans-serif;margin:40px;}a{text-decoration:none;color:#0066cc;}a:hover{text-decoration:underline;}</style>\n";
-	html += "</head>\n<body>\n<h1>Directory Listing for " + filePath + "</h1>\n<hr>\n<ul>\n";
+	html += "</head>\n<body>\n<h1>Directory Listing for " + _request.getPath() + "</h1>\n<hr>\n<ul>\n";
 
 	DIR *dir = opendir(filePath.c_str());
 	if (dir != NULL)
@@ -834,7 +798,12 @@ void NewResponse::generateDirectoryListing(std::string &filePath)
 			std::string name = entry->d_name;
 			if (name != ".")
 			{
-				html += "<li><a href=\"" + name;
+				// Properly concatenate the request path with the file/directory name
+				std::string requestPath = _request.getPath();
+				if (requestPath.back() != '/')
+					requestPath += "/";
+
+				html += "<li><a href=\"" + requestPath + name;
 				if (entry->d_type == DT_DIR)
 					html += "/";
 				html += "\">" + name;
