@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/09 20:18:19 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:51:16 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,11 +135,11 @@ void Server::run()
 								  << "Error sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 					}
 
-					if (_connections[_poll_fds[i].fd].getClientRequest().find("Connection: keep-alive") != std::string::npos)
+					if (_connections[_poll_fds[i].fd].getKeepAlive())
 					{
 						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 								  << "Keeping connection alive for client fd=" << _poll_fds[i].fd << " , Untile Timeout" << WHIET << std::endl;
-						_connections[_poll_fds[i].fd].reset();
+						_connections[_poll_fds[i].fd].setIsComplete(false);
 					}
 					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_COMPLETED)
 					{
@@ -147,7 +147,9 @@ void Server::run()
 								  << "All Response send it to " << _poll_fds[i].fd << WHIET << std::endl;
 						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 								  << "Closing connection for client fd=" << _poll_fds[i].fd << WHIET << std::endl;
-						closeConnection(_poll_fds[i].fd);
+						if (_connections[_poll_fds[i].fd].getKeepAlive())
+							closeConnection(_poll_fds[i].fd);
+							
 					}
 					std::cout << RED << "			------------------------------			" << WHIET << std::endl;
 				}

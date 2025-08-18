@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/18 14:38:08 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:55:30 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -421,9 +421,9 @@ void NewResponse::sendOnlyHeaders()
 		this->_sendStatus = SEND_ERROR;
 		return;
 	}
-	std::cout << "----------------- Response headers ------------------" << std::endl;
-	std::cout << _response << std::endl;
-	std::cout << "----------------- Response headers ------------------" << std::endl;
+	// std::cout << "----------------- Response headers ------------------" << std::endl;
+	// std::cout << _response << std::endl;
+	// std::cout << "----------------- Response headers ------------------" << std::endl;
 }
 
 void NewResponse::generateResponse()
@@ -446,7 +446,7 @@ void NewResponse::generateResponse()
 
 void NewResponse::handleGetRequest()
 {
-	std::cout << "request path : " << _request.getPath() << std::endl;
+	// std::cout << "request path : " << _request.getPath() << std::endl;
 	if (!findMatchingLocation(_request.getPath()))
 	{
 		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;
@@ -665,7 +665,7 @@ void NewResponse::handlePostRequest()
 
 void NewResponse::handleDeleteRequest()
 {
-	std::cout << "starting DELETE request handling" << std::endl;
+	// std::cout << "starting DELETE request handling" << std::endl;
 
 	if (!findMatchingLocation(_request.getPath()))
 	{
@@ -732,7 +732,7 @@ void NewResponse::handleDeleteRequest()
 		{
 			this->_body = getErrorPage(this->_request.get_status_code(), this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
-sod			sendResponseToClient();
+			sendResponseToClient();
 		}
 		return;
 	}
@@ -892,7 +892,7 @@ size_t NewResponse::sendAll(int sockfd, const void *buf, size_t len)
 	size_t total_sent = 0;
 	while (total_sent < len)
 	{
-		size_t n = send(sockfd, (const char *)buf + total_sent, len - total_sent, 0);
+		ssize_t n = send(sockfd, (const char *)buf + total_sent, len - total_sent, 0);
 		if (n == -1)
 		{
 			// A real error occurred, report it
@@ -905,7 +905,7 @@ size_t NewResponse::sendAll(int sockfd, const void *buf, size_t len)
 
 void NewResponse::sendNextChunk()
 {
-	std::cout << "Sending file in chunks..." << std::endl;
+	// std::cout << "Sending file in chunks..." << std::endl;
 	if (this->_sendStatus == SEND_COMPLETED || this->_sendStatus == SEND_ERROR)
 		return;
 
@@ -959,7 +959,7 @@ void NewResponse::sendNextChunk()
 		this->_sendStatus = SEND_ERROR;
 		return;
 	}
-	std::cout << "move to next chunk " << std::endl;
+	// std::cout << "move to next chunk " << std::endl;
 
 	this->_byteSent += bytes_read;
 

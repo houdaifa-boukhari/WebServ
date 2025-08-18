@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 14:28:41 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:28:12 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ void Connection::reset()
 	ClientResponse = "";
 	lastActivity = time(NULL);
 	isComplete = false;
+	KeepAlive = false;
+	needClose = false;
 }
 
 void Server::closeConnection(int fd)
@@ -97,9 +99,9 @@ void Server::handleClientData(int ClientFd)
 	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
 
-	// std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
-	// 		  << "Received data from client ------ \n\n"
-	// 		  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
+	std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
+			  << "Received data from client ------ \n\n"
+			  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
 
 	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
@@ -133,48 +135,15 @@ void Server::handleClientData(int ClientFd)
 				std::cout << "not a correct cgi path" << std::endl;
 			}
 		}
-		else
-			std::cout << "normal request" << std::endl;
-		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
-		std::cout << MAGENTA << "cookies : " << WHIET << std::endl;
-		print_map(request.get_cookies());
-		std::cout << MAGENTA << "params : " << WHIET << std::endl;
-		print_map(request.getParams());
-		std::cout << MAGENTA << "raw path : " << WHIET  << std::endl;
-		std::cout << request.get_path_without_params() << std::endl;
-		std::cout << MAGENTA << "raw request : "<< WHIET  << std::endl;
-		std::cout << request.getPath()	<< std::endl;
-		std::cout << MAGENTA << "headers : "<< WHIET  << std::endl;
-		print_map(request.getHeaders());
-		std::cout << MAGENTA << "content type value : "<< WHIET << std::endl;
-		print_map(request.get_content_type_values());
-		std::cout << MAGENTA << "get boundary : "<< WHIET << std::endl;
-		std::cout << request.get_boundary() << std::endl;
-		std::cout << MAGENTA << "body : "<< WHIET  << std::endl;
-		std::cout << request.getBody() << std::endl;
-		// std::cout << request.parse_body() << std::endl;
-		// std::cout << MAGENTA << "body without boundy : "<< WHIET  << std::endl;
-		// std::cout << request.parse_body() << std::endl;
-		// std::cout << MAGENTA << "body headers : "<< WHIET  << std::endl;
-		// print_map(request.GetcontentdisPositionMap());
-		std::cout <<  MAGENTA << "the two vals "<< WHIET  << std::endl;
-		std::cout << "name : " << request.getNameValue() << " ; " << "filename : " << request.getFilenameValue() << std::endl;
-		std::cout << "content type : " << request.getcontent_type_valbody() << std::endl;
-		std::cout << MAGENTA << "passed body : " << WHIET << std::endl;
-		std::cout << request.getparssed_body() << std::endl;
-		std::cout << MAGENTA << "correct size : " << WHIET << std::endl;
-		std::cout << (request.get_correct_size() ? "true" : "false") << std::endl;
-		// std::cout << MAGENTA << "full cgi path : " << WHIET << std::endl;
-		std::cout << "-----------------------------" << std::endl;
-		// std::cout << "headers : " << std::endl;
-		// else no cookies should be sent
+		// else
+			// std::cout << "normal request" << std::endl;
+		
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
-		// std::cout << confg.getHost() << ":" << std::endl;
+		if (_connections[ClientFd].getClientRequest().find("Connection: keep-alive"))
+			_connections[ClientFd].setKeepAlive(true);
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
-		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-		//		<< "Request Is complete" << WHIET << std::endl;
-		// std::cout << RED << "			------------------------------------			" << std::endl;
+		
 	}
 	else if (_connections[ClientFd].getNeedClose())
 		closeConnection(ClientFd);

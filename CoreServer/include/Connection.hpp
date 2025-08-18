@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 21:19:37 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 14:30:04 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:54:28 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,31 @@ class Connection
 		NewResponse _response;
 		time_t lastActivity;
 		bool isComplete;
+		bool KeepAlive;
 		bool needClose;
 	public:
-		Connection() : Client_fd(-1), lastActivity(time(NULL)), ClientResponse(""), isComplete(false), needClose(false) {}
-		Connection(int fd, const ServerConfig &cfg) : Client_fd(fd), config(cfg), lastActivity(time(NULL)), ClientResponse(""), isComplete(false), needClose(false) {}
+ 		Connection()
+            : Client_fd(-1),
+              ClientRequest(),
+              ClientResponse(""),
+              config(),
+              ParseRequest(),
+              _response(),
+              lastActivity(time(NULL)),
+              isComplete(false),
+              KeepAlive(false),
+              needClose(false) {}
+		  Connection(int fd, const ServerConfig &cfg)
+            : Client_fd(fd),
+              ClientRequest(),
+              ClientResponse(""),
+              config(cfg),
+              ParseRequest(),
+              _response(),
+              lastActivity(time(NULL)),
+              isComplete(false),
+              KeepAlive(false),
+              needClose(false) {}
 		int getClientFd() const { return Client_fd; }
 		std::string getClientRequest()  {
 			return std::string(ClientRequest.data(), ClientRequest.size()); }
@@ -58,6 +79,8 @@ class Connection
 		void updateLastActivity() { lastActivity = time(NULL); }
 		bool getNeedClose() {return needClose;};
 		void setNeedClose(bool status) {needClose = status;}
+		bool getKeepAlive() {return KeepAlive;}
+		void setKeepAlive(bool status) {KeepAlive = status;}
 	bool RequestIsComplete(const std::vector<char> &request);
 		// Response related methods
 	void buildResponse(int clientFd, ParssedRequest &request, ServerConfig &config);

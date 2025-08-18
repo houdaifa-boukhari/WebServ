@@ -207,7 +207,7 @@ void ParssedRequest::assign_boundary()
     }
     else
     {
-        std::cerr << "Boundary not found in Content-Type header.\n";
+        // std::cerr << "Boundary not found in Content-Type header.\n";
         _boundary = "";
     }
 }
@@ -251,7 +251,7 @@ void ParssedRequest::parse_body()
 {
     if (_boundary.empty())
     {
-        std::cerr << "Boundary is not set, cannot parse body.\n";
+        // std::cerr << "Boundary is not set, cannot parse body.\n";
         return;
     }
     std::string full_boundary = "--" + _boundary;
@@ -322,7 +322,7 @@ void ParssedRequest::check_body_size()
         _headers["Transfer-Encoding"] == "chunked")
     {
         chunked = true;
-        int i = 0;
+        // int i = 0;
 
         while (pos < _body.size())
         {
@@ -382,7 +382,7 @@ void ParssedRequest::check_body_size()
             }
             pos += 2;
 
-            std::cout << "i :" << i++ << ", size: " << chunk_size << std::endl;
+            // std::cout << "i :" << i++ << ", size: " << chunk_size << std::endl;
         }
 
         // If we exit loop without seeing 0-size chunk, it's invalid

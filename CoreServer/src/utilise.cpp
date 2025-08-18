@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 14:26:59 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:58:27 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,12 +76,12 @@ bool Connection::RequestIsComplete(const std::vector<char> &request)
             return (false);
         contentLengthStr = std::string(request.begin() + start, request.begin() + end);
         len = ::atoi(contentLengthStr.c_str());
-        std::cout << "len is " << len << "\n";
         if (len > this->config.getMaxBodySizeBytes())
         {
             std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
                       << "Request is larger than defined max body size  " << WHIET << std::endl;
             NewResponse::sendSimpleErrorResponse(Client_fd, 413, config);
+            setNeedClose(true);
             return (false);
         }
         body_size = request.size() - body_start;

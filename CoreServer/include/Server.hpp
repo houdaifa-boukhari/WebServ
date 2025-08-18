@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 10:11:38 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/07/29 12:08:10 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 17:56:49 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@
 #include "logger.hpp"
 #include "../../configParsing/serverConfig.hpp"
 #include "../../ParseRequest/Request.hpp"
-#include "../../response/response.hpp"
 #include "../../response/NewResponse.hpp"
 #include "Connection.hpp"
 

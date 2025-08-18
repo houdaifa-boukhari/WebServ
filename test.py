@@ -34,7 +34,7 @@ DEFAULT_BASE = "http://127.0.0.1:8080"
 UPLOAD_PATH = "/upload"        # route that accepts file uploads (adjust if needed)
 STATIC_TEST_PATH = "/index.html"
 DIR_LISTING_PATH = "/files/"   # a directory route used to test directory listing
-CGI_TEST_PATH = "/cgi-bin/test.py"  # an example CGI script path you should provide in config
+CGI_TEST_PATH = "/cgi-files/test.py"  # an example CGI script path you should provide in config
 DELETE_TEST_PATH = "/tmp-to-delete.txt"  # URL path used for testing DELETE (script will create + delete)
 MAX_BODY_TEST_PATH = "/big"    # route that accepts POST body (adjust if needed)
 # -----------------------------------------------------------------------------
@@ -308,20 +308,20 @@ def main():
             proc = start_server(args.start_cmd, args.wait)
 
         # sequence of tests
-        # results.append(("connection", test_connection(args.base)))
-        # results.append(("static_file", test_static_file(args.base)))
-        # results.append(("directory_listing", test_directory_listing(args.base)))
-        # results.append(("upload", test_upload(args.base)))
+        results.append(("connection", test_connection(args.base)))
+        results.append(("static_file", test_static_file(args.base)))
+        results.append(("directory_listing", test_directory_listing(args.base)))
+        results.append(("upload", test_upload(args.base)))
         results.append(("delete", test_delete(args.base)))
-        # results.append(("chunked", test_chunked(args.base)))
-        # results.append(("cgi", test_cgi(args.base)))
-        # results.append(("max_body", test_max_body_size(args.base)))
-        # results.append(("keep-alive", test_keepalive(args.base)))
+        results.append(("chunked", test_chunked(args.base)))
+        results.append(("cgi", test_cgi(args.base)))
+        results.append(("max_body", test_max_body_size(args.base)))
+        results.append(("keep-alive", test_keepalive(args.base)))
 
-        # if not args.no_stress:
-        #     results.append(("stress", stress_test(args.base, "/", concurrency=args.concurrency, requests_count=args.requests)))
-        # else:
-        #     print("Skipping stress test (--no-stress)")
+        if not args.no_stress:
+            results.append(("stress", stress_test(args.base, "/", concurrency=args.concurrency, requests_count=args.requests)))
+        else:
+            print("Skipping stress test (--no-stress)")
 
         if args.ports:
             results.append(("ports", test_ports(args.base, args.ports)))

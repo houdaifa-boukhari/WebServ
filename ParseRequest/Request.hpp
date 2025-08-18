@@ -49,7 +49,7 @@ private:
     std::string parssed_body;
     std::map<std::string, std::map<std::string, std::string> > _sessions;
     int status_code;
-    bool cookie_avai;
+    // bool cookie_avai;
     bool _cgi;
     bool correct_size;
     bool chunked;
