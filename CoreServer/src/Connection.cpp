@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/09 20:30:28 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/17 19:36:10 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,13 @@ void Server::handleClientData(int ClientFd)
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
 		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
-
+		if (request.get_correct_size() == false)
+		{
+			NewResponse::sendSimpleErrorResponse(ClientFd, 400, _connections[ClientFd].getServerConfig());
+			_connections[ClientFd].setIsComplete(false);
+			closeConnection(ClientFd);
+			return ;
+		}
 		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
 		{
 			request.assign_full_cgi_path();

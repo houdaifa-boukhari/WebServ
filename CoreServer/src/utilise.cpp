@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/09 20:54:31 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/17 18:51:48 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,30 +14,30 @@
 
 bool chunkedRequest(const std::string &request)
 {
-	size_t pos, body_start, body_end;
+    size_t pos, body_start, body_end;
 
-	pos = request.find("Transfer-Encoding: chunked");
-	if (pos != std::string::npos)
-	{
-		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
-				  << "Chunked request detected" << WHIET << std::endl;
-		// Find the start of the body
-		body_start = request.find("\r\n\r\n");
-		if (body_start == std::string::npos)
-		{
-			std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
-					  << "Invalid chunked request format" << WHIET << std::endl;
-			return false;
-		}
-		body_start += 4; // Skip past the \r\n\r\n
-		body_end = request.find("\r\n0\r\n\r\n", body_start);
-		if (body_end == std::string::npos)
-			return (false);
-		std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
-				  << "Chunked request processing complete" << WHIET << std::endl;
-		return (true);
-	}
-	return (false);
+    pos = request.find("Transfer-Encoding: chunked");
+    if (pos != std::string::npos)
+    {
+        std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
+                  << "Chunked request detected" << WHIET << std::endl;
+        // Find the start of the body (\r\n\r\n)
+        body_start = request.find("\r\n\r\n");
+        if (body_start == std::string::npos) // Check if the body delimiter exists
+        {
+            std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
+                      << "Invalid chunked request format" << WHIET << std::endl;
+            return (false);
+        }
+        body_start += 4; // Skip past the \r\n\r\n
+        body_end = request.find("\r\n0\r\n\r\n", body_start);
+        if (body_end == std::string::npos) // Check if the end of the body exists
+            return (false);
+        std::cout << YELLOW << currentTime() << CYAN << " [DEBUG] "
+                  << "Chunked request processing complete" << WHIET << std::endl;
+        return (true);
+    }
+    return (false);
 }
 
 bool Connection::RequestIsComplete(const std::vector<char> &request)
@@ -63,8 +63,7 @@ bool Connection::RequestIsComplete(const std::vector<char> &request)
     {
         if (std::search(request.begin(), request.end(), "Transfer-Encoding: chunked",
                         "Transfer-Encoding: chunked" + 25) != request.end())
-            // return chunkedRequest(request);
-            return (true); //need to back to this later
+            return (chunkedRequest(std::string(request.begin(), request.end())));
         pos = std::search(request.begin(), request.end(), "Content-Length:", "Content-Length:" + 15) - request.begin();
         if (pos >= request.size())
             return (false);
