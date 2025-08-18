@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/18 18:29:19 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:58:20 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -446,7 +446,7 @@ void NewResponse::generateResponse()
 
 void NewResponse::handleGetRequest()
 {
-	// std::cout << "request path : " << _request.getPath() << std::endl;
+	std::cout << "request path : " << _request.getPath() << std::endl;
 	if (!findMatchingLocation(_request.getPath()))
 	{
 		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;
@@ -636,7 +636,7 @@ void NewResponse::handlePostRequest()
 
 void NewResponse::handleDeleteRequest()
 {
-	// std::cout << "starting DELETE request handling" << std::endl;
+	std::cout << "starting DELETE request handling" << std::endl;
 
 	if (!findMatchingLocation(_request.getPath()))
 	{
@@ -874,7 +874,7 @@ size_t NewResponse::sendAll(int sockfd, const void *buf, size_t len)
 
 void NewResponse::sendNextChunk()
 {
-	// std::cout << "Sending file in chunks..." << std::endl;
+	std::cout << "Sending file in chunks..." << std::endl;
 	if (this->_sendStatus == SEND_COMPLETED || this->_sendStatus == SEND_ERROR)
 		return;
 
