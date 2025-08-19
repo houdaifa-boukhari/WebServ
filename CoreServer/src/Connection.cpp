@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 18:31:16 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/19 16:40:48 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,9 @@ void Server::handleClientData(int ClientFd)
 	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
 
-	std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
-			  << "Received data from client ------ \n\n"
-			  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
+	// std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
+	// 		  << "Received data from client ------ \n\n"
+	// 		  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
 
 	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{

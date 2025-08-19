@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 19:31:24 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/19 16:41:29 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,8 @@ void Server::initializeSockets()
 			setsockopt(tmp_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 			sockaddr_in address;
 			address.sin_family = AF_INET;										// Address family: IPv4
-			address.sin_addr.s_addr = inet_addr(host.c_str());					// assign host ; why is forebedin
-			address.sin_port = htons(ports[j]);									// assign port
+			address.sin_addr.s_addr = InetAdress(host);
+ 			address.sin_port = htons(ports[j]);									// assign port
 			if (bind(tmp_fd, (struct sockaddr *)&address, sizeof(address)) < 0) // abin port and host
 				perror("bind");
 			listen(tmp_fd, SOMAXCONN);
@@ -121,22 +121,14 @@ void Server::run()
 				{
 					std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 							  << "Sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
-					_connections[_poll_fds[i].fd].setIsComplete(false);
+					// _connections[_poll_fds[i].fd].setIsComplete(false);
 					if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_NOT_STARTED)
-					{
-						std::cout << "send\n";
 						_connections[_poll_fds[i].fd].generateResponse();
-					}
 					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_IN_PROGRESS)
-					{
 						_connections[_poll_fds[i].fd].generateChunkedResponse();
-					}
 					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_ERROR)
-					{
 						std::cerr << YELLOW << currentTime() << RED << " [ERROR] "
 								  << "Error sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
-					}
-
 					if (_connections[_poll_fds[i].fd].getKeepAlive())
 					{
 						std::cout << YELLOW << currentTime() << GREEN << " [INFO] "

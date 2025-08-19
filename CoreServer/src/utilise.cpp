@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 18:30:35 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/19 16:36:56 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,4 +125,32 @@ void Server::checkTimeouts()
 		else
 			++it;
 	}
+}
+
+ssize_t  Server::InetAdress(std::string Ip)
+{
+    int pos = 0;
+    int adress[4] = {0};
+	std::string tmp;
+    ssize_t result;
+
+    if (std::count(Ip.begin(), Ip.end(), '.') != 3)
+        return (-1);
+    adress[0] = ::atoi(Ip.c_str());
+    pos = Ip.find('.') + 1;
+    tmp = Ip.substr(pos);
+	adress[1] = ::atoi(tmp.c_str());
+	pos = tmp.find('.') + 1;
+    tmp = tmp.substr(pos);
+	adress[2] = ::atoi(tmp.c_str());
+	pos = tmp.find('.') + 1;
+    tmp = tmp.substr(pos);
+	adress[3] = ::atoi(tmp.c_str());
+	for (int i = 0; i < 4; i++)
+	{
+		if (adress[i] < 0 || adress[i] > 255)
+			return (-1);
+	}
+    result = (adress[0] << 24) | (adress[1] << 16) | (adress[2] << 8) | adress[3];
+    return (htonl(result));
 }
