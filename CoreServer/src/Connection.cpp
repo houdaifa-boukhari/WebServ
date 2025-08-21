@@ -63,7 +63,6 @@ LocationConfig* findMatchingLocation(std::vector<LocationConfig> &locations,cons
 
     if (bestMatch)
     {
-		std::cout << "correct" << std::endl;
         // this->_matchedLocation = *bestMatch;
         return bestMatch;
     }
@@ -190,15 +189,11 @@ void Server::handleClientData(int ClientFd)
 		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
 
-		// ServerConfig &config = _connections[ClientFd].getServerConfig();
-		// std::vector<LocationConfig> locations = config.getLocations();
-		// LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
-		// check if (there is a cgi path in the nginx conf && the path exists) then execute 
-		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
+		ServerConfig &config = _connections[ClientFd].getServerConfig();
+		std::vector<LocationConfig> locations = config.getLocations();
+		LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
+		if (CgiConfig && CgiConfig->isCgi())
 		{
-			ServerConfig &config = _connections[ClientFd].getServerConfig();
-			std::vector<LocationConfig> locations = config.getLocations();
-			LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
 			request.assign_cgi_path(CgiConfig->getCgiPath());
 			request.assign_full_cgi_path();
 			if (request.path_exists() && CgiConfig != NULL)
@@ -219,13 +214,11 @@ void Server::handleClientData(int ClientFd)
 				std::cout << "no cgiPath config found" << std::endl;
 			}
 		}
-		
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		if (_connections[ClientFd].getClientRequest().find("Connection: keep-alive"))
 			_connections[ClientFd].setKeepAlive(true);
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
-		
 	}
 	else if (_connections[ClientFd].getNeedClose())
 		closeConnection(ClientFd);

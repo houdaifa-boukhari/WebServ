@@ -446,7 +446,7 @@ void NewResponse::generateResponse()
 
 void NewResponse::handleGetRequest()
 {
-	std::cout << "request path : " << _request.getPath() << std::endl;
+	// std::cout << "request path : " << _request.getPath() << std::endl;
 	if (!findMatchingLocation(_request.getPath()))
 	{
 		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;
