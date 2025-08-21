@@ -190,6 +190,8 @@ void Server::handleClientData(int ClientFd)
 		ServerConfig &config = _connections[ClientFd].getServerConfig();
 		std::vector<LocationConfig> locations = config.getLocations();
 		LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
+		request.set_status_code(200);
+		std::cout << RED << request.get_status_code() << WHIET << std::endl;
 		if (CgiConfig && CgiConfig->isCgi())
 		{
 			request.assign_cgi_path(CgiConfig->getCgiPath());
@@ -211,6 +213,12 @@ void Server::handleClientData(int ClientFd)
 				std::cout << "no cgiPath config found" << std::endl;
 			}
 		}
+		else if (request.is_cgi())
+		{
+			request.set_status_code(404);
+			std::cout << "not a correct file under cgi-bin dir" << std::endl;
+		}
+		std::cout << RED << request.get_status_code() << WHIET << std::endl;
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		if (_connections[ClientFd].getClientRequest().find("Connection: keep-alive"))

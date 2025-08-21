@@ -52,7 +52,7 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
     std::string c_path;
     std::string output;
     c_path = request.getCgiPath();
-
+    // request.set_status_code(200);
     char *const args[] = {
         const_cast<char *>(c_path.c_str()),
         const_cast<char *>(file_path.c_str()),
