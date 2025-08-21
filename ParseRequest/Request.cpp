@@ -173,7 +173,7 @@ void ParssedRequest::assign_content_type()
     std::istringstream stream(content_type_value);
     std::string cookie_pair;
 
-    std::cout << RED << content_type_value << WHIET << std::endl; // multipart/form-data; boundary=----geckoformboundarya62674fb9d5e16f0d6991b29e3e0e5d5
+    // std::cout << RED << content_type_value << WHIET << std::endl; // multipart/form-data; boundary=----geckoformboundarya62674fb9d5e16f0d6991b29e3e0e5d5
     _content_type_values.clear();
     while (std::getline(stream, cookie_pair, ';'))
     {

@@ -198,6 +198,7 @@ void Server::handleClientData(int ClientFd)
 			{
 				char **env = request.get_env();
 				request.assign_cgi_output(execute_cgi(request, request.get_cgi_path(), env));
+				// std::cout << "cgi output: " << request.get_cgi_output() << std::endl;
 				free_envp(env);
 			}
 			else if (!request.path_exists())
