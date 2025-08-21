@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:42:15 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/29 13:25:28 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/18 13:34:33 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,10 +154,21 @@ std::string LocationConfig::getIndexPath() const
 	return "/" + _index[0];
 }
 
+std::string LocationConfig::getDefaultFile() const
+{
+	return _default_file;
+}
+
+void LocationConfig::setDefaultFile(std::string file)
+{
+	this->_default_file = file;
+}
+
 void LocationConfig::printLocation() const
 {
 	std::cout << "Location Name: " << _name << std::endl;
 	std::cout << "Root: " << _root << std::endl;
+	std::cout << "default file : " << _default_file << std::endl;
 	std::cout << "Index : " << std::endl;
 	for (size_t i = 0; i < _index.size(); i++)
 	{

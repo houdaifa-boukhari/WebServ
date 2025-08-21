@@ -1,0 +1,58 @@
+10
+The quick brown 
+10
+fox jumps over t
+10
+he lazy dog.The 
+10
+quick brown fox 
+10
+jumps over the l
+10
+azy dog.The quic
+10
+k brown fox jump
+10
+s over the lazy 
+10
+dog.The quick br
+10
+own fox jumps ov
+10
+er the lazy dog.
+10
+The quick brown 
+10
+fox jumps over t
+10
+he lazy dog.The 
+10
+quick brown fox 
+10
+jumps over the l
+10
+azy dog.The quic
+10
+k brown fox jump
+10
+s over the lazy 
+10
+dog.The quick br
+10
+own fox jumps ov
+10
+er the lazy dog.
+10
+The quick brown 
+10
+fox jumps over t
+10
+he lazy dog.The 
+10
+quick brown fox 
+10
+jumps over the l
+8
+azy dog.
+0
+

@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/09 20:30:28 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/19 16:40:48 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,15 +189,11 @@ void Server::handleClientData(int ClientFd)
 		// std::cout << findMatchingLocation << std::endl;
 		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
-		// if (CgiConfig != NULL)
-		// 	std::cout << YELLOW << "HHHHHHH " << CgiConfig->getCgiPath() << " ddd" << WHIET << std::endl;
-		// else
-		// {
-		// 	request.set_status_code(404);
-		// 	std::cout << YELLOW << "HHHHHHH NULL PATH" <<  WHIET << std::endl;
-		// }
-		// std::cout << YELLOW << request.get_path_without_params() << WHIET << std::endl;
 
+		// ServerConfig &config = _connections[ClientFd].getServerConfig();
+		// std::vector<LocationConfig> locations = config.getLocations();
+		// LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
+		// check if (there is a cgi path in the nginx conf && the path exists) then execute 
 		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
 		{
 			ServerConfig &config = _connections[ClientFd].getServerConfig();
@@ -213,56 +209,26 @@ void Server::handleClientData(int ClientFd)
 				// std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
 				free_envp(env);
 			}
-			else
+			else if (!request.path_exists())
 			{
 				request.set_status_code(404);
 				std::cout << "not a correct cgi path" << std::endl;
+			}else
+			{
+				request.set_status_code(500);
+				std::cout << "no cgiPath config found" << std::endl;
 			}
 		}
-		else
-			std::cout << "normal request" << std::endl;
-		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
-		std::cout << MAGENTA << "cookies : " << WHIET << std::endl;
-		print_map(request.get_cookies());
-		std::cout << MAGENTA << "params : " << WHIET << std::endl;
-		print_map(request.getParams());
-		std::cout << MAGENTA << "raw path : " << WHIET  << std::endl;
-		std::cout << request.get_path_without_params() << std::endl;
-		std::cout << MAGENTA << "raw request : "<< WHIET  << std::endl;
-		std::cout << request.getPath()	<< std::endl;
-		std::cout << MAGENTA << "headers : "<< WHIET  << std::endl;
-		print_map(request.getHeaders());
-		std::cout << MAGENTA << "content type value : "<< WHIET << std::endl;
-		print_map(request.get_content_type_values());
-		std::cout << MAGENTA << "get boundary : "<< WHIET << std::endl;
-		std::cout << request.get_boundary() << std::endl;
-		std::cout << MAGENTA << "body : "<< WHIET  << std::endl;
-		std::cout << request.getBody() << std::endl;
-		// std::cout << request.parse_body() << std::endl;
-		// std::cout << MAGENTA << "body without boundy : "<< WHIET  << std::endl;
-		// std::cout << request.parse_body() << std::endl;
-		// std::cout << MAGENTA << "body headers : "<< WHIET  << std::endl;
-		// print_map(request.GetcontentdisPositionMap());
-		std::cout <<  MAGENTA << "the two vals "<< WHIET  << std::endl;
-		std::cout << "name : " << request.getNameValue() << " ; " << "filename : " << request.getFilenameValue() << std::endl;
-		std::cout << "content type : " << request.getcontent_type_valbody() << std::endl;
-		std::cout << MAGENTA << "passed body : " << WHIET << std::endl;
-		std::cout << request.getparssed_body() << std::endl;
-		std::cout << MAGENTA << "correct size : " << WHIET << std::endl;
-		std::cout << (request.get_correct_size() ? "true" : "false") << std::endl;
-		// std::cout << MAGENTA << "full cgi path : " << WHIET << std::endl;
-		std::cout << "-----------------------------" << std::endl;
-		// std::cout << "headers : " << std::endl;
-		// else no cookies should be sent
+		
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
-		// std::cout << confg.getHost() << ":" << std::endl;
+		if (_connections[ClientFd].getClientRequest().find("Connection: keep-alive"))
+			_connections[ClientFd].setKeepAlive(true);
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
-		// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-		//		<< "Request Is complete" << WHIET << std::endl;
-		// std::cout << RED << "			------------------------------------			" << std::endl;
+		
 	}
-	// else
+	else if (_connections[ClientFd].getNeedClose())
+		closeConnection(ClientFd);
 	// 	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 	// 			  << "Request not complete yet" << WHIET << std::endl;
 }
