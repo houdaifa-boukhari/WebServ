@@ -20,6 +20,85 @@ void Connection::reset()
 	isComplete = false;
 }
 
+LocationConfig* findMatchingLocation(std::vector<LocationConfig> &locations,const std::string &pat)
+{
+    // std::vector<LocationConfig> locations = _config.getLocations();
+    LocationConfig *bestMatch = NULL;
+    size_t bestLen = 0;
+    bool isWildcardMatch = false;
+	std::string path;
+	if (pat == "/")
+		path = pat;
+	else 
+		path = pat.substr(1);
+		
+    for (size_t i = 0; i < locations.size(); i++)
+    {
+        const std::string &locName = locations[i].getName();
+
+        if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
+        {
+            std::string extension = locName.substr(1); // Remove the '*'
+            if (path.size() >= extension.size() &&
+                path.substr(path.size() - extension.size()) == extension)
+            {
+                if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
+                {
+                    bestLen = extension.size();
+                    bestMatch = &locations[i];
+                    isWildcardMatch = true;
+                }
+            }
+        }
+        else if (path.compare(0, locName.size(), locName) == 0 &&
+                 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+        {
+            if (!isWildcardMatch && locName.size() > bestLen)
+            {
+                bestLen = locName.size();
+                bestMatch = &locations[i];
+            }
+        }
+    }
+
+    if (bestMatch)
+    {
+		std::cout << "correct" << std::endl;
+        // this->_matchedLocation = *bestMatch;
+        return bestMatch;
+    }
+    return NULL;
+}
+
+// LocationConfig* findMatchingLocation(std::vector<LocationConfig> &locations,const std::string &pat)
+// {
+//     LocationConfig *bestMatch = NULL;
+//     size_t bestLen = 0;
+// 	std::string path = pat.substr(1); // Remove query parameters if any
+//     for (size_t i = 0; i < locations.size(); i++)
+//     {
+//         const std::string &locName = locations[i].getName();
+//         if (path.compare(0, locName.size(), locName) == 0 &&
+//             (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+//         {
+//             if (locName.size() > bestLen)
+//             {
+//                 bestLen = locName.size();
+//                 bestMatch = &locations[i];
+//             }
+//         }
+//     }
+//     if (bestMatch)
+//     {
+// 		std::cout << GREEN << currentTime() << GREEN << " [INFO] "
+// 				  << "Found matching location: " << bestMatch->getName() << WHIET << std::endl;
+//        return  bestMatch;
+//     }
+// 	std::cout << GREEN << currentTime() << RED << " [ERROR] "
+// 			  << "No matching location found for path: " << path << WHIET << std::endl;
+//     return NULL;
+// }
+
 void Server::closeConnection(int fd)
 {
 	if (fd < 0)
@@ -107,13 +186,26 @@ void Server::handleClientData(int ClientFd)
 
 		/////// anour Part ///////
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
+		// std::cout << findMatchingLocation << std::endl;
 		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
+		// if (CgiConfig != NULL)
+		// 	std::cout << YELLOW << "HHHHHHH " << CgiConfig->getCgiPath() << " ddd" << WHIET << std::endl;
+		// else
+		// {
+		// 	request.set_status_code(404);
+		// 	std::cout << YELLOW << "HHHHHHH NULL PATH" <<  WHIET << std::endl;
+		// }
+		// std::cout << YELLOW << request.get_path_without_params() << WHIET << std::endl;
 
 		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
 		{
+			ServerConfig &config = _connections[ClientFd].getServerConfig();
+			std::vector<LocationConfig> locations = config.getLocations();
+			LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
+			request.assign_cgi_path(CgiConfig->getCgiPath());
 			request.assign_full_cgi_path();
-			if (request.path_exists())
+			if (request.path_exists() && CgiConfig != NULL)
 			{
 				char **env = request.get_env();
 				request.assign_cgi_output(execute_cgi(request, request.get_cgi_path(), env));

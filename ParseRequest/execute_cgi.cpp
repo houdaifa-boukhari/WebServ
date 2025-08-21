@@ -51,18 +51,8 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
 {
     std::string c_path;
     std::string output;
-    if (is_suffix(file_path, ".py"))
-    {
-        c_path = "/usr/local/bin/python3.7";
-    }else if (is_suffix(file_path, ".php"))
-    {
-        c_path = "/usr/bin/php";
-    }else
-    {
-        std::cout << "not a correct extension" << std::endl;
-        return "";
-    }
-    
+    c_path = request.getCgiPath();
+
     char *const args[] = {
         const_cast<char *>(c_path.c_str()),
         const_cast<char *>(file_path.c_str()),

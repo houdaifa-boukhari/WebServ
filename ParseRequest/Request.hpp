@@ -47,6 +47,7 @@ private:
     std::string nameValue;
     std::string filenameValue;
     std::string parssed_body;
+    std::string cgiPath;
     std::map<std::string, std::map<std::string, std::string> > _sessions;
     int status_code;
     bool cookie_avai;
@@ -58,6 +59,8 @@ public:
     // void assign_cookies();
     // std::string generate_session_response();
     void check_body_size();
+    void assign_cgi_path(std::string cgi_path){this->cgiPath = cgi_path;};
+    std::string getCgiPath() { return cgiPath; };
     bool get_correct_size() { return correct_size; };
     std::string getNameValue() { return nameValue; };
     std::string getFilenameValue() { return filenameValue; };
