@@ -356,29 +356,46 @@ bool NewResponse::isMethodAllowed(const std::string &method, LocationConfig &loc
 
 bool NewResponse::findMatchingLocation(const std::string &path)
 {
-	std::vector<LocationConfig> locations = _config.getLocations();
-	LocationConfig *bestMatch = NULL;
-	size_t bestLen = 0;
+    std::vector<LocationConfig> locations = _config.getLocations();
+    LocationConfig *bestMatch = NULL;
+    size_t bestLen = 0;
+    bool isWildcardMatch = false;
 
-	for (size_t i = 0; i < locations.size(); i++)
-	{
-		const std::string &locName = locations[i].getName();
-		if (path.compare(0, locName.size(), locName) == 0 &&
-			(path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
-		{
-			if (locName.size() > bestLen)
-			{
-				bestLen = locName.size();
-				bestMatch = &locations[i];
-			}
-		}
-	}
-	if (bestMatch)
-	{
-		this->_matchedLocation = *bestMatch;
-		return true;
-	}
-	return false;
+    for (size_t i = 0; i < locations.size(); i++)
+    {
+        const std::string &locName = locations[i].getName();
+
+        if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
+        {
+            std::string extension = locName.substr(1); // Remove the '*'
+            if (path.size() >= extension.size() &&
+                path.substr(path.size() - extension.size()) == extension)
+            {
+                if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
+                {
+                    bestLen = extension.size();
+                    bestMatch = &locations[i];
+                    isWildcardMatch = true;
+                }
+            }
+        }
+        else if (path.compare(0, locName.size(), locName) == 0 &&
+                 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+        {
+            if (!isWildcardMatch && locName.size() > bestLen)
+            {
+                bestLen = locName.size();
+                bestMatch = &locations[i];
+            }
+        }
+    }
+
+    if (bestMatch)
+    {
+        this->_matchedLocation = *bestMatch;
+        return true;
+    }
+    return false;
 }
 
 void NewResponse::sendResponseToClient()

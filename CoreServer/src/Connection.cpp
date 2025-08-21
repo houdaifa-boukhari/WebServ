@@ -175,20 +175,18 @@ void Server::handleClientData(int ClientFd)
 	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
 
-	// std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
-	// 		  << "Received data from client ------ \n\n"
-	// 		  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
-
 	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
 		_connections[ClientFd].setIsComplete(true);
 
-		/////// anour Part ///////
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
-		// std::cout << findMatchingLocation << std::endl;
 		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
-
+		if (request.get_boundary() != "" && request.get_correct_size() == false)
+		{
+			NewResponse::sendSimpleErrorResponse(ClientFd, 400, _connections[ClientFd].getServerConfig());
+			return;
+		}
 		ServerConfig &config = _connections[ClientFd].getServerConfig();
 		std::vector<LocationConfig> locations = config.getLocations();
 		LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
@@ -200,8 +198,6 @@ void Server::handleClientData(int ClientFd)
 			{
 				char **env = request.get_env();
 				request.assign_cgi_output(execute_cgi(request, request.get_cgi_path(), env));
-				// std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
-				// std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
 				free_envp(env);
 			}
 			else if (!request.path_exists())
@@ -222,8 +218,6 @@ void Server::handleClientData(int ClientFd)
 	}
 	else if (_connections[ClientFd].getNeedClose())
 		closeConnection(ClientFd);
-	// 	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-	// 			  << "Request not complete yet" << WHIET << std::endl;
 }
 
 SendStatus Connection::getSendStatus() const
