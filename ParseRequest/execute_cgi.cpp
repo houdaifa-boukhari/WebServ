@@ -52,14 +52,13 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
     std::string c_path;
     std::string output;
     c_path = request.getCgiPath();
-    // request.set_status_code(200);
     char *const args[] = {
         const_cast<char *>(c_path.c_str()),
         const_cast<char *>(file_path.c_str()),
         NULL
     };
 
-    std::clock_t clk = std::clock(); // processor clock ticks
+    std::clock_t clk = std::clock();
     unsigned int seed = static_cast<unsigned int>(clk);
 
     unsigned int unique_id = simple_random(seed);
@@ -73,7 +72,6 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
     int input_fd = open(temp_inputfilename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
     int writing_in = write(input_fd, request.getBody().c_str(), request.getBody().length());
     close(input_fd);
-    // perror("write");
     if (writing_in == -1)
     {
         request.set_status_code(500);
@@ -88,18 +86,12 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
             std::exit(12);
         if (dup2(output_fd, 1) == -1 || dup2(output_fd, 2) == -1 || dup2(new_input_fd, 0) == -1)
         {
-            // std::cout << "Error duplicating file descriptors: " << strerror(errno) << std::endl;
             close(output_fd);
             std::exit(12);
         }
         close(output_fd);
         close(new_input_fd);
-        // int file_int = fopen("tst.txt", O_RDWR | O_CREAT | O_TRUNC, 0600);
         execve(c_path.c_str(), args, env);
-        // FILE *file_int = fopen("/Users/aet-tale/Desktop/WebServ copy 2/tst.txt", "w");
-
-        // fprintf(file_int, "Error executing CGI script: %s\n", strerror(errno));
-        // perror("execve failed");
         std::exit(127);
     }else if (pid > 0)
     {
