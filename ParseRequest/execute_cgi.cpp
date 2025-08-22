@@ -51,9 +51,10 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
 {
     std::string c_path;
     std::string output;
+    request.set_status_code(200);
     if (is_suffix(file_path, ".py"))
     {
-        c_path = "/usr/local/bin/python3.7";
+        c_path = "/opt/homebrew/bin/python3";
     }else if (is_suffix(file_path, ".php"))
     {
         c_path = "/usr/bin/php";

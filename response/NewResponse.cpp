@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   NewResponse.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/18 18:58:20 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/20 15:04:08 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -359,20 +359,37 @@ bool NewResponse::findMatchingLocation(const std::string &path)
 	std::vector<LocationConfig> locations = _config.getLocations();
 	LocationConfig *bestMatch = NULL;
 	size_t bestLen = 0;
+	bool isWildcardMatch = false;
 
 	for (size_t i = 0; i < locations.size(); i++)
 	{
 		const std::string &locName = locations[i].getName();
-		if (path.compare(0, locName.size(), locName) == 0 &&
-			(path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+
+		if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
 		{
-			if (locName.size() > bestLen)
+			std::string extension = locName.substr(1); // Remove the '*'
+			if (path.size() >= extension.size() &&
+				path.substr(path.size() - extension.size()) == extension)
+			{
+				if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
+				{
+					bestLen = extension.size();
+					bestMatch = &locations[i];
+					isWildcardMatch = true;
+				}
+			}
+		}
+		else if (path.compare(0, locName.size(), locName) == 0 &&
+				 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+		{
+			if (!isWildcardMatch && locName.size() > bestLen)
 			{
 				bestLen = locName.size();
 				bestMatch = &locations[i];
 			}
 		}
 	}
+
 	if (bestMatch)
 	{
 		this->_matchedLocation = *bestMatch;
@@ -511,7 +528,7 @@ void NewResponse::handleGetRequest()
 	}
 	else
 	{
-		std::string normalizedPath = normalizePath(_request.getPath());
+		std::string normalizedPath = normalizePath(_request.get_path_without_params());
 		std::string locationName = _matchedLocation.getName();
 		std::string relativePath = normalizedPath.substr(locationName.size());
 		if (!relativePath.empty() && relativePath[0] == '/')
@@ -602,7 +619,12 @@ void NewResponse::handlePostRequest()
 			sendResponseToClient();
 			return;
 		}
-		out << _request.getBody();
+
+		if (!_request.get_boundary().empty())
+			out << _request.getparssed_body();
+		else
+			out << _request.getBody();
+
 		out.close();
 
 		this->_statusCode = 201;

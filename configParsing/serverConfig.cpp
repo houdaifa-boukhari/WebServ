@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 23:29:35 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/29 13:27:42 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/19 11:48:15 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,6 +178,7 @@ void ServerConfig::printServer()
 	{
 		std::cout << "\t" << it->first << ": " << it->second << std::endl;
 	}
+	
 	std::cout << "Number of Locations: " << RED << _locations.size() << RESET << std::endl;
 	std::cout << "Locations: " << std::endl;
 	for (size_t i = 0; i < _locations.size(); i++)

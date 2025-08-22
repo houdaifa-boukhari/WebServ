@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-import cgi
-import cgitb
 import os
+import sys
 from http import cookies
 import json
 import hashlib
 import time
-
-cgitb.enable()
+from urllib.parse import parse_qs
 
 SESSION_FILE = "/tmp/sessions.json"
 print("HTTP/1.1 200 OK")
@@ -25,6 +23,25 @@ def save_sessions(sessions):
 def generate_session_id():
     return hashlib.sha256(str(time.time()).encode()).hexdigest()[:16]
 
+def parse_form_data():
+    """Parse form data from POST request"""
+    form_data = {}
+    
+    # Check if it's a POST request with form data
+    request_method = os.environ.get('REQUEST_METHOD', '')
+    content_type = os.environ.get('CONTENT_TYPE', '')
+    
+    if request_method == 'POST' and 'application/x-www-form-urlencoded' in content_type:
+        content_length = int(os.environ.get('CONTENT_LENGTH', 0))
+        if content_length > 0:
+            post_data = sys.stdin.buffer.read(content_length).decode('utf-8')
+            parsed_data = parse_qs(post_data)
+            # Convert list values to single values
+            for key, value_list in parsed_data.items():
+                form_data[key] = value_list[0] if value_list else ''
+    
+    return form_data
+
 sessions = load_sessions()
 cookie = cookies.SimpleCookie()
 cookie.load(os.environ.get('HTTP_COOKIE', ''))
@@ -39,11 +56,11 @@ else:
     new_session = True
 
 # Process form data
-form = cgi.FieldStorage()
-session_data['color'] = form.getvalue('color') if 'color' in form else session_data.get('color', '#000000')
-session_data['firstname'] = form.getvalue('firstname') if 'firstname' in form else session_data.get('firstname', '')
-session_data['lastname'] = form.getvalue('lastname') if 'lastname' in form else session_data.get('lastname', '')
-session_data['email'] = form.getvalue('email') if 'email' in form else session_data.get('email', '')
+form = parse_form_data()
+session_data['color'] = form.get('color', session_data.get('color', '#000000'))
+session_data['firstname'] = form.get('firstname', session_data.get('firstname', ''))
+session_data['lastname'] = form.get('lastname', session_data.get('lastname', ''))
+session_data['email'] = form.get('email', session_data.get('email', ''))
 
 sessions[session_id] = session_data
 save_sessions(sessions)
@@ -66,7 +83,7 @@ html = f"""
             margin: 0;
             min-height: 100vh;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: {{current_color}};
+            color: {current_color};
             display: flex;
             flex-direction: column;
             align-items: center;

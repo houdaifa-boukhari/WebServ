@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 18:31:16 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/19 12:31:42 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,9 @@ void Server::handleClientData(int ClientFd)
 	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
 
-	std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
-			  << "Received data from client ------ \n\n"
-			  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
+	// std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
+	// 		  << "Received data from client ------ \n\n"
+	// 		  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
 
 	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
@@ -125,8 +125,8 @@ void Server::handleClientData(int ClientFd)
 			{
 				char **env = request.get_env();
 				request.assign_cgi_output(execute_cgi(request, request.get_cgi_path(), env));
-				// std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
-				// std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
+				std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
+				std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
 				free_envp(env);
 			}
 			else
@@ -136,14 +136,13 @@ void Server::handleClientData(int ClientFd)
 			}
 		}
 		// else
-			// std::cout << "normal request" << std::endl;
-		
+		// std::cout << "normal request" << std::endl;
+
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		if (_connections[ClientFd].getClientRequest().find("Connection: keep-alive"))
 			_connections[ClientFd].setKeepAlive(true);
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
-		
 	}
 	else if (_connections[ClientFd].getNeedClose())
 		closeConnection(ClientFd);
