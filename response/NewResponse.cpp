@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/20 15:04:08 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 16:40:21 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -356,46 +356,46 @@ bool NewResponse::isMethodAllowed(const std::string &method, LocationConfig &loc
 
 bool NewResponse::findMatchingLocation(const std::string &path)
 {
-	std::vector<LocationConfig> locations = _config.getLocations();
-	LocationConfig *bestMatch = NULL;
-	size_t bestLen = 0;
-	bool isWildcardMatch = false;
+    std::vector<LocationConfig> locations = _config.getLocations();
+    LocationConfig *bestMatch = NULL;
+    size_t bestLen = 0;
+    bool isWildcardMatch = false;
 
-	for (size_t i = 0; i < locations.size(); i++)
-	{
-		const std::string &locName = locations[i].getName();
+    for (size_t i = 0; i < locations.size(); i++)
+    {
+        const std::string &locName = locations[i].getName();
 
-		if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
-		{
-			std::string extension = locName.substr(1); // Remove the '*'
-			if (path.size() >= extension.size() &&
-				path.substr(path.size() - extension.size()) == extension)
-			{
-				if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
-				{
-					bestLen = extension.size();
-					bestMatch = &locations[i];
-					isWildcardMatch = true;
-				}
-			}
-		}
-		else if (path.compare(0, locName.size(), locName) == 0 &&
-				 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
-		{
-			if (!isWildcardMatch && locName.size() > bestLen)
-			{
-				bestLen = locName.size();
-				bestMatch = &locations[i];
-			}
-		}
-	}
+        if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
+        {
+            std::string extension = locName.substr(1); // Remove the '*'
+            if (path.size() >= extension.size() &&
+                path.substr(path.size() - extension.size()) == extension)
+            {
+                if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
+                {
+                    bestLen = extension.size();
+                    bestMatch = &locations[i];
+                    isWildcardMatch = true;
+                }
+            }
+        }
+        else if (path.compare(0, locName.size(), locName) == 0 &&
+                 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+        {
+            if (!isWildcardMatch && locName.size() > bestLen)
+            {
+                bestLen = locName.size();
+                bestMatch = &locations[i];
+            }
+        }
+    }
 
-	if (bestMatch)
-	{
-		this->_matchedLocation = *bestMatch;
-		return true;
-	}
-	return false;
+    if (bestMatch)
+    {
+        this->_matchedLocation = *bestMatch;
+        return true;
+    }
+    return false;
 }
 
 void NewResponse::sendResponseToClient()
@@ -463,7 +463,7 @@ void NewResponse::generateResponse()
 
 void NewResponse::handleGetRequest()
 {
-	std::cout << "request path : " << _request.getPath() << std::endl;
+	// std::cout << "request path : " << _request.getPath() << std::endl;
 	if (!findMatchingLocation(_request.getPath()))
 	{
 		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;

@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 10:11:38 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/18 17:56:49 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/19 16:25:12 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,9 @@ class Server
 		void handleClientData(int ClientFd);
 		void closeConnection(int fd);
 		void checkTimeouts();
-		// bool RequestIsComplete(const std::string &request);
-		void generateResponse(int ClientFd);
+		ssize_t  InetAdress(std::string Ip);
+
+		
 		~Server();
 };
 
