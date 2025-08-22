@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/22 19:01:21 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 20:53:42 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,6 @@ void Server::run()
 							_connections[_poll_fds[i].fd].setKeepAlive(tmp);
 							
 					}
-					std::cout << RED << "			------------------------------			" << WHIET << std::endl;
 				}
 			}
 			i++;

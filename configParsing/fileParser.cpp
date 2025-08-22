@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 14:56:59 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/18 16:22:12 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 22:48:44 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,7 @@ void FileParser::createDefaultConfig()
 
 	defaultServer.addPort(8080);
 	defaultServer.setHost("127.0.0.1");
-	defaultServer.setServerName("default_server");
-
+	defaultServer.addServerName("");
 	defaultServer.setMaxBodySize("1M");
 
 	defaultServer.addErrorPage("404", "./pages/errors/404.html");
@@ -229,9 +228,18 @@ void FileParser::parseServerDirective(const std::string &directive, ServerConfig
 	}
 	else if (directive.find("server_name") != std::string::npos)
 	{
-		std::string serverName = directive.substr(directive.find("server_name") + 12, directive.find(";", directive.find("server_name") + 12) - (directive.find("server_name") + 12));
-		serverName = ParsingUtils::removeWhiteSpaces(serverName);
-		serverConfig.setServerName(serverName);
+		std::string serverNamesStr = directive.substr(
+			directive.find("server_name") + 12,
+			directive.find(";", directive.find("server_name") + 12) - (directive.find("server_name") + 12));
+		serverNamesStr = ParsingUtils::removeWhiteSpaces(serverNamesStr);
+
+		std::vector<std::string> serverNames = ParsingUtils::splitString(serverNamesStr, ' ');
+
+		for (size_t i = 0; i < serverNames.size(); i++)
+		{
+			std::string serverName = ParsingUtils::removeWhiteSpaces(serverNames[i]);
+			serverConfig.addServerName(serverName);
+		}
 	}
 	else if (directive.find("host") != std::string::npos)
 	{

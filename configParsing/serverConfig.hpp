@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 17:40:51 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/29 13:27:48 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 22:31:35 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class ServerConfig
 private:
 	std::vector<int> _ports;
 	std::string _host;
-	std::string _serverName;
+	std::vector<std::string> _serverNames;
 
 	// limits
 	std::string _max_Body_Size;
@@ -53,13 +53,13 @@ public:
 	~ServerConfig();
 	void addPort(int port);
 	void setHost(std::string host);
-	void setServerName(std::string serverName);
+	void addServerName(std::string serverName);
 	void setMaxBodySize(std::string maxBodySize);
 	void addErrorPage(std::string key, std::string value);
 	void addLocation(LocationConfig location);
 	std::vector<int> getPorts() const;
 	std::string getHost() const;
-	std::string getServerName() const;
+	std::vector<std::string> getServerNames() const;
 	std::string getMaxBodySize() const;
 	size_t getMaxBodySizeBytes() const;
 	std::string getErrorPage(std::string key) const;

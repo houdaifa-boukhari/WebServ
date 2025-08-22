@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/22 19:02:09 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 22:51:06 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,6 +123,37 @@ std::string NewResponse::getBody() const
 std::string NewResponse::getHttpVersion() const
 {
 	return this->_httpVersion;
+}
+
+std::string NewResponse::urlDecode(const std::string &str)
+{
+	std::string decoded;
+	for (size_t i = 0; i < str.length(); ++i)
+	{
+		if (str[i] == '%' && i + 2 < str.length())
+		{
+			int value;
+			std::istringstream is(str.substr(i + 1, 2));
+			if (is >> std::hex >> value)
+			{
+				decoded += static_cast<char>(value);
+				i += 2;
+			}
+			else
+			{
+				decoded += str[i];
+			}
+		}
+		else if (str[i] == '+')
+		{
+			decoded += ' ';
+		}
+		else
+		{
+			decoded += str[i];
+		}
+	}
+	return decoded;
 }
 
 std::string NewResponse::getMimeType(const std::string &filePath)
@@ -356,46 +387,46 @@ bool NewResponse::isMethodAllowed(const std::string &method, LocationConfig &loc
 
 bool NewResponse::findMatchingLocation(const std::string &path)
 {
-    std::vector<LocationConfig> locations = _config.getLocations();
-    LocationConfig *bestMatch = NULL;
-    size_t bestLen = 0;
-    bool isWildcardMatch = false;
+	std::vector<LocationConfig> locations = _config.getLocations();
+	LocationConfig *bestMatch = NULL;
+	size_t bestLen = 0;
+	bool isWildcardMatch = false;
 
-    for (size_t i = 0; i < locations.size(); i++)
-    {
-        const std::string &locName = locations[i].getName();
+	for (size_t i = 0; i < locations.size(); i++)
+	{
+		const std::string &locName = locations[i].getName();
 
-        if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
-        {
-            std::string extension = locName.substr(1); // Remove the '*'
-            if (path.size() >= extension.size() &&
-                path.substr(path.size() - extension.size()) == extension)
-            {
-                if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
-                {
-                    bestLen = extension.size();
-                    bestMatch = &locations[i];
-                    isWildcardMatch = true;
-                }
-            }
-        }
-        else if (path.compare(0, locName.size(), locName) == 0 &&
-                 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
-        {
-            if (!isWildcardMatch && locName.size() > bestLen)
-            {
-                bestLen = locName.size();
-                bestMatch = &locations[i];
-            }
-        }
-    }
+		if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
+		{
+			std::string extension = locName.substr(1); // Remove the '*'
+			if (path.size() >= extension.size() &&
+				path.substr(path.size() - extension.size()) == extension)
+			{
+				if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
+				{
+					bestLen = extension.size();
+					bestMatch = &locations[i];
+					isWildcardMatch = true;
+				}
+			}
+		}
+		else if (path.compare(0, locName.size(), locName) == 0 &&
+				 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+		{
+			if (!isWildcardMatch && locName.size() > bestLen)
+			{
+				bestLen = locName.size();
+				bestMatch = &locations[i];
+			}
+		}
+	}
 
-    if (bestMatch)
-    {
-        this->_matchedLocation = *bestMatch;
-        return true;
-    }
-    return false;
+	if (bestMatch)
+	{
+		this->_matchedLocation = *bestMatch;
+		return true;
+	}
+	return false;
 }
 
 void NewResponse::sendResponseToClient()
@@ -410,8 +441,6 @@ void NewResponse::sendResponseToClient()
 	}
 	_response += "\r\n";
 	_response += _body;
-	// std::cout << RED;
-	// std::cout << _response << WHIET << std::endl;
 	if (send(this->_clientFd, _response.c_str(), _response.size(), 0) < 0)
 	{
 		this->_sendStatus = SEND_ERROR;
@@ -438,9 +467,6 @@ void NewResponse::sendOnlyHeaders()
 		this->_sendStatus = SEND_ERROR;
 		return;
 	}
-	// std::cout << "----------------- Response headers ------------------" << std::endl;
-	// std::cout << _response << std::endl;
-	// std::cout << "----------------- Response headers ------------------" << std::endl;
 }
 
 void NewResponse::generateResponse()
@@ -463,10 +489,8 @@ void NewResponse::generateResponse()
 
 void NewResponse::handleGetRequest()
 {
-	// std::cout << "request path : " << _request.getPath() << std::endl;
-	if (!findMatchingLocation(_request.getPath()))
+	if (!findMatchingLocation(_request.get_path_without_params()))
 	{
-		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;
 		this->_statusCode = 404;
 		this->_body = getErrorPage(this->_statusCode, this->_config);
 		this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
@@ -528,7 +552,7 @@ void NewResponse::handleGetRequest()
 	}
 	else
 	{
-		std::string normalizedPath = normalizePath(_request.get_path_without_params());
+		std::string normalizedPath = normalizePath(this->urlDecode(_request.get_path_without_params()));
 		std::string locationName = _matchedLocation.getName();
 		std::string relativePath = normalizedPath.substr(locationName.size());
 		if (!relativePath.empty() && relativePath[0] == '/')
@@ -553,7 +577,7 @@ void NewResponse::handleGetRequest()
 void NewResponse::handlePostRequest()
 {
 	std::cout << "starting POST request handling" << std::endl;
-	if (!findMatchingLocation(_request.getPath()))
+	if (!findMatchingLocation(_request.get_path_without_params()))
 	{
 		this->_statusCode = 404;
 		this->_body = getErrorPage(this->_statusCode, this->_config);
@@ -660,7 +684,7 @@ void NewResponse::handleDeleteRequest()
 {
 	std::cout << "starting DELETE request handling" << std::endl;
 
-	if (!findMatchingLocation(_request.getPath()))
+	if (!findMatchingLocation(_request.get_path_without_params()))
 	{
 		std::cout << "No matching location found for path: " << _request.getPath() << std::endl;
 		this->_statusCode = 404;
@@ -693,9 +717,7 @@ void NewResponse::handleDeleteRequest()
 	{
 		if (this->_request.get_status_code() >= 200 && this->_request.get_status_code() <= 308)
 		{
-
 			std::string cgi_response = _request.get_cgi_output();
-
 			if (send(this->_clientFd, _request.get_cgi_output().c_str(), _request.get_cgi_output().length(), 0) < 0)
 			{
 				this->_sendStatus = SEND_ERROR;
@@ -716,12 +738,39 @@ void NewResponse::handleDeleteRequest()
 	}
 	else
 	{
-		std::string normalizedPath = normalizePath(_request.getPath());
-		std::string locationName = _matchedLocation.getName();
-		std::string relativePath = normalizedPath.substr(locationName.size());
-		if (!relativePath.empty() && relativePath[0] == '/')
-			relativePath = relativePath.substr(1);
-		std::string fullPath = joinPath(_matchedLocation.getRoot(), relativePath);
+		std::map<std::string, std::string> params = _request.get_params();
+		std::string fileToDelete;
+
+		if (params.find("path") != params.end())
+		{
+			fileToDelete = params["path"];
+			std::cout << "File to delete from query parameter: " << fileToDelete << std::endl;
+		}
+		else
+		{
+			std::cout << "No 'path' parameter found in query string" << std::endl;
+			this->_statusCode = 400;
+			this->_body = getErrorPage(this->_statusCode, this->_config);
+			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
+			sendResponseToClient();
+			return;
+		}
+
+		fileToDelete = urlDecode(fileToDelete);
+
+		fileToDelete = normalizePath(fileToDelete);
+
+		std::string fullPath;
+		if (fileToDelete[0] == '/')
+		{
+			fullPath = joinPath(_matchedLocation.getRoot(), fileToDelete.substr(1));
+		}
+		else
+		{
+			fullPath = joinPath(_matchedLocation.getRoot(), fileToDelete);
+		}
+
+		std::cout << "Full path to delete: " << fullPath << std::endl;
 
 		if (!fileExists(fullPath))
 		{
@@ -745,25 +794,48 @@ void NewResponse::handleDeleteRequest()
 
 		if (access(fullPath.c_str(), W_OK) != 0)
 		{
-			std::cout << "No write permission for file: " << fullPath  << std::endl;
+			std::cout << "No write permission for file: " << fullPath << std::endl;
 			this->_statusCode = 403;
 			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 			return;
 		}
+
 		if (remove(fullPath.c_str()) == 0)
 		{
 			std::cout << "Successfully deleted file: " << fullPath << std::endl;
-			this->_statusCode = 204;
-			this->_body = "";
+			this->_statusCode = 200; // Changed from 204 to 200 to include response body
+			this->_body =
+				"<!DOCTYPE html>\n"
+				"<html lang=\"en\">\n"
+				"<head>\n"
+				"  <meta charset=\"UTF-8\">\n"
+				"  <title>File Deleted</title>\n"
+				"  <style>\n"
+				"    body { font-family: Arial, sans-serif; background: #f9f9f9; text-align: center; margin-top: 60px; }\n"
+				"    .success { color: #388e3c; font-size: 2em; margin-bottom: 20px; }\n"
+				"    .info { color: #555; }\n"
+				"    a { color: #1976d2; text-decoration: none; }\n"
+				"    a:hover { text-decoration: underline; }\n"
+				"  </style>\n"
+				"</head>\n"
+				"<body>\n"
+				"  <div class=\"success\">&#10003; File deleted successfully!</div>\n"
+				"  <div class=\"info\">File: " +
+				fileToDelete + "</div>\n"
+							   "  <p><a href=\"/\">Return to Home</a></p>\n"
+							   "  <hr>\n"
+							   "  <p><em>WebServ/1.0</em></p>\n"
+							   "</body>\n"
+							   "</html>";
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
 			sendResponseToClient();
 			return;
 		}
 		else
 		{
-			std::cout << "Failed to delete file: " << fullPath << " - " << std::endl;
+			std::cout << "Failed to delete file: " << fullPath << " - Error: " << std::endl;
 			this->_statusCode = 500;
 			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
@@ -772,7 +844,6 @@ void NewResponse::handleDeleteRequest()
 		}
 	}
 }
-
 void NewResponse::handleDirectoryRequest(std::string &dirPath)
 {
 	std::string defaultFile = _matchedLocation.getDefaultFile();
@@ -820,7 +891,6 @@ void NewResponse::generateDirectoryListing(std::string &filePath)
 			std::string name = entry->d_name;
 			if (name != ".")
 			{
-				// Properly concatenate the request path with the file/directory name
 				std::string requestPath = _request.getPath();
 				if (requestPath.back() != '/')
 					requestPath += "/";
@@ -862,7 +932,6 @@ void NewResponse::prepareFileResponse(const std::string &filePath)
 	this->_response_headers["Content-Type"] = getMimeType(filePath);
 	this->_response_headers["Transfer-Encoding"] = "chunked";
 	sendOnlyHeaders();
-	std::cout << "File size: " << this->_totalFileSize << " bytes" << std::endl;
 	if (this->_totalFileSize == 0)
 	{
 		this->_sendStatus = SEND_COMPLETED;
@@ -875,7 +944,6 @@ void NewResponse::prepareFileResponse(const std::string &filePath)
 		this->_sendStatus = SEND_IN_PROGRESS;
 		this->_byteSent = 0;
 	}
-	std::cout << "Done Sending headers" << std::endl;
 }
 
 size_t NewResponse::sendAll(int sockfd, const void *buf, size_t len)
@@ -886,7 +954,6 @@ size_t NewResponse::sendAll(int sockfd, const void *buf, size_t len)
 		ssize_t n = send(sockfd, (const char *)buf + total_sent, len - total_sent, 0);
 		if (n == -1)
 		{
-			// A real error occurred, report it
 			return -1;
 		}
 		total_sent += n;
@@ -896,7 +963,6 @@ size_t NewResponse::sendAll(int sockfd, const void *buf, size_t len)
 
 void NewResponse::sendNextChunk()
 {
-	std::cout << "Sending file in chunks..." << std::endl;
 	if (this->_sendStatus == SEND_COMPLETED || this->_sendStatus == SEND_ERROR)
 		return;
 
@@ -920,7 +986,6 @@ void NewResponse::sendNextChunk()
 	}
 	if (bytes_read == 0)
 	{
-		// Send last chunk to mark the end of the stream
 		const char *last_chunk = "0\r\n\r\n";
 		ssize_t sent = send(this->_clientFd, last_chunk, strlen(last_chunk), 0);
 		if (sent < 0)
@@ -950,8 +1015,6 @@ void NewResponse::sendNextChunk()
 		this->_sendStatus = SEND_ERROR;
 		return;
 	}
-	// std::cout << "move to next chunk " << std::endl;
-
 	this->_byteSent += bytes_read;
 
 	this->_sendStatus = SEND_IN_PROGRESS;

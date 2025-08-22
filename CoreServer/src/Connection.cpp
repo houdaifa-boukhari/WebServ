@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/22 18:12:28 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 22:41:53 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,6 @@ void Server::handleClientData(int ClientFd)
 		_connections[ClientFd].setIsComplete(true);
 
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
-		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
 		if (request.get_boundary() != "" && request.get_correct_size() == false)
 		{
@@ -247,7 +246,27 @@ void Connection::generateChunkedResponse()
 
 void Connection::buildResponse(int clientFd, ParssedRequest &request, ServerConfig &config)
 {
-	if (request.get_host() != config.getServerName() && request.get_host() != config.getHost())
+	std::string requestHost = request.get_host();
+	bool hostMatches = false;
+
+	if (requestHost == config.getHost())
+	{
+		hostMatches = true;
+	}
+	else
+	{
+		std::vector<std::string> serverNames = config.getServerNames();
+		for (size_t i = 0; i < serverNames.size(); i++)
+		{
+			if (requestHost == serverNames[i] || serverNames[i].empty())
+			{
+				hostMatches = true;
+				break;
+			}
+		}
+	}
+
+	if (!hostMatches)
 	{
 		NewResponse::sendSimpleErrorResponse(clientFd, 400, config);
 		return;

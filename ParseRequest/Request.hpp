@@ -55,11 +55,12 @@ private:
     bool correct_size;
     bool chunked;
     std::string cgi_path;
+
 public:
     // void assign_cookies();
     // std::string generate_session_response();
     void check_body_size();
-    void assign_cgi_path(std::string cgi_path){this->cgiPath = cgi_path;};
+    void assign_cgi_path(std::string cgi_path) { this->cgiPath = cgi_path; };
     std::string getCgiPath() { return cgiPath; };
     bool get_correct_size() { return correct_size; };
     std::string getNameValue() { return nameValue; };
@@ -70,15 +71,15 @@ public:
     // void assign_file_name() {this->file_name = file_name;};
     void parse_body();
     void assign_boundary();
-    std::map<std::string, std::string> GetcontentdisPositionMap() {return Content_Disposition_values;};
-    std::string get_boundary() {return _boundary;};
-    std::map<std::string, std::string> get_cookies(){return _cookies;};
-    std::string getcontent_type_valbody() {return content_type_valbody;};
+    std::map<std::string, std::string> GetcontentdisPositionMap() { return Content_Disposition_values; };
+    std::string get_boundary() { return _boundary; };
+    std::map<std::string, std::string> get_cookies() { return _cookies; };
+    std::string getcontent_type_valbody() { return content_type_valbody; };
     void clear_params();
     int get_cookie_avai();
-    void is_cgi_path(const std::string& path);
+    void is_cgi_path(const std::string &path);
     void assign_cgi_output(std::string cgi_outpt);
-    std::map<std::string, std::string> get_content_type_values() {return _content_type_values;};
+    std::map<std::string, std::string> get_content_type_values() { return _content_type_values; };
     std::string get_cgi_output(void);
     bool is_cgi();
     void assign_cookies_response(std::string cookies_response);
@@ -90,7 +91,7 @@ public:
     bool path_exists();
     void assignhost_port();
     ParssedRequest(std::string request);
-    std::string get_path_without_params() {return _path_without_params;};
+    std::string get_path_without_params() { return _path_without_params; };
     ~ParssedRequest();
     void AssignRequestLine(std::string request);
     void AssignHeaders(std::string request);
@@ -108,9 +109,10 @@ public:
     void assign_params(std::string path);
     void printParams();
     std::map<std::string, std::string> getParams();
-    void set_status_code(int stts_cd){this->status_code = stts_cd;};
-    int get_status_code(){return (this->status_code);};
+    void set_status_code(int stts_cd) { this->status_code = stts_cd; };
+    int get_status_code() { return (this->status_code); };
     char **get_env();
+    std::map<std::string, std::string> get_params() const;
 };
 std::string execute_cgi(ParssedRequest &request, std::string file_path, char **env);
 // std::string execute_cgi(std::string file_path, char **env);

@@ -1,6 +1,6 @@
 NAME = WebServer
 CC = c++
-CPPFLAGS =  -g   -Wall -Wextra -Werror 
+# CPPFLAGS =  -g   -Wall -Wextra -Werror 
 SRC = $(wildcard *.cpp) $(wildcard configParsing/*.cpp) $(wildcard CoreServer/src/*.cpp) \
 		$(wildcard ./ParseRequest/*.cpp) $(wildcard ./response/*.cpp)
 HEADER = $(wildcard *.hpp) $(wildcard configParsing/*.hpp) $(wildcard ./ParseRequest/*.hpp) $(wildcard ./response/*.hpp)

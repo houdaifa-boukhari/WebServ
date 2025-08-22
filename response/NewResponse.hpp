@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 12:59:27 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/07/31 12:25:48 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 19:50:29 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ private:
 	std::string joinPath(const std::string &root, const std::string &path);
 	void prepareFileResponse(const std::string &filePath);
 	std::string getCreatedResponseBody();
+	std::string urlDecode(const std::string &src);
 
 	// HTTP request handlers
 	void sendOnlyHeaders();

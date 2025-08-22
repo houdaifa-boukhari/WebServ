@@ -59,19 +59,19 @@
 
 				result.textContent = 'Sending DELETE...';
 				result.className = 'mt-3 text-sm text-yellow-300';
-
-				var url = '/' + encodeURIComponent(path);
+				
+				var url = '/uploads?path=' + encodeURIComponent(path);
 				fetch(url, { method: 'DELETE', credentials: 'same-origin' })
 					.then(function (res) {
 						if (res.ok) {
 							return res.text().then(function (t) {
 								result.className = 'mt-3 text-sm text-green-400';
-								result.textContent = 'Deleted successfully' + (t ? ': ' + t : '.');
+								result.textContent = 'Deleted successfully ' + res.statusText + '!';
 							});
 						}
 						return res.text().then(function (t) {
 							result.className = 'mt-3 text-sm text-red-400';
-							result.textContent = 'Delete failed: ' + (t || ('HTTP ' + res.status));
+							result.textContent = 'Delete failed: ' + res.status;
 						});
 					})
 					.catch(function (err) {

@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/08 23:29:35 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/19 11:48:15 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 22:48:33 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@ ServerConfig::ServerConfig()
 {
 	_ports = std::vector<int>();
 	_host = "";
-	_serverName = "";
+	_serverNames = std::vector<std::string>();
+	_serverNames.push_back("localhost");
 	_max_Body_Size = "";
 	_max_Body_Size_Bytes = 1024 * 1024;
 	_errorPages = std::map<std::string, std::string>();
@@ -34,7 +35,7 @@ ServerConfig &ServerConfig::operator=(const ServerConfig &other)
 	{
 		_ports = other._ports;
 		_host = other._host;
-		_serverName = other._serverName;
+		_serverNames = other._serverNames;
 		_max_Body_Size = other._max_Body_Size;
 		_max_Body_Size_Bytes = other._max_Body_Size_Bytes;
 		_errorPages = other._errorPages;
@@ -56,9 +57,9 @@ void ServerConfig::setHost(std::string host)
 	_host = host;
 }
 
-void ServerConfig::setServerName(std::string serverName)
+void ServerConfig::addServerName(std::string serverName)
 {
-	_serverName = serverName;
+	_serverNames.push_back(serverName);
 }
 
 size_t ServerConfig::parseBodySizeToBytes(const std::string &sizeStr)
@@ -131,9 +132,9 @@ std::string ServerConfig::getHost() const
 	return _host;
 }
 
-std::string ServerConfig::getServerName() const
+std::vector<std::string> ServerConfig::getServerNames() const
 {
-	return _serverName;
+	return _serverNames;
 }
 
 std::string ServerConfig::getMaxBodySize() const
@@ -161,7 +162,14 @@ std::vector<LocationConfig> ServerConfig::getLocations() const
 
 void ServerConfig::printServer()
 {
-	std::cout << "Server Name: " << _serverName << std::endl;
+	std::cout << "Server Names: ";
+	for (size_t i = 0; i < _serverNames.size(); i++)
+	{
+		std::cout << _serverNames[i];
+		if (i != _serverNames.size() - 1)
+			std::cout << ", ";
+	}
+	std::cout << std::endl;
 	std::cout << "Host: " << _host << std::endl;
 	std::cout << "Ports: ";
 	for (size_t i = 0; i < _ports.size(); i++)
@@ -178,7 +186,7 @@ void ServerConfig::printServer()
 	{
 		std::cout << "\t" << it->first << ": " << it->second << std::endl;
 	}
-	
+
 	std::cout << "Number of Locations: " << RED << _locations.size() << RESET << std::endl;
 	std::cout << "Locations: " << std::endl;
 	for (size_t i = 0; i < _locations.size(); i++)

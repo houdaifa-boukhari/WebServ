@@ -30,6 +30,11 @@ ParssedRequest::~ParssedRequest()
 {
 }
 
+std::map<std::string, std::string> ParssedRequest::get_params() const
+{
+    return _params;
+}
+
 void ParssedRequest::printParams()
 {
     std::map<std::string, std::string>::iterator it;
