@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/22 16:38:58 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 18:12:28 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,53 +20,53 @@ void Connection::reset()
 	isComplete = false;
 }
 
-LocationConfig* findMatchingLocation(std::vector<LocationConfig> &locations,const std::string &pat)
+LocationConfig *findMatchingLocation(std::vector<LocationConfig> &locations, const std::string &pat)
 {
-    // std::vector<LocationConfig> locations = _config.getLocations();
-    LocationConfig *bestMatch = NULL;
-    size_t bestLen = 0;
-    bool isWildcardMatch = false;
+	// std::vector<LocationConfig> locations = _config.getLocations();
+	LocationConfig *bestMatch = NULL;
+	size_t bestLen = 0;
+	bool isWildcardMatch = false;
 	std::string path;
 	if (pat == "/")
 		path = pat;
-	else 
+	else
 		path = pat.substr(1);
-		
-    for (size_t i = 0; i < locations.size(); i++)
-    {
-        const std::string &locName = locations[i].getName();
 
-        if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
-        {
-            std::string extension = locName.substr(1); // Remove the '*'
-            if (path.size() >= extension.size() &&
-                path.substr(path.size() - extension.size()) == extension)
-            {
-                if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
-                {
-                    bestLen = extension.size();
-                    bestMatch = &locations[i];
-                    isWildcardMatch = true;
-                }
-            }
-        }
-        else if (path.compare(0, locName.size(), locName) == 0 &&
-                 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
-        {
-            if (!isWildcardMatch && locName.size() > bestLen)
-            {
-                bestLen = locName.size();
-                bestMatch = &locations[i];
-            }
-        }
-    }
+	for (size_t i = 0; i < locations.size(); i++)
+	{
+		const std::string &locName = locations[i].getName();
 
-    if (bestMatch)
-    {
-        // this->_matchedLocation = *bestMatch;
-        return bestMatch;
-    }
-    return NULL;
+		if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
+		{
+			std::string extension = locName.substr(1); // Remove the '*'
+			if (path.size() >= extension.size() &&
+				path.substr(path.size() - extension.size()) == extension)
+			{
+				if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
+				{
+					bestLen = extension.size();
+					bestMatch = &locations[i];
+					isWildcardMatch = true;
+				}
+			}
+		}
+		else if (path.compare(0, locName.size(), locName) == 0 &&
+				 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+		{
+			if (!isWildcardMatch && locName.size() > bestLen)
+			{
+				bestLen = locName.size();
+				bestMatch = &locations[i];
+			}
+		}
+	}
+
+	if (bestMatch)
+	{
+		// this->_matchedLocation = *bestMatch;
+		return bestMatch;
+	}
+	return NULL;
 }
 
 // LocationConfig* findMatchingLocation(std::vector<LocationConfig> &locations,const std::string &pat)
@@ -149,13 +149,13 @@ void print_map(const std::map<std::string, std::string> &m)
 void Server::handleClientData(int ClientFd)
 {
 	ssize_t len = 0;
-	std::vector<char> buffer(1024);
+	std::vector<char> buffer(50024);
 
 	if (ClientFd < 0)
 		return;
 	_connections[ClientFd].updateLastActivity();
-	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-			  << "Reading from client " << ClientFd << WHIET << std::endl;
+	// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+	// 		  << "Reading from client " << ClientFd << WHIET << std::endl;
 	len = recv(ClientFd, buffer.data(), buffer.size(), 0); // 0 for non bloking socket
 	if (len <= 0)
 	{
@@ -207,7 +207,8 @@ void Server::handleClientData(int ClientFd)
 			{
 				request.set_status_code(404);
 				std::cout << "not a correct cgi path" << std::endl;
-			}else
+			}
+			else
 			{
 				request.set_status_code(500);
 				std::cout << "no cgiPath config found" << std::endl;
@@ -246,5 +247,10 @@ void Connection::generateChunkedResponse()
 
 void Connection::buildResponse(int clientFd, ParssedRequest &request, ServerConfig &config)
 {
+	if (request.get_host() != config.getServerName() && request.get_host() != config.getHost())
+	{
+		NewResponse::sendSimpleErrorResponse(clientFd, 400, config);
+		return;
+	}
 	_response = NewResponse(clientFd, config, request);
 }

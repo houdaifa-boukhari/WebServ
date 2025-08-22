@@ -87,7 +87,7 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
         if (dup2(output_fd, 1) == -1 || dup2(output_fd, 2) == -1 || dup2(new_input_fd, 0) == -1)
         {
             close(output_fd);
-            std::exit(12);
+            std::exit(13);
         }
         close(output_fd);
         close(new_input_fd);

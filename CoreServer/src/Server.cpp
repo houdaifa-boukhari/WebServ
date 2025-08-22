@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/19 16:41:29 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/22 19:01:21 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,11 @@ void Server::initializeSockets()
 			address.sin_family = AF_INET;										// Address family: IPv4
 			address.sin_addr.s_addr = InetAdress(host);
  			address.sin_port = htons(ports[j]);									// assign port
-			if (bind(tmp_fd, (struct sockaddr *)&address, sizeof(address)) < 0) // abin port and host
-				perror("bind");
+			if (bind(tmp_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+			{
+				std::cout << YELLOW << currentTime() << RED << " [ERROR] Is Already Listening " << host << ":" << ports[j] << WHIET << std::endl;
+				continue ;
+			}
 			listen(tmp_fd, SOMAXCONN);
 			struct pollfd pfd = {tmp_fd, POLLIN, 0};
 			_poll_fds.push_back(pfd);

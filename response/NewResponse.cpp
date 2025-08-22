@@ -6,7 +6,7 @@
 /*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 13:03:46 by yel-moun          #+#    #+#             */
-/*   Updated: 2025/08/22 16:40:21 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/22 19:02:09 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -745,7 +745,7 @@ void NewResponse::handleDeleteRequest()
 
 		if (access(fullPath.c_str(), W_OK) != 0)
 		{
-			std::cout << "No write permission for file: " << fullPath << " - " << strerror(errno) << std::endl;
+			std::cout << "No write permission for file: " << fullPath  << std::endl;
 			this->_statusCode = 403;
 			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
@@ -763,7 +763,7 @@ void NewResponse::handleDeleteRequest()
 		}
 		else
 		{
-			std::cout << "Failed to delete file: " << fullPath << " - " << strerror(errno) << std::endl;
+			std::cout << "Failed to delete file: " << fullPath << " - " << std::endl;
 			this->_statusCode = 500;
 			this->_body = getErrorPage(this->_statusCode, this->_config);
 			this->_response_headers["Content-Type"] = "text/html; charset=UTF-8";
