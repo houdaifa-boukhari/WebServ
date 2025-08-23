@@ -11,6 +11,7 @@ new_bg = form.getvalue('bgColor')
 
 # Read cookies from environment
 cookie = cookies.SimpleCookie(os.environ.get('HTTP_COOKIE', ''))
+
 # Extract cookie values safely
 text_color = cookie.get('textColor')
 bg_color = cookie.get('bgColor')

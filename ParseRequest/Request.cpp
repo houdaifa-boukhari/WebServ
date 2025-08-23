@@ -572,12 +572,12 @@ char **ParssedRequest::get_env()
     std::strcpy(envp[i], key_val.c_str());
     i++;
     key = "PATH_INFO";
-    key_val = key + "=" + _path_info;
+    key_val = key + "=" + cgi_path;
     envp[i] = new char[key_val.size() + 1];
     std::strcpy(envp[i], key_val.c_str());
     i++;
     key = "SCRIPT_NAME";
-    key_val = key + "=" + _script_name;
+    key_val = key + "=" + cgiPath;
     envp[i] = new char[key_val.size() + 1];
     std::strcpy(envp[i], key_val.c_str());
     return envp;

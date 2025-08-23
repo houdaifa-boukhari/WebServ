@@ -205,23 +205,23 @@ void Server::handleClientData(int ClientFd)
 			else if (!request.path_exists())
 			{
 				request.set_status_code(404);
-				std::cout << "not a correct cgi path" << std::endl;
+				std::cerr << "not a correct cgi path" << std::endl;
 			}
 			else
 			{
 				request.set_status_code(500);
-				std::cout << "no cgiPath config found" << std::endl;
+				std::cerr << "no cgiPath config found" << std::endl;
 			}
 		}
 		else if (request.is_cgi())
 		{
 			request.set_status_code(404);
-			std::cout << "not a correct file under cgi-bin dir" << std::endl;
+			std::cerr << "not a correct file under cgi-bin dir" << std::endl;
 		}
-		std::cout << "-- RAW RESPONSE --" << std::endl;
-		std::cout << request.get_cgi_output() << std::endl;
-		std::cout << "-- END OF RAW RESPONSE --" << std::endl;
-		std::cout << RED << request.get_status_code() << WHIET << std::endl;
+		std::cerr << RED << request.get_status_code() << WHIET << std::endl;
+		// std::cout << "------------- RAW RESPONSE ---------------" << std::endl;
+		// std::cout << request.get_cgi_output() << std::endl;
+		// std::cout << "------------------------------------------" << std::endl;
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		if (_connections[ClientFd].getClientRequest().find("Connection: keep-alive"))

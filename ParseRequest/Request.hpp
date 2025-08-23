@@ -50,15 +50,12 @@ private:
     std::string cgiPath;
     std::map<std::string, std::map<std::string, std::string> > _sessions;
     int status_code;
-    // bool cookie_avai;
     bool _cgi;
     bool correct_size;
     bool chunked;
     std::string cgi_path;
 
 public:
-    // void assign_cookies();
-    // std::string generate_session_response();
     void check_body_size();
     void assign_cgi_path(std::string cgi_path) { this->cgiPath = cgi_path; };
     std::string getCgiPath() { return cgiPath; };
@@ -68,7 +65,6 @@ public:
     void assign_Disposition_map(std::string key_values);
     void assign_cookies(std::string key_value);
     std::string getparssed_body() { return parssed_body; };
-    // void assign_file_name() {this->file_name = file_name;};
     void parse_body();
     void assign_boundary();
     std::map<std::string, std::string> GetcontentdisPositionMap() { return Content_Disposition_values; };
@@ -115,7 +111,6 @@ public:
     std::map<std::string, std::string> get_params() const;
 };
 std::string execute_cgi(ParssedRequest &request, std::string file_path, char **env);
-// std::string execute_cgi(std::string file_path, char **env);
 void free_envp(char **envp);
 
 #endif
