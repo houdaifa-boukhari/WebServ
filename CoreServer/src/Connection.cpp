@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/23 13:43:40 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/23 13:46:56 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,85 @@ void Connection::reset()
 	ClientResponse = "";
 	lastActivity = time(NULL);
 	isComplete = false;
-	KeepAlive = false;
-	needClose = false;
 }
+
+LocationConfig *findMatchingLocation(std::vector<LocationConfig> &locations, const std::string &pat)
+{
+	// std::vector<LocationConfig> locations = _config.getLocations();
+	LocationConfig *bestMatch = NULL;
+	size_t bestLen = 0;
+	bool isWildcardMatch = false;
+	std::string path;
+	if (pat == "/")
+		path = pat;
+	else
+		path = pat.substr(1);
+
+	for (size_t i = 0; i < locations.size(); i++)
+	{
+		const std::string &locName = locations[i].getName();
+
+		if (locName.size() > 1 && locName[0] == '*' && locName[1] == '.')
+		{
+			std::string extension = locName.substr(1); // Remove the '*'
+			if (path.size() >= extension.size() &&
+				path.substr(path.size() - extension.size()) == extension)
+			{
+				if (!bestMatch || !isWildcardMatch || extension.size() > bestLen)
+				{
+					bestLen = extension.size();
+					bestMatch = &locations[i];
+					isWildcardMatch = true;
+				}
+			}
+		}
+		else if (path.compare(0, locName.size(), locName) == 0 &&
+				 (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+		{
+			if (!isWildcardMatch && locName.size() > bestLen)
+			{
+				bestLen = locName.size();
+				bestMatch = &locations[i];
+			}
+		}
+	}
+
+	if (bestMatch)
+	{
+		// this->_matchedLocation = *bestMatch;
+		return bestMatch;
+	}
+	return NULL;
+}
+
+// LocationConfig* findMatchingLocation(std::vector<LocationConfig> &locations,const std::string &pat)
+// {
+//     LocationConfig *bestMatch = NULL;
+//     size_t bestLen = 0;
+// 	std::string path = pat.substr(1); // Remove query parameters if any
+//     for (size_t i = 0; i < locations.size(); i++)
+//     {
+//         const std::string &locName = locations[i].getName();
+//         if (path.compare(0, locName.size(), locName) == 0 &&
+//             (path.size() == locName.size() || path[locName.size()] == '/' || locName[locName.size() - 1] == '/'))
+//         {
+//             if (locName.size() > bestLen)
+//             {
+//                 bestLen = locName.size();
+//                 bestMatch = &locations[i];
+//             }
+//         }
+//     }
+//     if (bestMatch)
+//     {
+// 		std::cout << GREEN << currentTime() << GREEN << " [INFO] "
+// 				  << "Found matching location: " << bestMatch->getName() << WHIET << std::endl;
+//        return  bestMatch;
+//     }
+// 	std::cout << GREEN << currentTime() << RED << " [ERROR] "
+// 			  << "No matching location found for path: " << path << WHIET << std::endl;
+//     return NULL;
+// }
 
 void Server::closeConnection(int fd)
 {
@@ -73,13 +149,13 @@ void print_map(const std::map<std::string, std::string> &m)
 void Server::handleClientData(int ClientFd)
 {
 	ssize_t len = 0;
-	std::vector<char> buffer(1024);
+	std::vector<char> buffer(50024);
 
 	if (ClientFd < 0)
 		return;
 	_connections[ClientFd].updateLastActivity();
-	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-			  << "Reading from client " << ClientFd << WHIET << std::endl;
+	// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
+	// 		  << "Reading from client " << ClientFd << WHIET << std::endl;
 	len = recv(ClientFd, buffer.data(), buffer.size(), 0); // 0 for non bloking socket
 	if (len <= 0)
 	{
@@ -98,45 +174,59 @@ void Server::handleClientData(int ClientFd)
 	}
 	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
+
 	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
 		_connections[ClientFd].setIsComplete(true);
+
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
-		std::cout << RED << "			------------------------------	 		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
-		if (request.get_correct_size() == false)
+		if (request.get_boundary() != "" && request.get_correct_size() == false)
 		{
 			NewResponse::sendSimpleErrorResponse(ClientFd, 400, _connections[ClientFd].getServerConfig());
-			_connections[ClientFd].setIsComplete(false);
-			closeConnection(ClientFd);
 			return;
 		}
-		if (request.is_cgi() && (request.getMethod() == "GET" || request.getMethod() == "POST"))
+		ServerConfig &config = _connections[ClientFd].getServerConfig();
+		std::vector<LocationConfig> locations = config.getLocations();
+		LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
+		request.set_status_code(200);
+		std::cout << RED << request.get_status_code() << WHIET << std::endl;
+		if (CgiConfig && CgiConfig->isCgi())
 		{
+			request.assign_cgi_path(CgiConfig->getCgiPath());
 			request.assign_full_cgi_path();
-			if (request.path_exists())
+			if (request.path_exists() && CgiConfig != NULL)
 			{
 				char **env = request.get_env();
 				request.assign_cgi_output(execute_cgi(request, request.get_cgi_path(), env));
-				// std::cout << GREEN << "output_cgi : " << std::endl << request.get_cgi_output() << WHIET << std::endl;
-				// std::cout << "output" << execute_cgi(request, request.get_cgi_path(), env) << std::endl;
+				// std::cout << "cgi output: " << request.get_cgi_output() << std::endl;
 				free_envp(env);
+			}
+			else if (!request.path_exists())
+			{
+				request.set_status_code(404);
+				std::cerr << "not a correct cgi path" << std::endl;
 			}
 			else
 			{
-				request.set_status_code(404);
-				std::cout << "not a correct cgi path" << std::endl;
+				request.set_status_code(500);
+				std::cerr << "no cgiPath config found" << std::endl;
 			}
 		}
-		// else
-			// std::cout << "normal request" << std::endl;
-		
+		else if (request.is_cgi())
+		{
+			request.set_status_code(404);
+			std::cerr << "not a correct file under cgi-bin dir" << std::endl;
+		}
+		std::cerr << RED << request.get_status_code() << WHIET << std::endl;
+		// std::cout << "------------- RAW RESPONSE ---------------" << std::endl;
+		// std::cout << request.get_cgi_output() << std::endl;
+		// std::cout << "------------------------------------------" << std::endl;
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		if (_connections[ClientFd].getClientRequest().find("Connection: keep-alive"))
 			_connections[ClientFd].setKeepAlive(true);
 		_connections[ClientFd].buildResponse(ClientFd, req, confg);
-		
 	}
 	else if (_connections[ClientFd].getNeedClose())
 		closeConnection(ClientFd);
@@ -159,5 +249,30 @@ void Connection::generateChunkedResponse()
 
 void Connection::buildResponse(int clientFd, ParssedRequest &request, ServerConfig &config)
 {
+	std::string requestHost = request.get_host();
+	bool hostMatches = false;
+
+	if (requestHost == config.getHost())
+	{
+		hostMatches = true;
+	}
+	else
+	{
+		std::vector<std::string> serverNames = config.getServerNames();
+		for (size_t i = 0; i < serverNames.size(); i++)
+		{
+			if (requestHost == serverNames[i] || serverNames[i].empty())
+			{
+				hostMatches = true;
+				break;
+			}
+		}
+	}
+
+	if (!hostMatches)
+	{
+		NewResponse::sendSimpleErrorResponse(clientFd, 400, config);
+		return;
+	}
 	_response = NewResponse(clientFd, config, request);
 }

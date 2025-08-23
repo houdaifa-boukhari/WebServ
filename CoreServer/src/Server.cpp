@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/23 11:27:13 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/23 13:47:32 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,6 @@ void Server::run()
 							_connections[_poll_fds[i].fd].setKeepAlive(tmp);
 							
 					}
-					std::cout << RED << "			------------------------------			" << WHIET << std::endl;
 				}
 			}
 			i++;

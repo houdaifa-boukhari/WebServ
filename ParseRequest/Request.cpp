@@ -30,6 +30,11 @@ ParssedRequest::~ParssedRequest()
 {
 }
 
+std::map<std::string, std::string> ParssedRequest::get_params() const
+{
+    return _params;
+}
+
 void ParssedRequest::printParams()
 {
     std::map<std::string, std::string>::iterator it;
@@ -173,7 +178,7 @@ void ParssedRequest::assign_content_type()
     std::istringstream stream(content_type_value);
     std::string cookie_pair;
 
-    std::cout << RED << content_type_value << WHIET << std::endl; // multipart/form-data; boundary=----geckoformboundarya62674fb9d5e16f0d6991b29e3e0e5d5
+    // std::cout << RED << content_type_value << WHIET << std::endl; // multipart/form-data; boundary=----geckoformboundarya62674fb9d5e16f0d6991b29e3e0e5d5
     _content_type_values.clear();
     while (std::getline(stream, cookie_pair, ';'))
     {
@@ -567,12 +572,12 @@ char **ParssedRequest::get_env()
     std::strcpy(envp[i], key_val.c_str());
     i++;
     key = "PATH_INFO";
-    key_val = key + "=" + _path_info;
+    key_val = key + "=" + cgi_path;
     envp[i] = new char[key_val.size() + 1];
     std::strcpy(envp[i], key_val.c_str());
     i++;
     key = "SCRIPT_NAME";
-    key_val = key + "=" + _script_name;
+    key_val = key + "=" + cgiPath;
     envp[i] = new char[key_val.size() + 1];
     std::strcpy(envp[i], key_val.c_str());
     return envp;

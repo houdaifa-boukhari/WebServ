@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilise.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/19 16:36:56 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/22 18:02:29 by yel-moun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,9 +85,6 @@ bool Connection::RequestIsComplete(const std::vector<char> &request)
             return (false);
         }
         body_size = request.size() - body_start;
-        std::cout << "Request size: " << request.size() << std::endl;
-        std::cout << "Body start: " << body_start << std::endl;
-        std::cout << "Calculated body size: " << body_size << std::endl;
         if (body_size < len)
             return (false);
         else if (body_size > len)

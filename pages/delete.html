@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Delete File - Webserv</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+	<div class="w-full max-w-md p-8 bg-gray-800 rounded-lg shadow-md">
+		<h1 class="text-2xl font-semibold text-cyan-400 mb-4">Test DELETE - Remove a file</h1>
+		<p class="text-gray-400 text-sm mb-6">Enter the file path or name you want the server to delete. Example: <code class="text-sm text-gray-200">/uploads/test.txt</code> or <code class="text-sm text-gray-200">test.txt</code></p>
+
+		<form id="delete-form" class="space-y-4">
+			<label class="block text-sm text-gray-300">
+				File path / name
+				<input id="file-path" name="path" type="text" required
+					class="mt-2 w-full px-3 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+					placeholder="/path/to/file.txt" />
+			</label>
+
+			<div class="flex gap-3">
+				<button id="delete-btn" type="submit"
+					class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
+					Send DELETE
+				</button>
+				<button id="clear-btn" type="button"
+					class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition">
+					Clear
+				</button>
+			</div>
+
+			<div id="result" class="mt-3 text-sm"></div>
+		</form>
+
+		<p class="mt-6 text-xs text-gray-500">Note: The server must implement a DELETE handler at <code class="text-xs text-gray-400">/delete?path=...</code> (or adjust the endpoint in the script).</p>
+	</div>
+
+	<script>
+		(function () {
+			var form = document.getElementById('delete-form');
+			var input = document.getElementById('file-path');
+			var result = document.getElementById('result');
+			var clearBtn = document.getElementById('clear-btn');
+
+			clearBtn.addEventListener('click', function () {
+				input.value = '';
+				result.textContent = '';
+			});
+
+			form.addEventListener('submit', function (ev) {
+				ev.preventDefault();
+				var path = input.value.trim();
+				if (!path) return;
+
+				if (!confirm('Send DELETE request to delete: ' + path + '?')) return;
+
+				result.textContent = 'Sending DELETE...';
+				result.className = 'mt-3 text-sm text-yellow-300';
+				
+				var url = '/uploads?path=' + encodeURIComponent(path);
+				fetch(url, { method: 'DELETE', credentials: 'same-origin' })
+					.then(function (res) {
+						if (res.ok) {
+							return res.text().then(function (t) {
+								result.className = 'mt-3 text-sm text-green-400';
+								result.textContent = 'Deleted successfully ' + res.statusText + '!';
+							});
+						}
+						return res.text().then(function (t) {
+							result.className = 'mt-3 text-sm text-red-400';
+							result.textContent = 'Delete failed: ' + res.status;
+						});
+					})
+					.catch(function (err) {
+						result.className = 'mt-3 text-sm text-red-400';
+						result.textContent = 'Request error: ' + err.message;
+					});
+			});
+		})();
+	</script>
+</body>
+</html>
