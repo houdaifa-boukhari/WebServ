@@ -149,7 +149,7 @@ void print_map(const std::map<std::string, std::string> &m)
 void Server::handleClientData(int ClientFd)
 {
 	ssize_t len = 0;
-	std::vector<char> buffer(50024);
+	std::vector<char> buffer(16384);
 
 	if (ClientFd < 0)
 		return;
@@ -180,17 +180,19 @@ void Server::handleClientData(int ClientFd)
 		_connections[ClientFd].setIsComplete(true);
 
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
+		// std::cout << MAGENTA <<  "------------------------- RAW REQUEST: -------------------------" << WHIET << std::endl;
+		// // std::cout << _connections[ClientFd].getClientRequest()<< std::endl;
+		// std::cout << MAGENTA << "------------------------- END OF RAW REQUEST -------------------" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
-		if (request.get_boundary() != "" && request.get_correct_size() == false)
-		{
-			NewResponse::sendSimpleErrorResponse(ClientFd, 400, _connections[ClientFd].getServerConfig());
-			return;
-		}
+		// if (request.get_boundary() != "" && request.get_correct_size() == false)
+		// {
+		// 	NewResponse::sendSimpleErrorResponse(ClientFd, 400, _connections[ClientFd].getServerConfig());
+		// 	return;
+		// }
 		ServerConfig &config = _connections[ClientFd].getServerConfig();
 		std::vector<LocationConfig> locations = config.getLocations();
 		LocationConfig *CgiConfig = findMatchingLocation(locations, request.get_path_without_params());
 		request.set_status_code(200);
-		std::cout << RED << request.get_status_code() << WHIET << std::endl;
 		if (CgiConfig && CgiConfig->isCgi())
 		{
 			request.assign_cgi_path(CgiConfig->getCgiPath());
@@ -217,11 +219,7 @@ void Server::handleClientData(int ClientFd)
 		{
 			request.set_status_code(404);
 			std::cerr << "not a correct file under cgi-bin dir" << std::endl;
-		}
-		std::cerr << RED << request.get_status_code() << WHIET << std::endl;
-		// std::cout << "------------- RAW RESPONSE ---------------" << std::endl;
-		// std::cout << request.get_cgi_output() << std::endl;
-		// std::cout << "------------------------------------------" << std::endl;
+		}		
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
 		if (_connections[ClientFd].getClientRequest().find("Connection: keep-alive"))

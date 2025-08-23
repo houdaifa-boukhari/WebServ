@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 		ServerConfiguration config = fp->getServerConfiguration();
 		ConfigFileValidator *validator = new ConfigFileValidator(config.getServers());
 		validator->validate();
-		// config.printConfig();
+		config.printConfig();
 		Server sv(config.getServers());
 		sv.run();
 		delete fp;

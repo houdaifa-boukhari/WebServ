@@ -78,7 +78,7 @@ void FileParser::createDefaultConfig()
 
 	LocationConfig defaultLocation;
 	defaultLocation.setName("/");
-	defaultLocation.setRoot("./");
+	defaultLocation.setRoot("./pages/");
 	defaultLocation.setAutoIndex(false);
 	defaultLocation.addIndex("index.html");
 	defaultLocation.addAllowedMethod("GET");

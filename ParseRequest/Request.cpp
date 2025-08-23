@@ -422,7 +422,6 @@ void ParssedRequest::check_body_size()
         correct_size = false;
     }
 
-    std::cout << GREEN << pos << WHIET << std::endl;
 }
 
 void ParssedRequest::AssignHeadersLine(std::string request)
@@ -527,7 +526,7 @@ char **ParssedRequest::get_env()
     std::string key_val;
     // set cookies array
     int cookie_size = _cookies.size();
-    int final_size = _params.size() + 3 + 1;
+    int final_size = _params.size() + 6 + 1;
     if (cookie_size > 0)
         final_size += 1;                  // add HTTP_COOKIE if we have cookies
     char **envp = new char *[final_size]; // add new cookies
@@ -566,7 +565,23 @@ char **ParssedRequest::get_env()
         std::strcpy(envp[i], key_val.c_str());
         i++; // Don't forget to increment envp index!
     }
-    std::string key = "REQUEST_METHOD";
+
+    std::string key = "HTTP_HOST";
+    key_val = key + "=" + _headers["Host"];
+    envp[i] = new char[key_val.size() + 1];
+    std::strcpy(envp[i], key_val.c_str());
+    i++;
+    key = "CONTENT_LENGTH";
+    key_val = key + "=" + _headers["Content-Length"];
+    envp[i] = new char[key_val.size() + 1];
+    std::strcpy(envp[i], key_val.c_str());
+    i++;
+    key = "CONTENT_TYPE";
+    key_val = key + "=" + _headers["Content-Type"];
+    envp[i] = new char[key_val.size() + 1];
+    std::strcpy(envp[i], key_val.c_str());
+    i++;
+    key = "REQUEST_METHOD";
     key_val = key + "=" + _method;
     envp[i] = new char[key_val.size() + 1];
     std::strcpy(envp[i], key_val.c_str());
