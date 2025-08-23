@@ -218,6 +218,9 @@ void Server::handleClientData(int ClientFd)
 			request.set_status_code(404);
 			std::cout << "not a correct file under cgi-bin dir" << std::endl;
 		}
+		std::cout << "-- RAW RESPONSE --" << std::endl;
+		std::cout << request.get_cgi_output() << std::endl;
+		std::cout << "-- END OF RAW RESPONSE --" << std::endl;
 		std::cout << RED << request.get_status_code() << WHIET << std::endl;
 		ParssedRequest req = _connections[ClientFd].getParsedRequest();
 		ServerConfig confg = _connections[ClientFd].getServerConfig();
