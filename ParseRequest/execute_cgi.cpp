@@ -85,7 +85,7 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
     int pid = fork();
     if (pid == 0)
     {
-        int output_fd = open(temp_filename.c_str(), O_RDWR);
+        int output_fd = open(temp_filename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
         int new_input_fd = open(temp_inputfilename.c_str(), O_RDONLY);
         if (output_fd == -1 || new_input_fd == -1)
             std::exit(12);
@@ -100,19 +100,18 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
         std::exit(127);
     }else if (pid > 0)
     {
-        int output_fd = open(temp_filename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
-        if (output_fd == -1)
-        {
-            request.set_status_code(500);
-            return "2";
-        }
         int status;
         waitpid(pid, &status, 0);
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
             std::cerr << "CGI exited with code: " << WEXITSTATUS(status) << std::endl;
             request.set_status_code(500);
-            close(output_fd);
             return "3";
+        }
+        int output_fd = open(temp_filename.c_str(), O_RDONLY, 0600);
+        if (output_fd == -1)
+        {
+            request.set_status_code(500);
+            return "2";
         }
         char buffer[128];
         int bytesRead;
