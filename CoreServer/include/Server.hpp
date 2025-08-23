@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 10:11:38 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/19 16:25:12 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/23 10:45:41 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,11 @@
 class Server
 {
 	private:
-		std::map<int, Connection> _connections; // Map to manage client connections
-		// ParssedRequest _request;					// Parsed request
-		std::map<int, ServerConfig> _server;				// fds for every socket conections
-		std::vector<ServerConfig> _config;			// Parsed server Configuration
-		std::vector<struct pollfd> _poll_fds;		// Polling structure for I/O monitoring
-		// std::map<int, std::string> _client_buffers; // to store request for every client
-		// std::map<int, time_t> _lastActivity;		// Tracks last activity time per client
-		const time_t _timeoutSec;					// Default 30s
+		std::map<int, Connection> _connections;
+		std::map<int, ServerConfig> _server;
+		std::vector<ServerConfig> _config;
+		std::vector<struct pollfd> _poll_fds;
+		const time_t _timeoutSec;
 	public:
 		Server(const std::vector<ServerConfig> &configs);
 		void initializeSockets();

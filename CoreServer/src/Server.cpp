@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 18:55:49 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/22 20:53:42 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/23 13:47:32 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void Server::initializeSockets()
 		ports = _config[i].getPorts();
 		for (size_t j = 0; j < _config[i].getPorts().size(); j++)
 		{
-			if (ports[j] < 1024) // all port younger than 1024 need high privilege
+			if (ports[j] < 1024)
 			{
 				std::cerr << YELLOW << currentTime() << " [WARNING] "
 						  << "Port " << ports[j] << " is privileged. Skipping." << WHIET << std::endl;
@@ -55,16 +55,16 @@ void Server::initializeSockets()
 			_server[tmp_fd] = _config[i];
 			if (fcntl(tmp_fd, F_SETFL, O_NONBLOCK) == -1)
 				throw("fcntl(F_SETFL) failed");
-			if (setsockopt(tmp_fd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0) // need to deep understand
+			if (setsockopt(tmp_fd, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) < 0)
 				throw("setsockopt(SO_REUSEADDR) failed");
 			setsockopt(tmp_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 			sockaddr_in address;
-			address.sin_family = AF_INET;										// Address family: IPv4
+			address.sin_family = AF_INET;
 			address.sin_addr.s_addr = InetAdress(host);
- 			address.sin_port = htons(ports[j]);									// assign port
+ 			address.sin_port = htons(ports[j]);
 			if (bind(tmp_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 			{
-				std::cout << YELLOW << currentTime() << RED << " [ERROR] Is Already Listening " << host << ":" << ports[j] << WHIET << std::endl;
+				std::cout << YELLOW << currentTime() << RED << " [ERROR] Listening on " << host << ":" << ports[j] << WHIET << std::endl;
 				continue ;
 			}
 			listen(tmp_fd, SOMAXCONN);
@@ -112,11 +112,7 @@ void Server::run()
 					handleNewConnection(_poll_fds[i].fd);
 				}
 				else
-				{
-					// std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-					// 		  << "Reading data from client fd=" << _poll_fds[i].fd << WHIET << std::endl;
 					handleClientData(_poll_fds[i].fd);
-				}
 			}
 			else if (_poll_fds[i].revents & POLLOUT && (_connections[_poll_fds[i].fd].getIsComplete() || _connections[_poll_fds[i].fd].getSendStatus() == SEND_IN_PROGRESS)) // remove else (check if close connection)
 			{
@@ -124,7 +120,6 @@ void Server::run()
 				{
 					std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
 							  << "Sending data to client fd=" << _poll_fds[i].fd << WHIET << std::endl;
-					// _connections[_poll_fds[i].fd].setIsComplete(false);
 					if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_NOT_STARTED)
 						_connections[_poll_fds[i].fd].generateResponse();
 					else if (_connections[_poll_fds[i].fd].getSendStatus() == SEND_IN_PROGRESS)
