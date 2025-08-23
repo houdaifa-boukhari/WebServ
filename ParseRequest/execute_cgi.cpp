@@ -70,6 +70,11 @@ std::string execute_cgi(ParssedRequest &request, std::string file_path, char **e
     std::string temp_filename = "/tmp/cgi_output_" + timestamp;
     std::string temp_inputfilename = "/tmp/cgi_input_" + timestamp;
     int input_fd = open(temp_inputfilename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
+    if (input_fd == -1)
+    {
+        request.set_status_code(500);
+        return "0";
+    }
     int writing_in = write(input_fd, request.getBody().c_str(), request.getBody().length());
     close(input_fd);
     if (writing_in == -1)
