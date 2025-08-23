@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 21:19:37 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/23 13:42:39 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/23 13:51:12 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ class Connection
               lastActivity(time(NULL)),
               isComplete(false),
               KeepAlive(false),
-              needClose(false) {}
-			  sizeToRead(4096);
+              needClose(false),
+			  sizeToRead(4096) {}
 		  Connection(int fd, const ServerConfig &cfg)
             : Client_fd(fd),
               ClientRequest(),
@@ -56,8 +56,8 @@ class Connection
               lastActivity(time(NULL)),
               isComplete(false),
               KeepAlive(false),
-              needClose(false) {}
-			  sizeToRead(4096);
+              needClose(false),
+			  sizeToRead(4096) {}
 		int getClientFd() const { return Client_fd; }
 		std::string getClientRequest()  {
 			return std::string(ClientRequest.data(), ClientRequest.size()); }

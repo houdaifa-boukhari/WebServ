@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilise.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yel-moun <yel-moun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/29 11:00:39 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/22 18:02:29 by yel-moun         ###   ########.fr       */
+/*   Updated: 2025/08/23 14:27:03 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 bool chunkedRequest(const std::string &request)
 {
     size_t pos, body_start, body_end;
-
     pos = request.find("Transfer-Encoding: chunked");
     if (pos != std::string::npos)
     {
@@ -43,7 +42,7 @@ bool chunkedRequest(const std::string &request)
 bool Connection::RequestIsComplete(const std::vector<char> &request)
 {
     size_t pos, start, end, len, body_start, body_size;
-    std::string header, contentLengthStr;
+    std::string headers, contentLengthStr;
 
     pos = std::search(request.begin(), request.end(), "\r\n\r\n", "\r\n\r\n" + 4) - request.begin();
     if (pos >= request.size())
@@ -56,13 +55,13 @@ bool Connection::RequestIsComplete(const std::vector<char> &request)
     size_t line_end = std::search(request.begin(), request.end(), "\r\n", "\r\n" + 2) - request.begin();
     if (line_end >= request.size())
         return (false);
-    header = std::string(request.begin(), request.begin() + line_end);
-    if (header.find("GET") == 0 || header.find("DELETE") == 0)
+    headers = std::string(request.begin(), request.begin() + pos);
+    if (headers.find("GET") == 0 || headers.find("DELETE") == 0)
         return (true);
-    else if (header.find("POST") == 0)
+    else if (headers.find("POST") == 0)
     {
-        if (std::search(request.begin(), request.end(), "Transfer-Encoding: chunked",
-                        "Transfer-Encoding: chunked" + 25) != request.end())
+        if (std::search(headers.begin(), headers.end(), "Transfer-Encoding: chunked",
+                        "Transfer-Encoding: chunked" + 25) != headers.end())
             return (chunkedRequest(std::string(request.begin(), request.end())));
         pos = std::search(request.begin(), request.end(), "Content-Length:", "Content-Length:" + 15) - request.begin();
         if (pos >= request.size())

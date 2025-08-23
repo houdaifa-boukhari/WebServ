@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/23 13:46:56 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/23 14:26:54 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,6 +177,8 @@ void Server::handleClientData(int ClientFd)
 
 	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
+		 std::cout << YELLOW << currentTime() << CYAN << " [INFO] "
+			  << "request is completed" << ClientFd << WHIET << std::endl;
 		_connections[ClientFd].setIsComplete(true);
 
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
