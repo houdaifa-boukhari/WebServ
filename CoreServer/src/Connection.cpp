@@ -6,7 +6,7 @@
 /*   By: hel-bouk <hel-bouk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:20:09 by hel-bouk          #+#    #+#             */
-/*   Updated: 2025/08/19 16:40:48 by hel-bouk         ###   ########.fr       */
+/*   Updated: 2025/08/23 13:43:40 by hel-bouk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,18 +98,11 @@ void Server::handleClientData(int ClientFd)
 	}
 	buffer.resize(len);
 	_connections[ClientFd].appendClientRequest(buffer);
-
-	// std::cout << GREEN << "\n----------- " << YELLOW << currentTime() << GREEN << " [INFO] "
-	// 		  << "Received data from client ------ \n\n"
-	// 		  << _connections[ClientFd].getClientRequest() << WHIET << std::endl;
-
 	if (_connections[ClientFd].RequestIsComplete(_connections[ClientFd].getClientRequestVector()))
 	{
 		_connections[ClientFd].setIsComplete(true);
-
-		/////// anour Part ///////
 		ParssedRequest &request = _connections[ClientFd].getParceRequest();
-		std::cout << RED << "			------------------------------	l		" << WHIET << std::endl;
+		std::cout << RED << "			------------------------------	 		" << WHIET << std::endl;
 		request.AssignHeadersLine(_connections[ClientFd].getClientRequest());
 		if (request.get_correct_size() == false)
 		{
@@ -147,8 +140,6 @@ void Server::handleClientData(int ClientFd)
 	}
 	else if (_connections[ClientFd].getNeedClose())
 		closeConnection(ClientFd);
-	// 	std::cout << YELLOW << currentTime() << GREEN << " [INFO] "
-	// 			  << "Request not complete yet" << WHIET << std::endl;
 }
 
 SendStatus Connection::getSendStatus() const
