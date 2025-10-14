@@ -230,10 +230,6 @@ curl -i "http://127.0.0.1:8080/cgi-bin/cgi_info.py?foo=bar"
 - Build with `make`
 - Test with curl or your browser
 
-## License
-
-No explicit license provided yet. If you plan to reuse the code, please contact the authors or open an issue.
-
 ## Authors
 
 - yel-moun
